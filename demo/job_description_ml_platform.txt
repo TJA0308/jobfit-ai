@@ -1,0 +1,7 @@
+AI Product Engineering Intern
+
+We are looking for an intern to help build AI-powered product workflows and internal tools.
+You will work on Python services, analytics pipelines, experimentation systems, and user-facing
+dashboards. The ideal candidate has experience with FastAPI, Streamlit, SQL, product analytics,
+machine learning workflows, and shipping features end to end. Strong written communication,
+ownership, and comfort working across engineering and product are important.

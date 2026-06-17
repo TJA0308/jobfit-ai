@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+data/
+streamlit.out.log
+streamlit.err.log
+api.out.log
+api.err.log
+.pytest_cache/

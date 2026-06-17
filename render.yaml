@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: jobfit-ai-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api_server:app --host 0.0.0.0 --port $PORT
+    plan: free
+
+  - type: web
+    name: jobfit-ai-streamlit
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0
+    plan: free
