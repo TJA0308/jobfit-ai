@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import sqlite3
+from dataclasses import asdict
 from pathlib import Path
 
 from jobfit_ai.models import HistoryEntry, ResumeAnalysis
@@ -61,7 +63,7 @@ def save_analysis(analysis: ResumeAnalysis) -> None:
                 analysis.target_role,
                 analysis.match_score,
                 analysis.tier,
-                analysis.model_dump_json(),
+                json.dumps(asdict(analysis)),
             ),
         )
 

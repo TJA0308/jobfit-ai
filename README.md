@@ -38,7 +38,6 @@ That makes it closer to a real product workflow than a one-off script.
 - Streamlit
 - FastAPI
 - scikit-learn
-- Pydantic
 - SQLite
 - pandas
 - PyPDF2
@@ -81,6 +80,7 @@ streamlit run streamlit_app.py
 ## Run The API
 
 ```bash
+pip install -r requirements-api.txt
 uvicorn api_server:app --reload
 ```
 
