@@ -33,6 +33,7 @@ This project was built as a practical portfolio piece for AI, software engineeri
 | Skill gaps | Shows missing role-specific terms from the job description |
 | Resume feedback | Flags missing sections and suggests concrete improvements |
 | Rewrite examples | Generates example bullets with optional OpenAI-powered rewrites |
+| Observability | Tracks parse, scoring, rewrite, and total analysis latency |
 | Persistence | Saves recent analyses locally with SQLite |
 | Deployment | Live Streamlit app with a simple root-level entry point |
 
@@ -201,11 +202,14 @@ Built and deployed JobFit AI, a resume matching app using Python, Streamlit, SQL
 - How to separate UI, parsing, scoring, persistence, and upload handling
 - How to deploy a Streamlit app from GitHub
 - How to debug dependency/runtime issues in a cloud environment
+- How to add lightweight observability for latency and rewrite mode
 - How to frame technical output around a real user workflow
 
 ## Roadmap
 
 - Improve the rewrite coach with user-selected tone and bullet style
+- Add vector embeddings for stronger semantic matching
+- Move batch processing to a background worker if the app grows beyond Streamlit Cloud
 - Add downloadable CSV or PDF reports
 - Add a small evaluation dataset for score calibration
 - Add screenshots and a short demo GIF to the README

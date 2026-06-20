@@ -40,6 +40,13 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
         )
         if analysis.insights.missing_sections:
             st.write(f"Missing sections: {', '.join(analysis.insights.missing_sections)}")
+        st.write("**Runtime**")
+        st.write(
+            f"{analysis.metrics.total_ms} ms total | "
+            f"parse {analysis.metrics.parse_ms} ms | "
+            f"score {analysis.metrics.scoring_ms} ms | "
+            f"rewrites {analysis.metrics.rewrite_mode}"
+        )
 
 
 st.title("JobFit AI")

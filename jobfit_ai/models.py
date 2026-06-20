@@ -32,6 +32,15 @@ class AnalysisBreakdown:
 
 
 @dataclass
+class AnalysisMetrics:
+    parse_ms: float = 0.0
+    scoring_ms: float = 0.0
+    rewrite_ms: float = 0.0
+    total_ms: float = 0.0
+    rewrite_mode: str = "template"
+
+
+@dataclass
 class ResumeAnalysis:
     analysis_id: str
     candidate_name: str
@@ -49,6 +58,7 @@ class ResumeAnalysis:
     skill_gaps: list[SkillGap]
     breakdown: AnalysisBreakdown
     insights: ResumeInsights
+    metrics: AnalysisMetrics = field(default_factory=AnalysisMetrics)
     created_at: str = field(default_factory=utc_now_iso)
 
 

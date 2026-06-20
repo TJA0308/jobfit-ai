@@ -4,6 +4,7 @@ import json
 import os
 import urllib.error
 import urllib.request
+from dataclasses import dataclass
 
 from jobfit_ai.models import ResumeAnalysis
 
@@ -11,20 +12,26 @@ OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 DEFAULT_MODEL = "gpt-4o-mini"
 
 
+@dataclass
+class RewriteResult:
+    bullets: list[str]
+    mode: str
+
+
 def has_openai_key(api_key: str | None = None) -> bool:
     return bool((api_key or os.getenv("OPENAI_API_KEY") or "").strip())
 
 
-def generate_ai_rewrites(
+def generate_rewrites(
     resume_text: str,
     job_description: str,
     analysis: ResumeAnalysis,
     api_key: str | None = None,
     model: str | None = None,
-) -> list[str]:
+) -> RewriteResult:
     resolved_key = (api_key or os.getenv("OPENAI_API_KEY") or "").strip()
     if not resolved_key:
-        return analysis.rewrite_suggestions
+        return RewriteResult(bullets=analysis.rewrite_suggestions, mode="template")
 
     resolved_model = (model or os.getenv("OPENAI_MODEL") or DEFAULT_MODEL).strip()
     prompt = _build_rewrite_prompt(resume_text, job_description, analysis)
@@ -55,11 +62,13 @@ def generate_ai_rewrites(
         with urllib.request.urlopen(request, timeout=30) as response:
             data = json.loads(response.read().decode("utf-8"))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
-        return analysis.rewrite_suggestions
+        return RewriteResult(bullets=analysis.rewrite_suggestions, mode="template")
 
     text = _extract_response_text(data)
     parsed = _parse_bullets(text)
-    return parsed or analysis.rewrite_suggestions
+    if not parsed:
+        return RewriteResult(bullets=analysis.rewrite_suggestions, mode="template")
+    return RewriteResult(bullets=parsed, mode="openai")
 
 
 def _build_rewrite_prompt(resume_text: str, job_description: str, analysis: ResumeAnalysis) -> str:

@@ -9,6 +9,7 @@ from jobfit_ai.scoring import analyze_resume_fit
 from jobfit_ai.resume_parser import (
     extract_resume_text,
     extract_text_from_docx,
+    extract_text_from_pdf,
     extract_text_from_txt,
 )
 
@@ -94,6 +95,20 @@ class JobFitTests(unittest.TestCase):
             txt_path.write_text("Jane Doe\nSkills\nPython SQL", encoding="utf-8")
             self.assertEqual(extract_text_from_txt(txt_path), "Jane Doe\nSkills\nPython SQL")
             self.assertIn("Python", extract_resume_text(txt_path, "txt"))
+
+    def test_unsupported_resume_type_raises_value_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            rtf_path = Path(temp_dir) / "resume.rtf"
+            rtf_path.write_text("Jane Doe", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                extract_resume_text(rtf_path, "rtf")
+
+    def test_corrupted_pdf_raises_exception(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            pdf_path = Path(temp_dir) / "broken.pdf"
+            pdf_path.write_bytes(b"not a real pdf")
+            with self.assertRaises(Exception):
+                extract_text_from_pdf(pdf_path)
 
 
 if __name__ == "__main__":
