@@ -1,61 +1,100 @@
+<div align="center">
+
 # JobFit AI
 
-JobFit AI is a resume matching app for students and early-career candidates. It compares resumes against a target job description, ranks fit, and explains the score with clear signals instead of vague feedback.
+### Explainable resume-to-job matching for internship applicants
 
-The project is built to demonstrate practical AI, software engineering, and product thinking for internship recruiting.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-0A6E4E?style=for-the-badge&logo=streamlit&logoColor=white)](https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/)
+[![Python](https://img.shields.io/badge/Python-3.13-2E6E9E?style=for-the-badge&logo=python&logoColor=white)](runtime.txt)
+[![Streamlit](https://img.shields.io/badge/Streamlit-App-D8442F?style=for-the-badge&logo=streamlit&logoColor=white)](streamlit_app.py)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-TF--IDF-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](jobfit_ai/scoring.py)
 
-Live demo: https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/
+Compare resumes against a target job description, rank fit, and explain the score with transparent matching signals.
 
-## What It Does
+**Live app:** https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/
 
-- Upload one or more resumes in `PDF`, `DOCX`, or `TXT`
-- Paste a target job description
-- Rank resumes by role fit
-- Show matching and missing keywords
-- Break the score into semantic similarity, keyword alignment, and resume quality
-- Flag missing resume sections such as projects, skills, or summary
-- Save recent analyses locally with SQLite
+</div>
 
-## Why It Matters
+---
 
-Students often apply to roles without knowing whether their resume is actually aligned with the job description. JobFit AI gives fast, explainable feedback so applicants can tailor resumes more deliberately.
+## Overview
 
-The goal is not to replace recruiters or guarantee outcomes. The goal is to make resume iteration more concrete, measurable, and easier to learn from.
+JobFit AI helps students and early-career candidates understand how well a resume lines up with a role. Upload one or more resumes, paste a job description, and get a ranked analysis with keyword matches, missing skills, resume structure feedback, and concrete suggestions.
 
-## What Makes It Different
+This project was built as a practical portfolio piece for AI, software engineering, and product internships. It focuses on a real workflow: tailoring resumes without relying on vague advice or black-box scores.
 
-Many beginner resume matchers only count shared words. JobFit AI combines:
+## Highlights
 
-- TF-IDF semantic similarity
-- weighted keyword alignment
-- resume structure checks
-- batch candidate ranking
-- a shared analysis engine used by both the UI and API
+| Area | What it does |
+| --- | --- |
+| Resume parsing | Supports `PDF`, `DOCX`, and `TXT` uploads |
+| Batch ranking | Compares multiple resumes against one job description |
+| Explainable scoring | Breaks fit into semantic similarity, keyword alignment, and resume quality |
+| Skill gaps | Shows missing role-specific terms from the job description |
+| Resume feedback | Flags missing sections and suggests concrete improvements |
+| Persistence | Saves recent analyses locally with SQLite |
+| Deployment | Live Streamlit app with a simple root-level entry point |
 
-That makes it closer to a real product workflow than a one-off script.
+## Why This Is Different
+
+Most beginner resume matchers only count shared words. JobFit AI combines multiple signals:
+
+- TF-IDF semantic similarity for broader text alignment
+- weighted keyword matching based on job-description terms
+- resume quality heuristics such as sections, bullets, and action verbs
+- batch comparison for a more realistic recruiting or applicant workflow
+- shared core logic that can power both the Streamlit app and FastAPI backend
+
+The result is still lightweight and explainable, but more useful than a basic keyword counter.
+
+## Product Flow
+
+```mermaid
+flowchart LR
+    A[Upload resumes] --> B[Paste job description]
+    B --> C[Parse resume text]
+    C --> D[Score fit]
+    D --> E[Rank candidates]
+    E --> F[Show strengths, gaps, and suggestions]
+    F --> G[Save recent analysis]
+```
+
+## Architecture
+
+```mermaid
+flowchart TB
+    UI[streamlit_app.py] --> SERVICE[jobfit_ai/upload_handler.py]
+    API[api_server.py] --> SERVICE
+    SERVICE --> PARSER[jobfit_ai/resume_parser.py]
+    SERVICE --> SCORING[jobfit_ai/scoring.py]
+    SERVICE --> STORE[jobfit_ai/history_store.py]
+    SCORING --> FEATURES[jobfit_ai/text_features.py]
+    SCORING --> MODELS[jobfit_ai/models.py]
+```
 
 ## Tech Stack
 
-- Python
-- Streamlit
-- FastAPI
-- scikit-learn
-- SQLite
-- pandas
-- PyPDF2
-- unittest
+| Layer | Tools |
+| --- | --- |
+| App | Streamlit |
+| API | FastAPI, Uvicorn |
+| ML/NLP | scikit-learn, TF-IDF, cosine similarity |
+| Data | SQLite, pandas |
+| Parsing | PyPDF2, DOCX XML parsing, plain text |
+| Testing | Python `unittest` |
+| Deployment | Streamlit Community Cloud |
 
 ## Project Structure
 
 ```text
 jobfit-ai/
   jobfit_ai/
-    history_store.py
-    models.py
-    resume_parser.py
-    scoring.py
-    text_features.py
-    upload_handler.py
+    history_store.py      # SQLite save/load logic
+    models.py             # dataclass models used across the app
+    resume_parser.py      # PDF, DOCX, and TXT extraction
+    scoring.py            # matching and scoring logic
+    text_features.py      # keyword, section, and text helpers
+    upload_handler.py     # upload-to-analysis workflow
   demo/
     job_description_ml_platform.txt
     resume_ava_patel.txt
@@ -68,9 +107,10 @@ jobfit-ai/
   api_server.py
   streamlit_app.py
   requirements.txt
+  runtime.txt
 ```
 
-## Run Locally
+## Quick Start
 
 ```bash
 python -m venv .venv
@@ -79,11 +119,26 @@ pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
 
-## Run The API
+Then open:
+
+```text
+http://localhost:8501
+```
+
+## Try The Demo Data
 
 ```bash
-pip install -r requirements-api.txt
-uvicorn api_server:app --reload
+python scripts/demo_batch.py
+```
+
+Sample output:
+
+```text
+JobFit AI Demo Ranking
+============================================================
+1. Ava Patel           48.51%  Moderate  Matches: 15  Missing: 15
+2. Sofia Ramirez       46.12%  Moderate  Matches: 15  Missing: 15
+3. Marcus Lee          16.43%  Weak      Matches:  5  Missing: 15
 ```
 
 ## Run Tests
@@ -92,40 +147,55 @@ uvicorn api_server:app --reload
 python -m unittest discover -s tests -v
 ```
 
-## Run The Demo Script
+## Optional API
+
+The Streamlit app does not need the API to run. The API is included to show backend design and reusable business logic.
 
 ```bash
-python scripts/demo_batch.py
+pip install -r requirements-api.txt
+uvicorn api_server:app --reload
 ```
 
-## API Routes
+Routes:
 
-- `GET /health`
-- `GET /history`
-- `POST /match`
-- `POST /match/batch`
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/health` | Health check |
+| `GET` | `/history` | Recent analyses |
+| `POST` | `/match` | Analyze one resume |
+| `POST` | `/match/batch` | Analyze multiple resumes |
 
 ## Deployment
 
-Live app: https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/
+Streamlit Community Cloud settings:
 
-For Streamlit Community Cloud:
+| Setting | Value |
+| --- | --- |
+| Repository | `TJA0308/jobfit-ai` |
+| Branch | `main` |
+| App file | `streamlit_app.py` |
+| Python | `3.13` |
 
-- Repository: `TJA0308/jobfit-ai`
-- Branch: `main`
-- App file: `streamlit_app.py`
-
-The root-level `streamlit_app.py` is intentional. It keeps deployment simple and avoids import path issues.
+No API key is required. The app runs on uploaded files and pasted job descriptions.
 
 ## Resume Bullet
 
 ```text
-Built JobFit AI, a resume matching app using Python, Streamlit, FastAPI, SQLite, and scikit-learn to rank resumes against job descriptions and explain fit with semantic similarity, keyword alignment, and resume quality signals.
+Built and deployed JobFit AI, a resume matching app using Python, Streamlit, SQLite, and scikit-learn to rank resumes against job descriptions and explain fit using semantic similarity, keyword alignment, and resume quality signals.
 ```
 
-## Next Improvements
+## What I Learned
+
+- How to structure a Python project beyond a single script
+- How to separate UI, parsing, scoring, persistence, and upload handling
+- How to deploy a Streamlit app from GitHub
+- How to debug dependency/runtime issues in a cloud environment
+- How to frame technical output around a real user workflow
+
+## Roadmap
 
 - Add LLM-powered resume bullet rewrite suggestions
-- Add downloadable CSV/PDF reports
+- Add downloadable CSV or PDF reports
 - Add a small evaluation dataset for score calibration
+- Add screenshots and a short demo GIF to the README
 - Deploy the FastAPI backend separately on Render
