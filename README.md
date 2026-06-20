@@ -32,6 +32,7 @@ This project was built as a practical portfolio piece for AI, software engineeri
 | Explainable scoring | Breaks fit into semantic similarity, keyword alignment, and resume quality |
 | Skill gaps | Shows missing role-specific terms from the job description |
 | Resume feedback | Flags missing sections and suggests concrete improvements |
+| Rewrite examples | Generates example bullets with optional OpenAI-powered rewrites |
 | Persistence | Saves recent analyses locally with SQLite |
 | Deployment | Live Streamlit app with a simple root-level entry point |
 
@@ -44,6 +45,7 @@ Most beginner resume matchers only count shared words. JobFit AI combines multip
 - resume quality heuristics such as sections, bullets, and action verbs
 - batch comparison for a more realistic recruiting or applicant workflow
 - shared core logic that can power both the Streamlit app and FastAPI backend
+- optional AI rewrite coaching when an OpenAI API key is configured
 
 The result is still lightweight and explainable, but more useful than a basic keyword counter.
 
@@ -178,6 +180,15 @@ Streamlit Community Cloud settings:
 
 No API key is required. The app runs on uploaded files and pasted job descriptions.
 
+Optional AI rewrite suggestions can be enabled with Streamlit secrets:
+
+```toml
+OPENAI_API_KEY = "your-api-key"
+OPENAI_MODEL = "gpt-4o-mini"
+```
+
+Without a key, the app still shows template rewrite examples.
+
 ## Resume Bullet
 
 ```text
@@ -194,7 +205,7 @@ Built and deployed JobFit AI, a resume matching app using Python, Streamlit, SQL
 
 ## Roadmap
 
-- Add LLM-powered resume bullet rewrite suggestions
+- Improve the rewrite coach with user-selected tone and bullet style
 - Add downloadable CSV or PDF reports
 - Add a small evaluation dataset for score calibration
 - Add screenshots and a short demo GIF to the README

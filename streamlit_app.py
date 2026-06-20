@@ -5,6 +5,7 @@ import streamlit as st
 
 from jobfit_ai.history_store import fetch_recent_analyses, initialize_database
 from jobfit_ai.models import ResumeAnalysis
+from jobfit_ai.rewrite_coach import has_openai_key
 from jobfit_ai.upload_handler import analyze_uploaded_bytes
 
 st.set_page_config(page_title="JobFit AI", page_icon=":briefcase:", layout="wide")
@@ -22,6 +23,9 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
             st.write(f"- {item}")
         st.write("**Suggestions**")
         for item in analysis.suggestions:
+            st.write(f"- {item}")
+        st.write("**Rewrite examples**")
+        for item in analysis.rewrite_suggestions:
             st.write(f"- {item}")
     with right_column:
         st.write("**Score breakdown**")
@@ -61,6 +65,8 @@ with summary_right:
 
 with st.sidebar:
     st.header("Recent analyses")
+    api_key_configured = has_openai_key(st.secrets.get("OPENAI_API_KEY", None))
+    st.caption("AI rewrites: enabled" if api_key_configured else "AI rewrites: template mode")
     recent_items = fetch_recent_analyses(limit=8)
     if recent_items:
         for item in recent_items:
@@ -95,6 +101,8 @@ if st.button("Analyze candidates", type="primary", use_container_width=True):
                     file_bytes=uploaded_resume.getvalue(),
                     filename=uploaded_resume.name,
                     job_description=job_description,
+                    openai_api_key=st.secrets.get("OPENAI_API_KEY", None),
+                    openai_model=st.secrets.get("OPENAI_MODEL", None),
                 )
                 analyses.append(analysis)
             except Exception as exc:

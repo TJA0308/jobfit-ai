@@ -125,6 +125,16 @@ def _suggestions(score: float, missing_keywords: list[str], insights: ResumeInsi
     return suggestions[:5]
 
 
+def _rewrite_suggestions(target_role: str, matching_keywords: list[str], missing_keywords: list[str]) -> list[str]:
+    role_terms = matching_keywords[:3] or ["role requirements"]
+    gap_terms = missing_keywords[:3] or ["target skills"]
+    return [
+        f"Built a project aligned with {target_role} using {', '.join(role_terms)} to improve a measurable product or engineering workflow.",
+        f"Improved resume alignment by adding evidence for {', '.join(gap_terms)} through project work, coursework, or internship experience.",
+        f"Collaborated across product and engineering to ship a feature involving {', '.join(role_terms[:2])}, documenting tradeoffs and outcomes.",
+    ]
+
+
 def analyze_resume_fit(
     resume_text: str,
     job_description: str,
@@ -157,6 +167,7 @@ def analyze_resume_fit(
         missing_keywords=missing_keywords,
         highlighted_strengths=_strengths(resume_text, matching_keywords, insights),
         suggestions=_suggestions(overall_score, missing_keywords, insights),
+        rewrite_suggestions=_rewrite_suggestions(target_role, matching_keywords, missing_keywords),
         skill_gaps=skill_gaps,
         breakdown=AnalysisBreakdown(
             semantic_similarity=semantic_similarity,

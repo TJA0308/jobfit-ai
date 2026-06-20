@@ -75,6 +75,7 @@ class JobFitTests(unittest.TestCase):
         self.assertIn(analysis.tier, {"Strong", "Moderate"})
         self.assertTrue(analysis.matching_keywords)
         self.assertTrue(analysis.suggestions)
+        self.assertTrue(analysis.rewrite_suggestions)
         self.assertTrue(analysis.target_role)
         self.assertGreaterEqual(analysis.breakdown.semantic_similarity, 0)
         self.assertGreaterEqual(analysis.insights.word_count, 10)

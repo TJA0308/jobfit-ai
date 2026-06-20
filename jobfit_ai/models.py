@@ -45,6 +45,7 @@ class ResumeAnalysis:
     missing_keywords: list[str]
     highlighted_strengths: list[str]
     suggestions: list[str]
+    rewrite_suggestions: list[str]
     skill_gaps: list[SkillGap]
     breakdown: AnalysisBreakdown
     insights: ResumeInsights
