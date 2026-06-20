@@ -4,6 +4,8 @@ JobFit AI is a resume matching app for students and early-career candidates. It 
 
 The project is built to demonstrate practical AI, software engineering, and product thinking for internship recruiting.
 
+Live demo: https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/
+
 ## What It Does
 
 - Upload one or more resumes in `PDF`, `DOCX`, or `TXT`
@@ -104,6 +106,8 @@ python scripts/demo_batch.py
 - `POST /match/batch`
 
 ## Deployment
+
+Live app: https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/
 
 For Streamlit Community Cloud:
 
