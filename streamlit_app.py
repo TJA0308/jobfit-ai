@@ -19,7 +19,7 @@ DEMO_DIR = ROOT_DIR / "demo"
 
 
 def load_demo_job_description() -> str:
-    return (DEMO_DIR / "job_description_ml_platform.txt").read_text(encoding="utf-8")
+    return (DEMO_DIR / "job_description_software_engineering_intern.txt").read_text(encoding="utf-8")
 
 
 def analyze_demo_resumes(job_description: str) -> list[ResumeAnalysis]:

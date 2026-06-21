@@ -31,6 +31,29 @@ ACTION_VERBS = {
     "shipped",
 }
 
+TOKEN_ALIASES = {
+    "apis": "api",
+    "applications": "application",
+    "building": "build",
+    "built": "build",
+    "customers": "customer",
+    "dashboards": "dashboard",
+    "database": "database",
+    "databases": "database",
+    "deployed": "deploy",
+    "deploying": "deploy",
+    "engineers": "engineer",
+    "features": "feature",
+    "models": "model",
+    "requirements": "requirement",
+    "services": "service",
+    "tested": "test",
+    "testing": "test",
+    "tests": "test",
+    "users": "user",
+    "workflows": "workflow",
+}
+
 
 def normalize_text(text: str) -> str:
     normalized = text.lower()
@@ -42,10 +65,14 @@ def normalize_text(text: str) -> str:
 def tokenize(text: str) -> list[str]:
     normalized = normalize_text(text)
     return [
-        token
+        normalize_token(token)
         for token in normalized.split()
-        if len(token) > 2 and token not in ENGLISH_STOP_WORDS
+        if len(token) > 2 and token not in ENGLISH_STOP_WORDS and any(char.isalpha() for char in token)
     ]
+
+
+def normalize_token(token: str) -> str:
+    return TOKEN_ALIASES.get(token, token)
 
 
 def extract_keywords(text: str, top_n: int = 30) -> list[str]:

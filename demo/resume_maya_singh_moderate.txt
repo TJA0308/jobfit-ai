@@ -1,0 +1,21 @@
+Maya Singh
+Summary
+Data-focused builder with experience in analytics dashboards, Python scripts, and applied machine learning projects. Interested in software engineering roles that combine product analytics and backend workflows.
+
+Experience
+- Built Python data pipelines to clean CSV files, join datasets, and generate weekly metrics for a student organization.
+- Created Streamlit dashboards with pandas visualizations to track usage, retention, and event attendance.
+- Automated spreadsheet reporting with Python scripts and documented assumptions for non-technical teammates.
+- Used Git for version control and collaborated with classmates on project planning, debugging, and basic code review.
+- Built a small internal tool with Python and SQL to help teammates search event data and export reports.
+
+Projects
+- Developed a machine learning notebook using scikit-learn to classify support tickets and evaluate model performance.
+- Built a SQL-backed analytics report for product adoption trends and presented insights to a campus team.
+- Created a small Flask API prototype to serve cleaned data to a dashboard, but did limited frontend and testing work.
+
+Skills
+Python SQL pandas scikit-learn Streamlit Flask Git analytics dashboards data processing machine learning documentation debugging communication basic API
+
+Education
+B.S. Data Science

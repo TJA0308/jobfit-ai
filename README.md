@@ -100,10 +100,10 @@ jobfit-ai/
     text_features.py      # keyword, section, and text helpers
     upload_handler.py     # upload-to-analysis workflow
   demo/
-    job_description_ml_platform.txt
-    resume_ava_patel.txt
-    resume_marcus_lee.txt
-    resume_sofia_ramirez.txt
+    job_description_software_engineering_intern.txt
+    resume_ethan_brooks_weak.txt
+    resume_jordan_kim_strong.txt
+    resume_maya_singh_moderate.txt
   scripts/
     demo_batch.py
   tests/
@@ -149,9 +149,9 @@ Sample output:
 ```text
 JobFit AI Demo Ranking
 ============================================================
-1. Ava Patel           48.51%  Moderate  Matches: 15  Missing: 15
-2. Sofia Ramirez       46.12%  Moderate  Matches: 15  Missing: 15
-3. Marcus Lee          16.43%  Weak      Matches:  5  Missing: 15
+1. Jordan Kim          67.16%  Strong    Matches: 15  Missing: 15
+2. Maya Singh          50.26%  Moderate  Matches: 11  Missing: 15
+3. Ethan Brooks        23.59%  Weak      Matches:  5  Missing: 15
 ```
 
 ## Run Tests

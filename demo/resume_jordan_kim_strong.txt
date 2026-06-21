@@ -1,0 +1,23 @@
+Jordan Kim
+Summary
+Software engineering student building full-stack web applications, backend APIs, and AI-powered productivity tools. Strong interest in product engineering, testing, and user-facing features.
+
+Experience
+- Built a full-stack internship tracker using React, Python, FastAPI, SQLite, and REST APIs to manage applications, deadlines, and interview notes.
+- Designed backend services, API endpoints, database models, and input validation for user-facing workflows across saved jobs and status updates.
+- Wrote unit tests and integration tests for parsing, scoring, API behavior, and upload handling logic, reducing regressions during feature changes.
+- Debugged deployment issues on Streamlit Cloud and documented Python runtime, dependency, and environment tradeoffs.
+- Collaborated with product-minded peers during planning, code review, and launch to explain technical decisions and improve maintainability.
+- Improved web application usability, accessibility, and performance by simplifying navigation and reducing repeated manual resume-tailoring steps.
+
+Projects
+- Built and deployed JobFit AI, a resume matching app using Streamlit, scikit-learn, Python, SQLite, and PDF/DOCX/TXT parsing.
+- Designed explainable scoring with TF-IDF, cosine similarity, keyword gap analysis, and resume-quality heuristics.
+- Added optional OpenAI rewrite suggestions, latency metrics, template fallback mode, and demo ranking for easier evaluation.
+- Created a React dashboard for club event analytics using JavaScript, SQL, HTTP requests, charts, and reusable UI components.
+
+Skills
+Python JavaScript TypeScript React FastAPI REST APIs SQL SQLite Git HTTP unit testing integration testing backend services database models Streamlit pandas scikit-learn debugging deployment accessibility documentation product engineering
+
+Education
+B.S. Computer Science

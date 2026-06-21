@@ -77,9 +77,9 @@ def _resume_quality_score(resume_text: str) -> tuple[float, ResumeInsights]:
 
 
 def _score_tier(score: float) -> str:
-    if score >= 75:
+    if score >= 65:
         return "Strong"
-    if score >= 35:
+    if score >= 40:
         return "Moderate"
     return "Weak"
 
@@ -152,7 +152,8 @@ def analyze_resume_fit(
         job_description,
     )
     resume_quality, insights = _resume_quality_score(resume_text)
-    overall_score = _clamp((0.55 * semantic_similarity) + (0.30 * keyword_alignment) + (0.15 * resume_quality))
+    raw_score = (0.55 * semantic_similarity) + (0.30 * keyword_alignment) + (0.15 * resume_quality)
+    overall_score = _clamp(raw_score * 1.6)
 
     return ResumeAnalysis(
         analysis_id=str(uuid4()),

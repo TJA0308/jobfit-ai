@@ -1,0 +1,27 @@
+Software Engineering Intern - Summer 2027
+
+About the role
+We are looking for a Software Engineering Intern to join our product engineering team for Summer 2027. You will work with full-time engineers to design, build, test, and ship user-facing features used by customers and internal teams. This internship is ideal for a student who enjoys solving technical problems, learning quickly, and writing clean, maintainable code.
+
+Responsibilities
+- Build and ship full-stack product features using Python, JavaScript, React, and REST APIs.
+- Design backend services, database models, and API endpoints for user-facing workflows.
+- Write unit tests and integration tests to improve reliability and prevent regressions.
+- Debug production issues, investigate logs, and communicate technical tradeoffs clearly.
+- Collaborate with product managers, designers, and engineers during planning, code review, and launch.
+- Improve performance, accessibility, and usability across web application workflows.
+- Document implementation details, edge cases, and follow-up work for future maintainers.
+
+Minimum qualifications
+- Currently pursuing a degree in Computer Science, Software Engineering, Data Science, or a related technical field.
+- Experience building projects with Python, JavaScript, TypeScript, React, SQL, or similar technologies.
+- Familiarity with data structures, algorithms, HTTP, APIs, Git, and basic software design.
+- Ability to write readable code, test changes, and explain technical decisions.
+- Strong ownership, curiosity, and communication skills.
+
+Preferred qualifications
+- Experience deploying applications with Streamlit, Flask, FastAPI, Node.js, Vercel, Render, or cloud platforms.
+- Experience with SQLite, PostgreSQL, or relational database design.
+- Experience using scikit-learn, pandas, or data processing tools.
+- Experience building user-facing tools, dashboards, or automation workflows.
+- Interest in AI-powered developer tools, productivity software, or applied machine learning.

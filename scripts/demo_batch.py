@@ -14,7 +14,7 @@ DEMO_DIR = ROOT_DIR / "demo"
 
 
 def main() -> None:
-    job_description = (DEMO_DIR / "job_description_ml_platform.txt").read_text(encoding="utf-8")
+    job_description = (DEMO_DIR / "job_description_software_engineering_intern.txt").read_text(encoding="utf-8")
     resume_files = sorted(DEMO_DIR.glob("resume_*.txt"))
 
     analyses = []
