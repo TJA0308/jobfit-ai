@@ -39,6 +39,8 @@ def inject_app_styles() -> None:
                 --red: #b84a39;
                 --red-soft: #f4d5cd;
                 --blue: #2e6e9e;
+                --ui-label-size: 0.86rem;
+                --ui-label-line: 1.2;
             }
 
             html, body, [class*="css"] {
@@ -121,7 +123,8 @@ def inject_app_styles() -> None:
                 background: rgba(255, 250, 240, 0.82);
                 color: var(--ink);
                 font-weight: 600;
-                font-size: 0.9rem;
+                font-size: var(--ui-label-size);
+                line-height: var(--ui-label-line);
             }
 
             .jobfit-card {
@@ -135,7 +138,8 @@ def inject_app_styles() -> None:
 
             .jobfit-card-label {
                 color: var(--muted);
-                font-size: 0.78rem;
+                font-size: var(--ui-label-size);
+                line-height: var(--ui-label-line);
                 font-weight: 700;
                 letter-spacing: 0.08em;
                 text-transform: uppercase;
@@ -160,7 +164,8 @@ def inject_app_styles() -> None:
                 border-radius: 999px;
                 padding: 0.42rem 0.68rem;
                 font-weight: 700;
-                font-size: 0.9rem;
+                font-size: var(--ui-label-size);
+                line-height: var(--ui-label-line);
             }
 
             .fit-strong {
@@ -191,14 +196,23 @@ def inject_app_styles() -> None:
                 background: rgba(10, 110, 78, 0.10);
                 color: var(--green);
                 border: 1px solid rgba(10, 110, 78, 0.20);
-                font-size: 0.86rem;
+                font-size: var(--ui-label-size);
+                line-height: var(--ui-label-line);
                 font-weight: 600;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             .keyword-pill.missing {
                 background: rgba(184, 74, 57, 0.10);
                 color: var(--red);
                 border-color: rgba(184, 74, 57, 0.20);
+            }
+
+            div[data-testid="stPopover"] button {
+                border-radius: 999px;
             }
 
             div[data-testid="stFileUploader"] {
@@ -278,10 +292,18 @@ def render_keyword_cloud(keywords: list[str], missing: bool = False, limit: int 
     css_class = "keyword-pill missing" if missing else "keyword-pill"
     visible_keywords = keywords[:limit]
     hidden_count = max(len(keywords) - limit, 0)
-    chips = "".join(f'<span class="{css_class}">{escape(keyword)}</span>' for keyword in visible_keywords)
-    if hidden_count:
-        chips += f'<span class="{css_class}">+{hidden_count} more</span>'
-    st.markdown(f'<div class="keyword-cloud">{chips}</div>', unsafe_allow_html=True)
+    cloud_container = st.container()
+    with cloud_container:
+        st.markdown('<div class="keyword-cloud">', unsafe_allow_html=True)
+        for keyword in visible_keywords:
+            if len(keyword) <= 28:
+                st.markdown(f'<span class="{css_class}" title="{escape(keyword)}">{escape(keyword)}</span>', unsafe_allow_html=True)
+            else:
+                with st.popover(f"{keyword[:25].rstrip()}..."):
+                    st.write(keyword)
+        if hidden_count:
+            st.markdown(f'<span class="{css_class}">+{hidden_count} more</span>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 def render_top_candidate_cards(analyses: list[ResumeAnalysis]) -> None:
@@ -381,13 +403,22 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
         )
         if analysis.insights.missing_sections:
             st.write(f"Missing sections: {', '.join(analysis.insights.missing_sections)}")
-        with st.expander("Technical details", expanded=False):
-            st.write(
-                f"{analysis.metrics.total_ms} ms total | "
-                f"parse {analysis.metrics.parse_ms} ms | "
-                f"score {analysis.metrics.scoring_ms} ms | "
-                f"rewrites {analysis.metrics.rewrite_mode}"
-            )
+
+        runtime_metrics = analysis.metrics
+        has_runtime_metrics = any(
+            value > 0 for value in [runtime_metrics.total_ms, runtime_metrics.parse_ms, runtime_metrics.scoring_ms, runtime_metrics.rewrite_ms]
+        )
+        if has_runtime_metrics:
+            with st.expander("Technical details", expanded=False):
+                st.write(
+                    f"{runtime_metrics.total_ms} ms total | "
+                    f"parse {runtime_metrics.parse_ms} ms | "
+                    f"score {runtime_metrics.scoring_ms} ms | "
+                    f"rewrite {runtime_metrics.rewrite_ms} ms | "
+                    f"mode {runtime_metrics.rewrite_mode}"
+                )
+        else:
+            st.caption("Runtime metrics appear after a live upload analysis.")
 
 
 inject_app_styles()
