@@ -190,6 +190,8 @@ OPENAI_MODEL = "gpt-4o-mini"
 
 Without a key, the app still shows template rewrite examples.
 
+When a key is configured, OpenAI rewrites are still opt-in from the app sidebar so public demo usage does not automatically spend API credits.
+
 ## Resume Bullet
 
 ```text

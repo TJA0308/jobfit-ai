@@ -40,13 +40,13 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
         )
         if analysis.insights.missing_sections:
             st.write(f"Missing sections: {', '.join(analysis.insights.missing_sections)}")
-        st.write("**Runtime**")
-        st.write(
-            f"{analysis.metrics.total_ms} ms total | "
-            f"parse {analysis.metrics.parse_ms} ms | "
-            f"score {analysis.metrics.scoring_ms} ms | "
-            f"rewrites {analysis.metrics.rewrite_mode}"
-        )
+        with st.expander("Technical details", expanded=False):
+            st.write(
+                f"{analysis.metrics.total_ms} ms total | "
+                f"parse {analysis.metrics.parse_ms} ms | "
+                f"score {analysis.metrics.scoring_ms} ms | "
+                f"rewrites {analysis.metrics.rewrite_mode}"
+            )
 
 
 st.title("JobFit AI")
@@ -73,7 +73,14 @@ with summary_right:
 with st.sidebar:
     st.header("Recent analyses")
     api_key_configured = has_openai_key(st.secrets.get("OPENAI_API_KEY", None))
-    st.caption("AI rewrites: enabled" if api_key_configured else "AI rewrites: template mode")
+    use_ai_rewrites = False
+    if api_key_configured:
+        use_ai_rewrites = st.toggle(
+            "Use OpenAI rewrites",
+            value=False,
+            help="Uses your configured OpenAI API key. Leave off for template rewrite examples.",
+        )
+    st.caption("AI rewrites: enabled" if use_ai_rewrites else "AI rewrites: template mode")
     recent_items = fetch_recent_analyses(limit=8)
     if recent_items:
         for item in recent_items:
@@ -108,8 +115,8 @@ if st.button("Analyze candidates", type="primary", use_container_width=True):
                     file_bytes=uploaded_resume.getvalue(),
                     filename=uploaded_resume.name,
                     job_description=job_description,
-                    openai_api_key=st.secrets.get("OPENAI_API_KEY", None),
-                    openai_model=st.secrets.get("OPENAI_MODEL", None),
+                    openai_api_key=st.secrets.get("OPENAI_API_KEY", None) if use_ai_rewrites else None,
+                    openai_model=st.secrets.get("OPENAI_MODEL", None) if use_ai_rewrites else None,
                 )
                 analyses.append(analysis)
             except Exception as exc:
