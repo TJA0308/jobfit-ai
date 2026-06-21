@@ -36,6 +36,7 @@ This project was built as a practical portfolio piece for AI, software engineeri
 | Observability | Tracks parse, scoring, rewrite, and total analysis latency |
 | Persistence | Saves recent analyses locally with SQLite |
 | Deployment | Live Streamlit app with a simple root-level entry point |
+| Demo mode | Includes one-click demo job description and sample resume ranking |
 
 ## Why This Is Different
 
@@ -129,6 +130,15 @@ http://localhost:8501
 ```
 
 ## Try The Demo Data
+
+In the live app, click:
+
+```text
+Load demo job description
+Run demo ranking
+```
+
+You can also run the same sample flow locally:
 
 ```bash
 python scripts/demo_batch.py

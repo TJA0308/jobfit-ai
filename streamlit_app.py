@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 
+from jobfit_ai.scoring import analyze_resume_fit
 from jobfit_ai.history_store import fetch_recent_analyses, initialize_database
 from jobfit_ai.models import ResumeAnalysis
 from jobfit_ai.rewrite_coach import has_openai_key
@@ -10,6 +13,28 @@ from jobfit_ai.upload_handler import analyze_uploaded_bytes
 
 st.set_page_config(page_title="JobFit AI", page_icon=":briefcase:", layout="wide")
 initialize_database()
+
+ROOT_DIR = Path(__file__).resolve().parent
+DEMO_DIR = ROOT_DIR / "demo"
+
+
+def load_demo_job_description() -> str:
+    return (DEMO_DIR / "job_description_ml_platform.txt").read_text(encoding="utf-8")
+
+
+def analyze_demo_resumes(job_description: str) -> list[ResumeAnalysis]:
+    analyses: list[ResumeAnalysis] = []
+    for resume_path in sorted(DEMO_DIR.glob("resume_*.txt")):
+        resume_text = resume_path.read_text(encoding="utf-8")
+        analyses.append(
+            analyze_resume_fit(
+                resume_text=resume_text,
+                job_description=job_description,
+                source_filename=resume_path.name,
+                source_type="txt",
+            )
+        )
+    return analyses
 
 
 def render_analysis_panel(analysis: ResumeAnalysis) -> None:
@@ -94,13 +119,55 @@ uploaded_resumes = st.file_uploader(
     type=["pdf", "docx", "txt"],
     accept_multiple_files=True,
 )
+
+if "job_description" not in st.session_state:
+    st.session_state.job_description = ""
+
+demo_left, demo_right = st.columns([1, 1])
+with demo_left:
+    if st.button("Load demo job description", use_container_width=True):
+        st.session_state.job_description = load_demo_job_description()
+with demo_right:
+    run_demo = st.button("Run demo ranking", use_container_width=True)
+
 job_description = st.text_area(
     "Paste the target job description",
     height=260,
+    key="job_description",
     placeholder="Paste the internship or full-time role description here...",
 )
 
-if st.button("Analyze candidates", type="primary", use_container_width=True):
+if run_demo:
+    if not job_description.strip():
+        st.session_state.job_description = load_demo_job_description()
+        job_description = st.session_state.job_description
+
+    analyses = analyze_demo_resumes(job_description)
+    analyses.sort(key=lambda item: item.match_score, reverse=True)
+    st.subheader("Demo candidate ranking")
+    st.dataframe(
+        pd.DataFrame(
+            [
+                {
+                    "Candidate": item.candidate_name,
+                    "Score": item.match_score,
+                    "Tier": item.tier,
+                    "Keyword matches": len(item.matching_keywords),
+                    "Missing keywords": len(item.missing_keywords),
+                }
+                for item in analyses
+            ]
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
+    st.subheader("Detailed reviews")
+    for analysis in analyses:
+        label = f"{analysis.candidate_name} | {analysis.match_score}% | {analysis.tier}"
+        with st.expander(label, expanded=analysis == analyses[0]):
+            render_analysis_panel(analysis)
+
+elif st.button("Analyze candidates", type="primary", use_container_width=True):
     if not uploaded_resumes:
         st.error("Upload at least one resume before analyzing.")
     elif not job_description.strip():
