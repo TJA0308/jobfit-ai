@@ -5,9 +5,12 @@
 ### Explainable resume-to-job matching for internship applicants
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-0A6E4E?style=for-the-badge&logo=streamlit&logoColor=white)](https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/)
+[![Tests](https://img.shields.io/github/actions/workflow/status/TJA0308/jobfit-ai/tests.yml?branch=main&style=for-the-badge&label=Tests)](https://github.com/TJA0308/jobfit-ai/actions/workflows/tests.yml)
+[![Streamlit](https://img.shields.io/badge/App-Streamlit-D8442F?style=for-the-badge&logo=streamlit&logoColor=white)](streamlit_app.py)
+[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](api_server.py)
 [![Python](https://img.shields.io/badge/Python-3.13-2E6E9E?style=for-the-badge&logo=python&logoColor=white)](runtime.txt)
-[![Streamlit](https://img.shields.io/badge/Streamlit-App-D8442F?style=for-the-badge&logo=streamlit&logoColor=white)](streamlit_app.py)
-[![scikit-learn](https://img.shields.io/badge/scikit--learn-TF--IDF-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](jobfit_ai/scoring.py)
+[![scikit-learn](https://img.shields.io/badge/ML-TF--IDF%20%2B%20scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](jobfit_ai/scoring.py)
+[![SQLite](https://img.shields.io/badge/Storage-SQLite-3B6EA5?style=for-the-badge&logo=sqlite&logoColor=white)](jobfit_ai/history_store.py)
 
 Compare resumes against a target job description, rank fit, and explain the score with transparent matching signals.
 
@@ -38,6 +41,15 @@ This project was built as a practical portfolio piece for AI, software engineeri
 | Deployment | Live Streamlit app with a simple root-level entry point |
 | Demo mode | Includes one-click demo job description and sample resume ranking |
 
+## Portfolio Signals
+
+- Deployed, usable app with a public Streamlit URL
+- Shared core logic reused by both the UI and optional FastAPI backend
+- Explainable ML-style scoring instead of a black-box result
+- Local persistence with SQLite for recent analysis history
+- Demo dataset for quick evaluation and recruiter walkthroughs
+- Unit tests covering scoring and resume extraction paths
+
 ## Why This Is Different
 
 Most beginner resume matchers only count shared words. JobFit AI combines multiple signals:
@@ -50,6 +62,22 @@ Most beginner resume matchers only count shared words. JobFit AI combines multip
 - optional AI rewrite coaching when an OpenAI API key is configured
 
 The result is still lightweight and explainable, but more useful than a basic keyword counter.
+
+## How The Score Is Computed
+
+The overall fit is a transparent weighted blend of three signals, each on a 0-100 scale:
+
+```text
+Fit = 0.45 x semantic similarity
+    + 0.35 x keyword alignment
+    + 0.20 x resume quality
+```
+
+- **Semantic similarity** blends TF-IDF cosine with job/resume token overlap. Because TF-IDF cosine between two short documents is inherently bounded well below 1.0, it is normalized against an explicit reference ceiling so the signal reads on a meaningful 0-100 scale.
+- **Keyword alignment** is the share of the weighted job-description keyword mass the resume covers.
+- **Resume quality** scores length, sections, bullet density, and action verbs.
+
+The weights sum to 1.0, so the headline percentage is exactly reconstructable from the three sub-scores shown in the app — there is no hidden scaling factor. Weights and thresholds live as named constants in `jobfit_ai/scoring.py`.
 
 ## Product Flow
 
@@ -149,9 +177,9 @@ Sample output:
 ```text
 JobFit AI Demo Ranking
 ============================================================
-1. Jordan Kim          67.16%  Strong    Matches: 15  Missing: 15
-2. Maya Singh          50.26%  Moderate  Matches: 11  Missing: 15
-3. Ethan Brooks        23.59%  Weak      Matches:  5  Missing: 15
+1. Jordan Kim          65.61%  Strong    Matches: 15  Missing: 15
+2. Maya Singh          47.96%  Moderate  Matches: 11  Missing: 15
+3. Ethan Brooks        21.77%  Weak      Matches:  5  Missing: 15
 ```
 
 ## Run Tests

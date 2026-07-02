@@ -18,6 +18,24 @@ from jobfit_ai.text_features import (
 )
 
 
+# Overall fit is a transparent weighted blend of three 0-100 signals. The
+# weights sum to 1.0, so the headline score is exactly reconstructable from the
+# three sub-scores shown in the UI -- there is no hidden scaling factor.
+SEMANTIC_WEIGHT = 0.45
+KEYWORD_WEIGHT = 0.35
+QUALITY_WEIGHT = 0.20
+
+# TF-IDF cosine similarity between two short documents is bounded far below 1.0
+# (empirically ~0.25 even for a strong resume/JD match). We blend it with the
+# token-overlap ratio and normalize against this reference ceiling so the signal
+# reads on a meaningful 0-100 scale instead of clustering near zero.
+SEMANTIC_MATCH_REFERENCE = 0.45
+
+# Tier thresholds on the final 0-100 score.
+STRONG_TIER_MIN = 65.0
+MODERATE_TIER_MIN = 40.0
+
+
 def _clamp(value: float, lower: float = 0.0, upper: float = 100.0) -> float:
     return max(lower, min(upper, round(value, 2)))
 
@@ -25,11 +43,12 @@ def _clamp(value: float, lower: float = 0.0, upper: float = 100.0) -> float:
 def _semantic_similarity_score(resume_text: str, job_description: str) -> float:
     vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=1)
     matrix = vectorizer.fit_transform([resume_text, job_description])
-    similarity = cosine_similarity(matrix[0:1], matrix[1:2])[0][0]
+    cosine = float(cosine_similarity(matrix[0:1], matrix[1:2])[0][0])
     resume_tokens = set(tokenize(resume_text))
     job_tokens = set(tokenize(job_description))
     overlap_ratio = (len(resume_tokens & job_tokens) / len(job_tokens)) if job_tokens else 0.0
-    return _clamp(((0.7 * float(similarity)) + (0.3 * overlap_ratio)) * 100)
+    blended = (0.5 * cosine) + (0.5 * overlap_ratio)
+    return _clamp((blended / SEMANTIC_MATCH_REFERENCE) * 100)
 
 
 def _keyword_alignment_score(
@@ -77,9 +96,9 @@ def _resume_quality_score(resume_text: str) -> tuple[float, ResumeInsights]:
 
 
 def _score_tier(score: float) -> str:
-    if score >= 65:
+    if score >= STRONG_TIER_MIN:
         return "Strong"
-    if score >= 40:
+    if score >= MODERATE_TIER_MIN:
         return "Moderate"
     return "Weak"
 
@@ -152,8 +171,11 @@ def analyze_resume_fit(
         job_description,
     )
     resume_quality, insights = _resume_quality_score(resume_text)
-    raw_score = (0.55 * semantic_similarity) + (0.30 * keyword_alignment) + (0.15 * resume_quality)
-    overall_score = _clamp(raw_score * 1.6)
+    overall_score = _clamp(
+        (SEMANTIC_WEIGHT * semantic_similarity)
+        + (KEYWORD_WEIGHT * keyword_alignment)
+        + (QUALITY_WEIGHT * resume_quality)
+    )
 
     return ResumeAnalysis(
         analysis_id=str(uuid4()),

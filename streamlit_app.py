@@ -327,7 +327,7 @@ def render_top_candidate_cards(analyses: list[ResumeAnalysis]) -> None:
 
 
 def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
-    analyses.sort(key=lambda item: item.match_score, reverse=True)
+    analyses = sorted(analyses, key=lambda item: item.match_score, reverse=True)
     st.subheader(title)
 
     top_candidate = analyses[0]
@@ -393,6 +393,10 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
         st.progress(analysis.breakdown.semantic_similarity / 100, text=f"Semantic similarity: {analysis.breakdown.semantic_similarity}%")
         st.progress(analysis.breakdown.keyword_alignment / 100, text=f"Keyword alignment: {analysis.breakdown.keyword_alignment}%")
         st.progress(analysis.breakdown.resume_quality / 100, text=f"Resume quality: {analysis.breakdown.resume_quality}%")
+        st.caption(
+            f"Fit {analysis.match_score}% = 0.45 x semantic + 0.35 x keyword + 0.20 x quality "
+            "(no hidden scaling)."
+        )
         st.write("**Matched keywords**")
         render_keyword_cloud(analysis.matching_keywords)
         st.write("**Missing skills**")
@@ -521,8 +525,9 @@ if run_demo:
         st.session_state.job_description = load_demo_job_description()
         job_description = st.session_state.job_description
 
-    analyses = analyze_demo_resumes(job_description)
-    render_ranking(analyses, "Demo candidate ranking")
+    with st.spinner("Ranking demo candidates..."):
+        analyses = analyze_demo_resumes(job_description)
+    st.session_state.results = (analyses, "Demo candidate ranking")
 
 elif analyze_uploaded:
     if not uploaded_resumes:
@@ -548,4 +553,9 @@ elif analyze_uploaded:
             progress.progress(index / len(uploaded_resumes), text=f"Analyzed {index} of {len(uploaded_resumes)} resumes")
 
         if analyses:
-            render_ranking(analyses, "Candidate ranking")
+            st.session_state.results = (analyses, "Candidate ranking")
+
+# Render the most recent results on every rerun so they survive incidental
+# widget interactions (a Streamlit button is only truthy on its own click).
+if st.session_state.get("results"):
+    render_ranking(*st.session_state.results)
