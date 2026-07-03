@@ -521,12 +521,14 @@ with input_right:
     analyze_uploaded = st.button("Analyze uploaded resumes", type="primary", use_container_width=True)
 
 if run_demo:
-    if not job_description.strip():
-        st.session_state.job_description = load_demo_job_description()
-        job_description = st.session_state.job_description
+    # Fall back to the built-in benchmark JD, but do not write it back to the
+    # text-area's session_state key -- that widget is already instantiated this
+    # run, so assigning to it would raise. The "Load demo job description"
+    # button handles pre-filling via an on_click callback instead.
+    active_job_description = job_description if job_description.strip() else load_demo_job_description()
 
     with st.spinner("Ranking demo candidates..."):
-        analyses = analyze_demo_resumes(job_description)
+        analyses = analyze_demo_resumes(active_job_description)
     st.session_state.results = (analyses, "Demo candidate ranking")
 
 elif analyze_uploaded:
