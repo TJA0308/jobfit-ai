@@ -1,17 +1,21 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
 from jobfit_ai.history_store import fetch_recent_analyses, initialize_database
 from jobfit_ai.models import BatchAnalysisResponse, ResumeAnalysis
 from jobfit_ai.upload_handler import analyze_uploaded_bytes
 
-app = FastAPI(title="JobFit AI API")
 
-
-@app.on_event("startup")
-def on_startup() -> None:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     initialize_database()
+    yield
+
+
+app = FastAPI(title="JobFit AI API", lifespan=lifespan)
 
 
 @app.get("/health")
