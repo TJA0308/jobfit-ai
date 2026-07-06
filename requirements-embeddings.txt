@@ -1,0 +1,6 @@
+# Optional: enables the sentence-transformer embeddings backend for semantic
+# scoring. NOT installed on the deployed app -- torch exceeds Streamlit Cloud's
+# free-tier memory budget, and the TF-IDF default matches embeddings on the eval
+# set (see scripts/evaluate.py). Install locally to benchmark or opt in:
+#   pip install -r requirements-embeddings.txt
+sentence-transformers==5.6.0

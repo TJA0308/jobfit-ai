@@ -6,6 +6,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 from jobfit_ai.scoring import analyze_resume_fit
+from jobfit_ai.semantic import embeddings_available, semantic_similarity
 from jobfit_ai.resume_parser import (
     extract_resume_text,
     extract_text_from_docx,
@@ -80,6 +81,21 @@ class JobFitTests(unittest.TestCase):
         self.assertTrue(analysis.target_role)
         self.assertGreaterEqual(analysis.breakdown.semantic_similarity, 0)
         self.assertGreaterEqual(analysis.insights.word_count, 10)
+
+    def test_semantic_tfidf_backend_is_available_and_bounded(self) -> None:
+        score, backend = semantic_similarity(RESUME_TEXT, JOB_DESCRIPTION, prefer_embeddings=False)
+        self.assertEqual(backend, "tfidf")
+        self.assertGreaterEqual(score, 0.0)
+        self.assertLessEqual(score, 100.0)
+
+    def test_semantic_falls_back_to_tfidf_when_embeddings_unavailable(self) -> None:
+        # When embeddings are not installed, requesting them must degrade to
+        # TF-IDF rather than raising.
+        _, backend = semantic_similarity(RESUME_TEXT, JOB_DESCRIPTION, prefer_embeddings=True)
+        if embeddings_available():
+            self.assertEqual(backend, "embeddings")
+        else:
+            self.assertEqual(backend, "tfidf")
 
     def test_docx_extraction_reads_document_xml(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

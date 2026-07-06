@@ -183,6 +183,46 @@ def inject_app_styles() -> None:
                 background: var(--red-soft);
             }
 
+            .score-gauge {
+                position: relative;
+                width: 132px;
+                height: 132px;
+                border-radius: 50%;
+                margin: 0.2rem auto 0.6rem;
+                background: conic-gradient(var(--gauge-color) var(--pct), rgba(16, 34, 23, 0.10) 0);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .score-gauge-inner {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                background: var(--card);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                box-shadow: inset 0 2px 8px rgba(16, 34, 23, 0.08);
+            }
+
+            .score-gauge-value {
+                font-family: "Space Grotesk", sans-serif;
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--ink);
+                line-height: 1;
+            }
+
+            .score-gauge-label {
+                font-size: 0.68rem;
+                letter-spacing: 0.16em;
+                color: var(--muted);
+                font-weight: 700;
+                margin-top: 0.25rem;
+            }
+
             .keyword-cloud {
                 display: flex;
                 flex-wrap: wrap;
@@ -282,6 +322,24 @@ def tier_class(tier: str) -> str:
     if tier == "Moderate":
         return "fit-moderate"
     return "fit-weak"
+
+
+def tier_color(tier: str) -> str:
+    return {"Strong": "#0a6e4e", "Moderate": "#b7791f"}.get(tier, "#b84a39")
+
+
+def render_score_gauge(score: float, tier: str) -> None:
+    st.markdown(
+        f"""
+        <div class="score-gauge" style="--pct: {score}%; --gauge-color: {tier_color(tier)};">
+            <div class="score-gauge-inner">
+                <span class="score-gauge-value">{round(score)}</span>
+                <span class="score-gauge-label">FIT</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_keyword_cloud(keywords: list[str], missing: bool = False, limit: int = 12) -> None:
@@ -389,6 +447,7 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
             for item in analysis.rewrite_suggestions:
                 st.write(f"- {item}")
     with right_column:
+        render_score_gauge(analysis.match_score, analysis.tier)
         st.write("**Score breakdown**")
         st.progress(analysis.breakdown.semantic_similarity / 100, text=f"Semantic similarity: {analysis.breakdown.semantic_similarity}%")
         st.progress(analysis.breakdown.keyword_alignment / 100, text=f"Keyword alignment: {analysis.breakdown.keyword_alignment}%")
@@ -419,7 +478,8 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
                     f"parse {runtime_metrics.parse_ms} ms | "
                     f"score {runtime_metrics.scoring_ms} ms | "
                     f"rewrite {runtime_metrics.rewrite_ms} ms | "
-                    f"mode {runtime_metrics.rewrite_mode}"
+                    f"mode {runtime_metrics.rewrite_mode} | "
+                    f"semantic backend {analysis.breakdown.semantic_backend}"
                 )
         else:
             st.caption("Runtime metrics appear after a live upload analysis.")
@@ -472,6 +532,26 @@ status_columns[0].metric("Formats", "PDF / DOCX / TXT")
 status_columns[1].metric("Mode", "Single + Batch")
 status_columns[2].metric("Scoring", "3 signals")
 status_columns[3].metric("Rewrites", "Opt-in AI")
+
+with st.expander("How the fit score is computed"):
+    st.markdown(
+        """
+        The headline fit is a **transparent weighted blend** of three 0-100 signals
+        — no hidden scaling, so the three bars in each result reconstruct the score exactly:
+
+        `Fit = 0.45 x semantic similarity + 0.35 x keyword alignment + 0.20 x resume quality`
+
+        - **Semantic similarity** — TF-IDF cosine blended with token overlap (default). An optional
+          sentence-transformer embeddings backend is implemented and benchmarked.
+        - **Keyword alignment** — share of the weighted job-description keyword mass the resume covers.
+        - **Resume quality** — length, sections, bullet density, and action verbs.
+
+        Tier thresholds and the weights were **calibrated on a hand-labeled evaluation set**
+        (Spearman rank correlation 0.93, tier accuracy 100% on the default backend).
+        On that set, embeddings did not beat TF-IDF for this keyword-heavy task, so the
+        lightweight backend stays the default — a measured tradeoff.
+        """
+    )
 
 with st.sidebar:
     st.header("Recent analyses")

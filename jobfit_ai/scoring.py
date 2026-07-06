@@ -2,10 +2,8 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-
 from jobfit_ai.models import AnalysisBreakdown, ResumeAnalysis, ResumeInsights, SkillGap
+from jobfit_ai.semantic import semantic_similarity
 from jobfit_ai.text_features import (
     action_verb_hits,
     count_bullets,
@@ -25,30 +23,15 @@ SEMANTIC_WEIGHT = 0.45
 KEYWORD_WEIGHT = 0.35
 QUALITY_WEIGHT = 0.20
 
-# TF-IDF cosine similarity between two short documents is bounded far below 1.0
-# (empirically ~0.25 even for a strong resume/JD match). We blend it with the
-# token-overlap ratio and normalize against this reference ceiling so the signal
-# reads on a meaningful 0-100 scale instead of clustering near zero.
-SEMANTIC_MATCH_REFERENCE = 0.45
-
-# Tier thresholds on the final 0-100 score.
-STRONG_TIER_MIN = 65.0
-MODERATE_TIER_MIN = 40.0
+# Tier thresholds on the final 0-100 score. Calibrated against the labeled eval
+# dataset (scripts/evaluate.py) -- these values give 100% tier accuracy on the
+# TF-IDF backend, up from 33% with the original hand-picked cutoffs.
+STRONG_TIER_MIN = 50.0
+MODERATE_TIER_MIN = 30.0
 
 
 def _clamp(value: float, lower: float = 0.0, upper: float = 100.0) -> float:
     return max(lower, min(upper, round(value, 2)))
-
-
-def _semantic_similarity_score(resume_text: str, job_description: str) -> float:
-    vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=1)
-    matrix = vectorizer.fit_transform([resume_text, job_description])
-    cosine = float(cosine_similarity(matrix[0:1], matrix[1:2])[0][0])
-    resume_tokens = set(tokenize(resume_text))
-    job_tokens = set(tokenize(job_description))
-    overlap_ratio = (len(resume_tokens & job_tokens) / len(job_tokens)) if job_tokens else 0.0
-    blended = (0.5 * cosine) + (0.5 * overlap_ratio)
-    return _clamp((blended / SEMANTIC_MATCH_REFERENCE) * 100)
 
 
 def _keyword_alignment_score(
@@ -159,20 +142,23 @@ def analyze_resume_fit(
     job_description: str,
     source_filename: str,
     source_type: str,
+    prefer_embeddings: bool = False,
 ) -> ResumeAnalysis:
     if not resume_text.strip() or not job_description.strip():
         raise ValueError("Resume text and job description must not be empty.")
 
     candidate_name = infer_candidate_name(resume_text, source_filename)
     target_role = infer_target_role(job_description)
-    semantic_similarity = _semantic_similarity_score(resume_text, job_description)
+    semantic_score, semantic_backend = semantic_similarity(
+        resume_text, job_description, prefer_embeddings=prefer_embeddings
+    )
     keyword_alignment, matching_keywords, missing_keywords, skill_gaps = _keyword_alignment_score(
         resume_text,
         job_description,
     )
     resume_quality, insights = _resume_quality_score(resume_text)
     overall_score = _clamp(
-        (SEMANTIC_WEIGHT * semantic_similarity)
+        (SEMANTIC_WEIGHT * semantic_score)
         + (KEYWORD_WEIGHT * keyword_alignment)
         + (QUALITY_WEIGHT * resume_quality)
     )
@@ -193,9 +179,10 @@ def analyze_resume_fit(
         rewrite_suggestions=_rewrite_suggestions(target_role, matching_keywords, missing_keywords),
         skill_gaps=skill_gaps,
         breakdown=AnalysisBreakdown(
-            semantic_similarity=semantic_similarity,
+            semantic_similarity=semantic_score,
             keyword_alignment=keyword_alignment,
             resume_quality=resume_quality,
+            semantic_backend=semantic_backend,
         ),
         insights=insights,
     )

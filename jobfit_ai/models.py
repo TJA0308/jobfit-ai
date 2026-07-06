@@ -29,6 +29,7 @@ class AnalysisBreakdown:
     semantic_similarity: float
     keyword_alignment: float
     resume_quality: float
+    semantic_backend: str = "tfidf"
 
 
 @dataclass

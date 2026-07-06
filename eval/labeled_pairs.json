@@ -1,0 +1,95 @@
+{
+  "description": "Hand-labeled resume/JD pairs for calibrating and validating JobFit AI scoring. Each role has candidates with a ground-truth rank (1 = best fit) and expected tier assigned by human judgement. Used by scripts/evaluate.py to compare scoring backends via rank correlation and tier accuracy.",
+  "roles": [
+    {
+      "role": "Software Engineering Intern",
+      "job_description": "Software Engineering Intern. Build and ship full-stack product features using Python, JavaScript, React, and REST APIs. Design backend services, database models, and API endpoints. Write unit tests and integration tests. Debug production issues and communicate technical tradeoffs. Collaborate with product managers and designers during planning, code review, and launch. Familiarity with data structures, algorithms, HTTP, Git, SQL, and software design.",
+      "candidates": [
+        {
+          "name": "Strong SWE",
+          "expected_rank": 1,
+          "expected_tier": "Strong",
+          "resume": "Alex Rivera\nSummary\nSoftware engineering student who ships full-stack features and cares about clean, tested code.\n\nExperience\n- Built a full-stack task manager with Python, FastAPI, React, and PostgreSQL used by 200 students.\n- Designed REST API endpoints and database models; wrote unit and integration tests with pytest.\n- Debugged production issues from logs and reduced error rate by 30 percent.\n\nProjects\n- Shipped a code-review dashboard using React and a Python backend deployed on Render.\n\nSkills\nPython JavaScript TypeScript React REST APIs SQL PostgreSQL Git data structures algorithms testing\n\nEducation\nB.S. Computer Science"
+        },
+        {
+          "name": "Good SWE",
+          "expected_rank": 2,
+          "expected_tier": "Moderate",
+          "resume": "Priya Nair\nSummary\nComputer science student comfortable building backend services and APIs.\n\nExperience\n- Built REST APIs in Python and Flask for a campus events app.\n- Wrote unit tests and used Git for version control in a team of four.\n\nProjects\n- Developed a SQL-backed inventory tool and deployed it to a cloud platform.\n\nSkills\nPython Flask REST APIs SQL Git algorithms unit testing\n\nEducation\nB.S. Computer Science"
+        },
+        {
+          "name": "Moderate SWE",
+          "expected_rank": 3,
+          "expected_tier": "Weak",
+          "resume": "Sam Carter\nSummary\nEngineering student interested in software and automation.\n\nExperience\n- Wrote Python scripts to automate spreadsheet reports.\n- Completed coursework in data structures and basic web development.\n\nProjects\n- Built a small personal website with HTML and CSS.\n\nSkills\nPython HTML CSS Excel basic Git\n\nEducation\nB.S. Mechanical Engineering"
+        },
+        {
+          "name": "Weak SWE",
+          "expected_rank": 4,
+          "expected_tier": "Weak",
+          "resume": "Jordan Blake\nSummary\nRecent graduate seeking opportunities in a dynamic environment.\n\nExperience\n- Worked part-time in retail handling customer service and cash registers.\n- Volunteered at a community center organizing events.\n\nSkills\nCommunication teamwork Microsoft Word time management\n\nEducation\nB.A. History"
+        }
+      ]
+    },
+    {
+      "role": "Data / Machine Learning Intern",
+      "job_description": "Machine Learning Intern. Build and evaluate machine learning models using Python, scikit-learn, and pandas. Clean and analyze large datasets, engineer features, and measure model performance with proper metrics. Run experiments, track results, and communicate findings. Familiarity with statistics, NumPy, data visualization, and SQL. Interest in NLP or applied ML is a plus.",
+      "candidates": [
+        {
+          "name": "Strong ML",
+          "expected_rank": 1,
+          "expected_tier": "Strong",
+          "resume": "Wei Zhang\nSummary\nData science student who builds and evaluates ML models end to end.\n\nExperience\n- Built classification models with scikit-learn and pandas, improving F1 from 0.71 to 0.84.\n- Engineered features from raw text and tracked experiments with clear metrics.\n- Analyzed a 2M-row dataset with SQL and NumPy to surface product insights.\n\nProjects\n- Trained an NLP sentiment model and evaluated it with precision, recall, and ROC-AUC.\n\nSkills\nPython scikit-learn pandas NumPy SQL statistics NLP data visualization model evaluation\n\nEducation\nB.S. Data Science"
+        },
+        {
+          "name": "Good ML",
+          "expected_rank": 2,
+          "expected_tier": "Moderate",
+          "resume": "Maria Lopez\nSummary\nStudent with hands-on machine learning coursework and projects.\n\nExperience\n- Used pandas and scikit-learn to build regression models for a class project.\n- Created data visualizations to explain trends to non-technical peers.\n\nProjects\n- Cleaned and analyzed a public dataset with Python and measured model accuracy.\n\nSkills\nPython pandas scikit-learn matplotlib statistics SQL\n\nEducation\nB.S. Statistics"
+        },
+        {
+          "name": "Moderate ML",
+          "expected_rank": 3,
+          "expected_tier": "Weak",
+          "resume": "Tom Becker\nSummary\nSoftware student curious about data.\n\nExperience\n- Wrote Python scripts to parse CSV files and generate summary tables.\n- Took an introductory statistics course.\n\nProjects\n- Built a web scraper in Python to collect pricing data.\n\nSkills\nPython CSV basic statistics Git\n\nEducation\nB.S. Computer Science"
+        },
+        {
+          "name": "Weak ML",
+          "expected_rank": 4,
+          "expected_tier": "Weak",
+          "resume": "Dana Ford\nSummary\nMarketing graduate passionate about brands and storytelling.\n\nExperience\n- Managed social media campaigns and grew followers by 20 percent.\n- Coordinated events and wrote marketing copy.\n\nSkills\nMarketing social media copywriting Canva communication\n\nEducation\nB.A. Marketing"
+        }
+      ]
+    },
+    {
+      "role": "Product Management Intern",
+      "job_description": "Product Management Intern. Work with engineering and design to define product requirements, prioritize a roadmap, and ship user-facing features. Talk to users, analyze product metrics, and write clear specs. Run experiments and A/B tests, measure impact, and communicate tradeoffs to stakeholders. Comfort with data, SQL, and translating user needs into product decisions.",
+      "candidates": [
+        {
+          "name": "Strong PM",
+          "expected_rank": 1,
+          "expected_tier": "Strong",
+          "resume": "Nina Patel\nSummary\nProduct-minded student who turns user needs into shipped features.\n\nExperience\n- Led a student product team, wrote specs, and prioritized a roadmap for a campus app.\n- Ran user interviews and A/B tests, then measured impact with product metrics and SQL.\n- Communicated tradeoffs to engineers and designers during planning and launch.\n\nProjects\n- Shipped a feature that increased weekly active users by 18 percent.\n\nSkills\nproduct management roadmap user research A/B testing product metrics SQL specs stakeholder communication\n\nEducation\nB.S. Business and Computer Science"
+        },
+        {
+          "name": "Good PM",
+          "expected_rank": 2,
+          "expected_tier": "Moderate",
+          "resume": "Chris Doyle\nSummary\nStudent interested in product and user experience.\n\nExperience\n- Coordinated a class project team and gathered user feedback through surveys.\n- Analyzed basic metrics in a spreadsheet to prioritize features.\n\nProjects\n- Wrote a product spec and mockups for a mobile app concept.\n\nSkills\nproduct thinking user research roadmap communication spreadsheets\n\nEducation\nB.A. Economics"
+        },
+        {
+          "name": "Moderate PM",
+          "expected_rank": 3,
+          "expected_tier": "Weak",
+          "resume": "Lee Morgan\nSummary\nBusiness student exploring tech roles.\n\nExperience\n- Interned in operations tracking orders and updating spreadsheets.\n- Took a course in business analytics.\n\nSkills\nExcel communication teamwork analytics\n\nEducation\nB.A. Business Administration"
+        },
+        {
+          "name": "Weak PM",
+          "expected_rank": 4,
+          "expected_tier": "Weak",
+          "resume": "Robin Shaw\nSummary\nBiology graduate seeking a role in a growing company.\n\nExperience\n- Assisted in a research lab preparing samples and recording results.\n- Tutored students in chemistry.\n\nSkills\nlab techniques microscopy data recording tutoring\n\nEducation\nB.S. Biology"
+        }
+      ]
+    }
+  ]
+}
