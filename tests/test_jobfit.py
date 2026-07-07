@@ -1,18 +1,27 @@
 from __future__ import annotations
 
+import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 from zipfile import ZipFile
 
+from api_server import health_check
+from jobfit_ai import history_store
+from jobfit_ai.history_store import fetch_recent_analyses, save_analysis
+from jobfit_ai.rewrite_coach import generate_rewrites
 from jobfit_ai.scoring import analyze_resume_fit
-from jobfit_ai.semantic import embeddings_available, semantic_similarity
+from jobfit_ai.semantic import semantic_similarity
 from jobfit_ai.resume_parser import (
     extract_resume_text,
     extract_text_from_docx,
     extract_text_from_pdf,
     extract_text_from_txt,
 )
+from jobfit_ai.upload_handler import analyze_uploaded_bytes
+from scripts.evaluate import evaluate_backend
 
 
 RESUME_TEXT = """
@@ -89,13 +98,9 @@ class JobFitTests(unittest.TestCase):
         self.assertLessEqual(score, 100.0)
 
     def test_semantic_falls_back_to_tfidf_when_embeddings_unavailable(self) -> None:
-        # When embeddings are not installed, requesting them must degrade to
-        # TF-IDF rather than raising.
-        _, backend = semantic_similarity(RESUME_TEXT, JOB_DESCRIPTION, prefer_embeddings=True)
-        if embeddings_available():
-            self.assertEqual(backend, "embeddings")
-        else:
-            self.assertEqual(backend, "tfidf")
+        with patch("jobfit_ai.semantic._embedding_similarity", return_value=None):
+            _, backend = semantic_similarity(RESUME_TEXT, JOB_DESCRIPTION, prefer_embeddings=True)
+        self.assertEqual(backend, "tfidf")
 
     def test_docx_extraction_reads_document_xml(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -125,6 +130,56 @@ class JobFitTests(unittest.TestCase):
             pdf_path.write_bytes(b"not a real pdf")
             with self.assertRaises(Exception):
                 extract_text_from_pdf(pdf_path)
+
+    def test_history_round_trip_uses_sqlite(self) -> None:
+        analysis = analyze_resume_fit(RESUME_TEXT, JOB_DESCRIPTION, "jane.txt", "txt")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            data_dir = Path(temp_dir)
+            with (
+                patch.object(history_store, "DATA_DIR", data_dir),
+                patch.object(history_store, "DB_PATH", data_dir / "history.db"),
+            ):
+                save_analysis(analysis)
+                entries = fetch_recent_analyses(limit=1)
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0].analysis_id, analysis.analysis_id)
+        self.assertEqual(entries[0].candidate_name, "Jane Doe")
+
+    def test_rewrite_coach_uses_templates_without_api_key(self) -> None:
+        analysis = analyze_resume_fit(RESUME_TEXT, JOB_DESCRIPTION, "jane.txt", "txt")
+        with patch.dict(os.environ, {"OPENAI_API_KEY": ""}):
+            result = generate_rewrites(RESUME_TEXT, JOB_DESCRIPTION, analysis)
+
+        self.assertEqual(result.mode, "template")
+        self.assertEqual(result.bullets, analysis.rewrite_suggestions)
+
+    def test_upload_handler_records_metrics_and_persists(self) -> None:
+        with (
+            patch.dict(os.environ, {"OPENAI_API_KEY": ""}),
+            patch("jobfit_ai.upload_handler.save_analysis") as save_mock,
+        ):
+            analysis = analyze_uploaded_bytes(
+                RESUME_TEXT.encode("utf-8"),
+                "jane.txt",
+                JOB_DESCRIPTION,
+            )
+
+        save_mock.assert_called_once_with(analysis)
+        self.assertEqual(analysis.source_type, "txt")
+        self.assertEqual(analysis.metrics.rewrite_mode, "template")
+        self.assertGreaterEqual(analysis.metrics.total_ms, 0)
+
+    def test_default_evaluation_metrics_do_not_regress(self) -> None:
+        dataset_path = Path(__file__).resolve().parent.parent / "eval" / "labeled_pairs.json"
+        dataset = json.loads(dataset_path.read_text(encoding="utf-8"))
+        result = evaluate_backend(dataset, prefer_embeddings=False)
+
+        self.assertAlmostEqual(result["mean_spearman"], 0.9333333333)
+        self.assertEqual(result["tier_accuracy"], 1.0)
+
+    def test_api_health_check(self) -> None:
+        self.assertEqual(health_check(), {"status": "ok"})
 
 
 if __name__ == "__main__":

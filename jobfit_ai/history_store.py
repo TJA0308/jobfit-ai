@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import closing
 from dataclasses import asdict
 from pathlib import Path
 
@@ -19,58 +20,60 @@ def get_connection() -> sqlite3.Connection:
 
 
 def initialize_database() -> None:
-    with get_connection() as connection:
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS analyses (
-                analysis_id TEXT PRIMARY KEY,
-                created_at TEXT NOT NULL,
-                candidate_name TEXT NOT NULL,
-                source_filename TEXT NOT NULL,
-                source_type TEXT NOT NULL,
-                target_role TEXT NOT NULL,
-                match_score REAL NOT NULL,
-                tier TEXT NOT NULL,
-                payload_json TEXT NOT NULL
+    with closing(get_connection()) as connection:
+        with connection:
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS analyses (
+                    analysis_id TEXT PRIMARY KEY,
+                    created_at TEXT NOT NULL,
+                    candidate_name TEXT NOT NULL,
+                    source_filename TEXT NOT NULL,
+                    source_type TEXT NOT NULL,
+                    target_role TEXT NOT NULL,
+                    match_score REAL NOT NULL,
+                    tier TEXT NOT NULL,
+                    payload_json TEXT NOT NULL
+                )
+                """
             )
-            """
-        )
 
 
 def save_analysis(analysis: ResumeAnalysis) -> None:
     initialize_database()
-    with get_connection() as connection:
-        connection.execute(
-            """
-            INSERT OR REPLACE INTO analyses (
-                analysis_id,
-                created_at,
-                candidate_name,
-                source_filename,
-                source_type,
-                target_role,
-                match_score,
-                tier,
-                payload_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                analysis.analysis_id,
-                analysis.created_at,
-                analysis.candidate_name,
-                analysis.source_filename,
-                analysis.source_type,
-                analysis.target_role,
-                analysis.match_score,
-                analysis.tier,
-                json.dumps(asdict(analysis)),
-            ),
-        )
+    with closing(get_connection()) as connection:
+        with connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO analyses (
+                    analysis_id,
+                    created_at,
+                    candidate_name,
+                    source_filename,
+                    source_type,
+                    target_role,
+                    match_score,
+                    tier,
+                    payload_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    analysis.analysis_id,
+                    analysis.created_at,
+                    analysis.candidate_name,
+                    analysis.source_filename,
+                    analysis.source_type,
+                    analysis.target_role,
+                    analysis.match_score,
+                    analysis.tier,
+                    json.dumps(asdict(analysis)),
+                ),
+            )
 
 
 def fetch_recent_analyses(limit: int = 20) -> list[HistoryEntry]:
     initialize_database()
-    with get_connection() as connection:
+    with closing(get_connection()) as connection:
         rows = connection.execute(
             """
             SELECT analysis_id, created_at, candidate_name, source_filename, source_type,

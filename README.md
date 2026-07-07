@@ -50,7 +50,7 @@ This project was built as a practical portfolio piece for AI, software engineeri
 - Explainable ML-style scoring instead of a black-box result
 - Local persistence with SQLite for recent analysis history
 - Demo dataset for quick evaluation and recruiter walkthroughs
-- Unit tests covering scoring and resume extraction paths
+- Unit tests covering scoring, extraction, persistence, upload orchestration, API health, and evaluation regression
 
 ## Why This Is Different
 
@@ -146,6 +146,7 @@ jobfit-ai/
     history_store.py      # SQLite save/load logic
     models.py             # dataclass models used across the app
     resume_parser.py      # PDF, DOCX, and TXT extraction
+    rewrite_coach.py      # template and optional OpenAI bullet rewrites
     scoring.py            # matching and scoring logic
     semantic.py           # pluggable semantic backend (TF-IDF / embeddings)
     text_features.py      # keyword, section, and text helpers
@@ -154,6 +155,7 @@ jobfit-ai/
     job_description_software_engineering_intern.txt
     resume_ethan_brooks_weak.txt
     resume_jordan_kim_strong.txt
+    resume_marcus_lee.txt
     resume_maya_singh_moderate.txt
   eval/
     labeled_pairs.json    # hand-labeled resume/JD pairs for calibration
@@ -165,6 +167,9 @@ jobfit-ai/
   api_server.py
   streamlit_app.py
   requirements.txt
+  requirements-api.txt
+  requirements-embeddings.txt
+  render.yaml
   runtime.txt
 ```
 
@@ -205,7 +210,8 @@ JobFit AI Demo Ranking
 ============================================================
 1. Jordan Kim          65.61%  Strong    Matches: 15  Missing: 15
 2. Maya Singh          47.96%  Moderate  Matches: 11  Missing: 15
-3. Ethan Brooks        21.77%  Weak      Matches:  5  Missing: 15
+3. Marcus Lee          31.21%  Moderate  Matches:  9  Missing: 15
+4. Ethan Brooks        21.77%  Weak      Matches:  5  Missing: 15
 ```
 
 ## Run Tests
@@ -217,6 +223,7 @@ python -m unittest discover -s tests -v
 ## Optional API
 
 The Streamlit app does not need the API to run. The API is included to show backend design and reusable business logic.
+The API requirements file includes the shared application dependencies.
 
 ```bash
 pip install -r requirements-api.txt
@@ -274,9 +281,9 @@ Built and deployed JobFit AI, a resume matching app using Python, Streamlit, SQL
 ## Roadmap
 
 - Improve the rewrite coach with user-selected tone and bullet style
-- Add vector embeddings for stronger semantic matching
+- Expand the labeled evaluation set with real anonymized resume/job pairs
+- Add chunk-level semantic matching for individual experience bullets
 - Move batch processing to a background worker if the app grows beyond Streamlit Cloud
 - Add downloadable CSV or PDF reports
-- Add a small evaluation dataset for score calibration
 - Add screenshots and a short demo GIF to the README
 - Deploy the FastAPI backend separately on Render
