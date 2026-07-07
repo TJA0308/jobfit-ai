@@ -4,6 +4,9 @@ __pycache__/
 data/
 streamlit.out.log
 streamlit.err.log
+.streamlit.stdout.log
+.streamlit.stderr.log
 api.out.log
 api.err.log
 .pytest_cache/
+.claude/
