@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
+import tempfile
 from contextlib import closing
 from dataclasses import asdict
 from pathlib import Path
@@ -13,10 +15,38 @@ DB_PATH = DATA_DIR / "jobfit_ai.db"
 
 
 def get_connection() -> sqlite3.Connection:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(DB_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
+    last_error: Exception | None = None
+    for path in _candidate_db_paths():
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            connection = sqlite3.connect(path)
+            connection.row_factory = sqlite3.Row
+            return connection
+        except OSError as exc:
+            last_error = exc
+        except sqlite3.Error as exc:
+            last_error = exc
+
+    raise RuntimeError("Unable to open a writable SQLite history database.") from last_error
+
+
+def _candidate_db_paths() -> list[Path]:
+    paths: list[Path] = []
+    configured_path = os.getenv("JOBFIT_DB_PATH")
+    if configured_path:
+        paths.append(Path(configured_path).expanduser())
+
+    paths.append(DB_PATH)
+    paths.append(Path(tempfile.gettempdir()) / "jobfit-ai" / "jobfit_ai.db")
+
+    unique_paths: list[Path] = []
+    seen: set[Path] = set()
+    for path in paths:
+        resolved = path.resolve()
+        if resolved not in seen:
+            unique_paths.append(path)
+            seen.add(resolved)
+    return unique_paths
 
 
 def initialize_database() -> None:

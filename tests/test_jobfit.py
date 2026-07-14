@@ -9,6 +9,7 @@ from unittest.mock import patch
 from zipfile import ZipFile
 
 from api_server import health_check
+from streamlit.testing.v1 import AppTest
 from jobfit_ai import history_store
 from jobfit_ai.history_store import fetch_recent_analyses, save_analysis
 from jobfit_ai.rewrite_coach import generate_rewrites
@@ -146,6 +147,31 @@ class JobFitTests(unittest.TestCase):
         self.assertEqual(entries[0].analysis_id, analysis.analysis_id)
         self.assertEqual(entries[0].candidate_name, "Jane Doe")
 
+    def test_history_store_falls_back_to_temp_database(self) -> None:
+        analysis = analyze_resume_fit(RESUME_TEXT, JOB_DESCRIPTION, "jane.txt", "txt")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            fallback_path = Path(temp_dir) / "fallback" / "history.db"
+            connect_calls = 0
+            original_connect = history_store.sqlite3.connect
+
+            def connect_with_primary_failure(path):
+                nonlocal connect_calls
+                connect_calls += 1
+                if Path(path) == Path(temp_dir) / "readonly" / "history.db":
+                    raise history_store.sqlite3.OperationalError("readonly database")
+                return original_connect(path)
+
+            with (
+                patch.object(history_store, "DB_PATH", Path(temp_dir) / "readonly" / "history.db"),
+                patch.object(history_store.tempfile, "gettempdir", return_value=str(fallback_path.parent.parent)),
+                patch.object(history_store.sqlite3, "connect", side_effect=connect_with_primary_failure),
+            ):
+                save_analysis(analysis)
+                entries = fetch_recent_analyses(limit=1)
+
+        self.assertGreaterEqual(connect_calls, 2)
+        self.assertEqual(entries[0].candidate_name, "Jane Doe")
+
     def test_rewrite_coach_uses_templates_without_api_key(self) -> None:
         analysis = analyze_resume_fit(RESUME_TEXT, JOB_DESCRIPTION, "jane.txt", "txt")
         with patch.dict(os.environ, {"OPENAI_API_KEY": ""}):
@@ -180,6 +206,15 @@ class JobFitTests(unittest.TestCase):
 
     def test_api_health_check(self) -> None:
         self.assertEqual(health_check(), {"status": "ok"})
+
+    def test_streamlit_app_renders_demo_without_exceptions(self) -> None:
+        app = AppTest.from_file("streamlit_app.py")
+        app.run(timeout=30)
+        self.assertEqual(list(app.exception), [])
+
+        app.button[1].click().run(timeout=30)
+        self.assertEqual(list(app.exception), [])
+        self.assertGreaterEqual(len(app.dataframe), 1)
 
 
 if __name__ == "__main__":
