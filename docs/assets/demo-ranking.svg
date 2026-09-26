@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="376" viewBox="0 0 1100 376" role="img" aria-labelledby="title desc">
+  <title id="title">Built-in software engineering demo results</title>
+  <desc id="desc">Alignment out of 100: Jordan Kim 73.14 Strong, Maya Singh 55.44 Strong, Marcus Lee 32.84 Moderate, Ethan Brooks 25.66 Weak. All bars use the same zero-to-100 scale. These sample results are not hiring predictions.</desc>
+  <rect width="1100" height="376" rx="18" fill="#0e1926"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="34" y="42" fill="#78e9b5" font-size="11" font-weight="700" letter-spacing="2">ONE ROLE. FOUR SAMPLE RESUMES.</text>
+    <text x="34" y="78" fill="#edf4fa" font-size="26" font-weight="650">Same scoring rules. Different alignment.</text>
+    <text x="34" y="104" fill="#93adbf" font-size="14">Software engineering internship demo · default TF-IDF backend</text>
+    <g stroke="#273a48" stroke-dasharray="3 5">
+      <path d="M232 130V306"/><path d="M527 130V306"/><path d="M822 130V306"/>
+    </g>
+    <g font-size="17" fill="#dce9ef">
+      <text x="34" y="157">Jordan Kim</text><text x="34" y="204">Maya Singh</text><text x="34" y="251">Marcus Lee</text><text x="34" y="298">Ethan Brooks</text>
+    </g>
+    <g fill="#1e303e">
+      <rect x="232" y="137" width="590" height="27" rx="5"/><rect x="232" y="184" width="590" height="27" rx="5"/>
+      <rect x="232" y="231" width="590" height="27" rx="5"/><rect x="232" y="278" width="590" height="27" rx="5"/>
+    </g>
+    <rect x="232" y="137" width="431.526" height="27" rx="5" fill="#78e9b5"/>
+    <rect x="232" y="184" width="327.096" height="27" rx="5" fill="#78e9b5"/>
+    <rect x="232" y="231" width="193.756" height="27" rx="5" fill="#d6b87b"/>
+    <rect x="232" y="278" width="151.394" height="27" rx="5" fill="#c296b5"/>
+    <g font-family="Consolas, monospace" font-size="18" font-weight="700" fill="#eef5fc">
+      <text x="850" y="157">73.14</text><text x="850" y="204">55.44</text><text x="850" y="251">32.84</text><text x="850" y="298">25.66</text>
+    </g>
+    <g font-size="14">
+      <text x="943" y="157" fill="#78e9b5">Strong</text><text x="943" y="204" fill="#78e9b5">Strong</text>
+      <text x="943" y="251" fill="#d6b87b">Moderate</text><text x="943" y="298" fill="#c296b5">Weak</text>
+    </g>
+    <g font-size="11" fill="#819aa9">
+      <text x="229" y="326">0</text><text x="520" y="326">50</text><text x="810" y="326">100</text>
+      <text x="34" y="355">Reproduce: python scripts/demo_batch.py</text><text x="715" y="355">Illustrative results · not hiring predictions</text>
+    </g>
+  </g>
+</svg>

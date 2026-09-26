@@ -2,7 +2,9 @@
 
 # JobFit AI
 
-### Read the role. Compare the evidence. Understand the score.
+### Resume matching you can understand.
+
+[![Illustration: compare resume language with a role and inspect the score.](docs/assets/project-banner.svg)](https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/)
 
 A Python resume-tailoring tool with explainable NLP scoring and a shared Streamlit / FastAPI core.
 
@@ -12,7 +14,7 @@ A Python resume-tailoring tool with explainable NLP scoring and a shared Streaml
 [![scikit-learn](https://img.shields.io/badge/NLP-scikit--learn-F7931E?logo=scikitlearn&logoColor=white)](jobfit_ai/scoring.py)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](api_server.py)
 
-[Try it](#try-it-in-60-seconds) · [How it works](#how-scoring-works) · [Evaluation](#evaluation-development-versus-separate-checks) · [Run locally](#run-locally) · [Architecture](#architecture)
+[Try it](#try-it-in-60-seconds) · [Explore a result](#explore-a-result) · [How it works](#how-scoring-works) · [Evaluation](#evaluation-development-versus-separate-checks) · [Run locally](#run-locally)
 
 </div>
 
@@ -24,6 +26,13 @@ A Python resume-tailoring tool with explainable NLP scoring and a shared Streaml
 2. Click **Load demo job description**, then **Run demo ranking**. No resume or API key needed.
 3. Open a candidate review to inspect the three score components and terms not found.
 
+[![Demo ranking: Jordan Kim 73.14, Maya Singh 55.44, Marcus Lee 32.84, and Ethan Brooks 25.66 out of 100. Click to try the live app.](docs/assets/demo-ranking.svg)](https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/)
+
+*Project illustrations, not app screenshots. The chart uses actual output from the included demo.*
+
+<details>
+<summary><strong>View the chart as a table + reproduce the results</strong></summary>
+
 | Demo candidate | Alignment / 100 | Tier |
 | --- | ---: | --- |
 | Jordan Kim | 73.14 | Strong |
@@ -33,7 +42,60 @@ A Python resume-tailoring tool with explainable NLP scoring and a shared Streaml
 
 Reproduce this example with `python scripts/demo_batch.py`. These are illustrative results, not hiring predictions.
 
-| Explore the product | Explore the code | Understand the decisions |
+</details>
+
+## Explore a result
+
+Choose a question below. Each section connects a visible result to the code or evidence behind it.
+
+<details>
+<summary><strong>01 / Why does Jordan score 73.14?</strong></summary>
+
+The demo returns these three components:
+
+| Signal | Component / 100 | Weight | Contribution |
+| --- | ---: | ---: | ---: |
+| Text similarity | 80.07 | 45% | 36.0315 |
+| Keyword coverage | 64.65 | 35% | 22.6275 |
+| Document structure | 72.38 | 20% | 14.4760 |
+| **Final alignment** | | | **73.14 / 100**, rounded |
+
+The output includes matching terms such as `api`, `database`, and `engineering`. Terms not found include `design` and `data`. These are token matches, not verified qualifications.
+
+Compare the [resume](demo/resume_jordan_kim_strong.txt) with the [job description](demo/job_description_software_engineering_intern.txt), then inspect the [scoring function](jobfit_ai/scoring.py).
+
+</details>
+
+<details>
+<summary><strong>02 / What happens to an uploaded resume?</strong></summary>
+
+```text
+UPLOAD       VALIDATE       EXTRACT       SCORE       EXPLAIN
+PDF/DOCX/TXT → size + type → plain text → 3 signals → review
+```
+
+The [upload handler](jobfit_ai/upload_handler.py) coordinates the work and removes its temporary file in `finally`. Streamlit keeps results in the current session; the API returns JSON. Neither public entry point reads shared SQLite history. Optional external rewrites require an explicit choice.
+
+Inspect the [privacy and upload tests](tests/test_regressions.py), or follow the complete [architecture map](#architecture).
+
+</details>
+
+<details>
+<summary><strong>03 / Where does the approach fail?</strong></summary>
+
+On the separate synthetic checks, a product candidate describing relevant work in different words scores **29.31**. A coursework candidate repeating role wording scores **35.24** and ranks higher.
+
+That is a useful failure: lexical similarity can miss relevant experience expressed through paraphrases. Copying a job description can also inflate alignment. The score is a tailoring aid, not an assessment of hiring suitability.
+
+Read the [two examples](eval/check_pairs.json) and reproduce the comparison:
+
+```bash
+python scripts/evaluate.py --dataset eval/check_pairs.json
+```
+
+</details>
+
+| I want to try it | I want to inspect it | I want to understand it |
 | --- | --- | --- |
 | [Live app](https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/) | [Start at the upload handler](jobfit_ai/upload_handler.py) | [Interview walkthrough](DEFENSE.md) |
 | [Sample resumes](demo/) | [Behavioral tests](tests/test_regressions.py) | [Deployment guide](docs/DEPLOYMENT.md) |
@@ -120,6 +182,12 @@ flowchart TD
     UP --> RESULT[Analysis result]
     RESULT --> SESSION[UI session state / API JSON]
     UP -. trusted local opt-in only .-> DB[(SQLite)]
+    classDef interface fill:#132b36,stroke:#78e9b5,color:#eff6fb
+    classDef core fill:#18263b,stroke:#79baff,color:#eff6fb
+    classDef optional fill:#302d27,stroke:#d6b87b,color:#eff6fb
+    class UI,API,SESSION interface
+    class UP,PARSE,SCORE,NLP,REWRITE,RESULT core
+    class DB optional
 ```
 
 Both interfaces use the same Python functions. The upload handler coordinates parsing, scoring, and rewrites in sequence; public requests do not use shared database history.
@@ -138,6 +206,19 @@ Both interfaces use the same Python functions. The upload handler coordinates pa
 | `jobfit_ai/scoring.py` | Components, weighted score, tiers, suggestions |
 | `jobfit_ai/history_store.py` | Optional local SQLite persistence |
 | `scripts/evaluate.py` | Ranking and tier agreement reports |
+
+</details>
+
+<details>
+<summary><strong>Three decisions that keep the project small</strong></summary>
+
+| Decision | What it buys | What it gives up |
+| --- | --- | --- |
+| TF-IDF default | Inspectable scoring with no model download | Deep semantic understanding |
+| Shared Python core | One implementation for UI and API | Separate UI/API behavior still needs tests |
+| Session-local history | Privacy without an account system | Durable cross-session history |
+
+More context: [engineering decisions and interview practice](DEFENSE.md).
 
 </details>
 
