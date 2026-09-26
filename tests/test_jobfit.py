@@ -189,6 +189,7 @@ class JobFitTests(unittest.TestCase):
                 RESUME_TEXT.encode("utf-8"),
                 "jane.txt",
                 JOB_DESCRIPTION,
+                persist_history=True,
             )
 
         save_mock.assert_called_once_with(analysis)
@@ -212,7 +213,7 @@ class JobFitTests(unittest.TestCase):
         app.run(timeout=30)
         self.assertEqual(list(app.exception), [])
 
-        app.button[1].click().run(timeout=30)
+        next(button for button in app.button if button.label == "Run demo ranking").click().run(timeout=30)
         self.assertEqual(list(app.exception), [])
         self.assertGreaterEqual(len(app.dataframe), 1)
 

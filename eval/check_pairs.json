@@ -1,0 +1,59 @@
+{
+  "description": "Separate synthetic check set: 9 AI-authored examples across 3 new job descriptions. Labels were written before running the updated scorer; weights and thresholds were not tuned to these results. This is a small sanity check, not independent human validation or evidence of hiring accuracy.",
+  "roles": [
+    {
+      "role": "Backend Tools Intern",
+      "job_description": "Backend Tools Intern. Develop Python services for a library reservation system. Create REST endpoints with FastAPI, store reservations in PostgreSQL, validate requests, and write automated tests. Investigate bugs with logs and document API behavior. Familiarity with Git and SQL is useful.",
+      "candidates": [
+        {
+          "name": "Backend direct experience", "expected_rank": 1, "expected_tier": "Strong",
+          "resume": "Avery Chen\nSummary\nStudent building Python services for campus tools.\nExperience\n- Built a library reservation system with FastAPI and PostgreSQL.\n- Created REST endpoints, added request validation, and wrote automated tests for duplicate reservations.\n- Investigated bugs using logs and documented API behavior.\nProjects\n- Developed a SQL report for overdue loans.\nSkills\nPython FastAPI PostgreSQL SQL Git REST tests\nEducation\nComputer science student"
+        },
+        {
+          "name": "Backend adjacent experience", "expected_rank": 2, "expected_tier": "Moderate",
+          "resume": "Casey Bell\nEducation\nComputer science student\nProjects\n- Built a command-line book catalog in Python using SQLite.\n- Wrote tests for book lookup and documented setup instructions.\n- Used Git to share changes with a classmate.\nSkills\nPython SQLite SQL Git testing"
+        },
+        {
+          "name": "Backend unrelated experience", "expected_rank": 3, "expected_tier": "Weak",
+          "resume": "Drew Lane\nEducation\nArts student\nExperience\n- Designed posters for a music festival.\n- Organized rehearsals and welcomed visitors.\nSkills\nIllustration photography scheduling"
+        }
+      ]
+    },
+    {
+      "role": "Analytics Intern",
+      "job_description": "Analytics Intern. Analyze support tickets with SQL and Python. Clean missing values with pandas, build dashboards, and explain weekly trends to the support team. Validate data quality and document metric definitions. Experience with spreadsheets and charts is helpful.",
+      "candidates": [
+        {
+          "name": "Analytics direct experience", "expected_rank": 1, "expected_tier": "Strong",
+          "resume": "Emery Park\nSummary\nStudent analyzing service data.\nExperience\n- Analyzed support tickets with SQL and Python to explain weekly trends.\n- Cleaned missing values with pandas and validated data quality before reporting.\n- Built dashboards and documented metric definitions for the support team.\nProjects\n- Created charts comparing ticket categories over time.\nSkills\nSQL Python pandas spreadsheets dashboards charts\nEducation\nStatistics student"
+        },
+        {
+          "name": "Analytics adjacent experience", "expected_rank": 2, "expected_tier": "Moderate",
+          "resume": "Finley Ross\nEducation\nBusiness student\nExperience\n- Used spreadsheets to summarize club attendance and create weekly charts.\n- Explained trends at committee meetings.\nProjects\n- Completed introductory SQL exercises and a Python course.\nSkills\nSpreadsheets SQL Python charts"
+        },
+        {
+          "name": "Analytics unrelated experience", "expected_rank": 3, "expected_tier": "Weak",
+          "resume": "Gray Cole\nEducation\nMusic student\nExperience\n- Performed in a string quartet and arranged concert pieces.\n- Tutored beginning violin students.\nSkills\nViolin composition teaching"
+        }
+      ]
+    },
+    {
+      "role": "Product Discovery Intern",
+      "job_description": "Product Discovery Intern. Interview students about campus transport, identify user needs, and prioritize improvements. Write product requirements with acceptance criteria, collaborate with design and engineering, and measure adoption after launch. Communicate research findings and tradeoffs clearly.",
+      "candidates": [
+        {
+          "name": "Product paraphrased experience", "expected_rank": 1, "expected_tier": "Strong",
+          "resume": "Harper Reed\nSummary\nStudent who turns rider feedback into useful software changes.\nExperience\n- Spoke with commuters to understand difficulties finding buses.\n- Selected the most valuable changes and described expected behavior for developers.\n- Worked with a designer on a route screen and checked usage after release.\nProjects\n- Presented interview findings and explained why some requests were postponed.\nSkills\nUser research prioritization collaboration product planning\nEducation\nInformation systems student"
+        },
+        {
+          "name": "Product coursework experience", "expected_rank": 2, "expected_tier": "Moderate",
+          "resume": "Indigo West\nEducation\nBusiness student\nProjects\n- Wrote product requirements and acceptance criteria for a class assignment.\n- Discussed design tradeoffs with classmates.\nSkills\nProduct requirements design communication"
+        },
+        {
+          "name": "Product unrelated experience", "expected_rank": 3, "expected_tier": "Weak",
+          "resume": "Jules Stone\nEducation\nChemistry student\nExperience\n- Prepared laboratory samples and cleaned equipment.\n- Recorded temperatures during experiments.\nSkills\nChemistry laboratory equipment safety"
+        }
+      ]
+    }
+  ]
+}

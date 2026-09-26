@@ -1,5 +1,5 @@
 {
-  "description": "Hand-labeled resume/JD pairs for calibrating and validating JobFit AI scoring. Each role has candidates with a ground-truth rank (1 = best fit) and expected tier assigned by human judgement. Used by scripts/evaluate.py to compare scoring backends via rank correlation and tier accuracy.",
+  "description": "Original development examples: 12 resume/JD pairs across 3 jobs, used when selecting tier thresholds. Expected ranks and tiers are reference labels with no independently verified annotation provenance. Results on this set are development agreement, not held-out accuracy or hiring validation.",
   "roles": [
     {
       "role": "Software Engineering Intern",

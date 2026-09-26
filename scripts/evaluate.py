@@ -1,17 +1,18 @@
-"""Evaluate JobFit AI scoring against the hand-labeled dataset.
+"""Evaluate JobFit AI scoring against explicitly selected reference examples.
 
 For each scoring backend (TF-IDF and embeddings) this reports, per role:
 
 * Spearman rank correlation between the model score and the ground-truth
-  ranking (1.0 = the model orders candidates exactly like a human did).
+  ranking (1.0 = the scorer orders candidates like the reference labels).
 * Tier accuracy -- how often the predicted tier (Strong/Moderate/Weak) matches
-  the human-assigned tier.
+  the reference tier. This is label agreement, not hiring accuracy.
 
 Run:  python scripts/evaluate.py
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -100,25 +101,34 @@ def evaluate_backend(dataset: dict, prefer_embeddings: bool) -> dict:
 
 
 def main() -> None:
-    dataset = json.loads(DATASET_PATH.read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser(description="Evaluate development or separate synthetic check examples.")
+    parser.add_argument("--dataset", type=Path, default=DATASET_PATH)
+    parser.add_argument("--embeddings", action="store_true", help="Also evaluate embeddings; may download a model.")
+    args = parser.parse_args()
+    dataset = json.loads(args.dataset.read_text(encoding="utf-8"))
     backends = [("TF-IDF", False)]
-    if embeddings_available():
-        backends.append(("Embeddings", True))
-    else:
-        print("(sentence-transformers not installed -- embeddings backend skipped)\n")
+    if args.embeddings:
+        if embeddings_available():
+            backends.append(("Embeddings", True))
+        else:
+            print("(Embedding library or model unavailable -- embeddings skipped)\n")
 
     print("JobFit AI Scoring Evaluation")
+    print(f"Dataset: {args.dataset.name}")
+    print(dataset["description"])
     print("=" * 60)
     for label, prefer_embeddings in backends:
         result = evaluate_backend(dataset, prefer_embeddings)
         print(f"\nBackend: {label}")
         print(f"  Mean Spearman rank correlation: {result['mean_spearman']:.3f}")
-        print(f"  Tier accuracy: {result['tier_accuracy'] * 100:.1f}%")
+        print(f"  Tier agreement: {result['tier_accuracy'] * 100:.1f}%")
         for role_result in result["per_role"]:
             print(f"  - {role_result['role']}: rho={role_result['spearman']:.3f}")
+            for name, score, predicted, expected in role_result["rows"]:
+                print(f"      {name}: {score:.2f}/100; predicted={predicted}, expected={expected}")
 
     print("\n" + "=" * 60)
-    print("Higher Spearman = ranking closer to human judgement (1.0 is perfect).")
+    print("Higher Spearman = ranking closer to reference labels (1.0 is exact agreement).")
 
 
 if __name__ == "__main__":

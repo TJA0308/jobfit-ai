@@ -1,172 +1,110 @@
-# JobFit AI — Defense & Deep-Dive Guide
+# JobFit AI: understand and defend the project
 
-A study guide for explaining and defending this project in interviews. It covers
-how the system works end to end, why each decision was made, what the limits are,
-and how to answer the hard questions honestly.
+## Your 30-second explanation
 
----
+> JobFit AI helps applicants compare a resume with a job description. It combines lightweight text similarity, keyword coverage, and document structure into a visible score. I use it as a tailoring aid, not a hiring prediction. The same Python analysis code serves a Streamlit interface and a FastAPI API, and tests cover the main workflow and bugs found during review.
 
-## 1. The 30-second pitch
+Only describe work as your own when you can explain and maintain it.
 
-> JobFit AI ranks resumes against a job description and explains *why*. Instead of a
-> black-box score, it breaks fit into three transparent signals — semantic similarity,
-> keyword alignment, and resume quality — combines them with fixed weights, and shows
-> the breakdown, skill gaps, and concrete rewrite suggestions. It's deployed on
-> Streamlit, has an optional FastAPI backend sharing the same core logic, and its
-> scoring is calibrated against a hand-labeled evaluation set.
+## Trace one upload
 
----
+1. Streamlit or FastAPI obtains file bytes and the job description.
+2. `upload_handler` checks basic limits and writes a temporary file.
+3. `resume_parser` extracts text. Empty/scanned documents get an actionable message.
+4. `scoring` computes three components and their weighted average.
+5. `rewrite_coach` returns placeholders by default. AI requires explicit opt-in.
+6. The temporary file is removed in `finally`, even when processing fails.
+7. Streamlit stores results in session state; the API returns JSON.
+8. SQLite is only used when a trusted local caller explicitly requests persistence.
 
-## 2. 60-second architecture walkthrough
+The API and UI share the core; they do not call each other.
 
-```
-User (Streamlit UI)  ─┐
-                      ├─►  upload_handler.analyze_uploaded_bytes()
-API (FastAPI)        ─┘        │
-                              ├─ resume_parser  → extract text (PDF/DOCX/TXT)
-                              ├─ scoring        → analyze_resume_fit()
-                              │     ├─ semantic     (TF-IDF or embeddings)
-                              │     ├─ keyword      (weighted overlap)
-                              │     └─ quality      (sections/bullets/verbs)
-                              ├─ rewrite_coach  → template or OpenAI rewrites
-                              └─ history_store  → save to SQLite
+## Explain the math
+
+```text
+Alignment = 0.45 × text similarity + 0.35 × keyword coverage + 0.20 × structure
 ```
 
-**The one design idea that matters most:** the UI and the API are both thin shells over
-the same `jobfit_ai/` core. No business logic lives in the frontend. That's why the same
-scoring can power a Streamlit app and a REST API without duplication.
+If the components are 60, 40, and 80, the final score is 27 + 14 + 16 = 57/100.
 
-### Module responsibilities
+- **TF-IDF:** term frequency with inverse-document-frequency weighting. Here the corpus contains only two documents, so IDF carries limited information.
+- **Cosine:** compares vector direction; identical nonzero vectors can score 1.
+- **Text similarity:** equal blend of TF-IDF cosine and the fraction of job tokens found in the resume, then divided by 0.45 and capped at 100.
+- **Keyword coverage:** frequency-weighted coverage of up to 45 job tokens. Check all resume tokens, not just frequent ones.
+- **Structure:** 35% length, 30% sections, 20% bullets, 15% distinct action verbs.
+- **Tiers:** Strong at 50, Moderate at 30, Weak below 30.
 
-| Module | Job |
-| --- | --- |
-| `resume_parser.py` | Extract plain text from PDF (PyPDF2), DOCX (unzip + parse XML), TXT. |
-| `text_features.py` | Tokenize, normalize (alias plurals→singular), detect sections, count bullets, find action verbs, infer name/role. |
-| `semantic.py` | Semantic similarity with a pluggable backend (TF-IDF default, embeddings optional) + graceful fallback. |
-| `scoring.py` | Combine the three signals into the final score, tier, strengths, gaps, and suggestions. |
-| `rewrite_coach.py` | Generate example bullet rewrites; uses OpenAI if a key is set, else templates. |
-| `models.py` | Dataclasses — the shared vocabulary passed between layers. |
-| `history_store.py` | SQLite persistence of recent analyses. |
-| `upload_handler.py` | Orchestrates parse → score → rewrite → persist, and times each stage. |
+Weights and reference bands are heuristics. Text similarity and keyword coverage overlap; they are not independent evidence. A score of 70 is not a 70% chance of getting hired.
 
----
+## Decisions you can defend
 
-## 3. The scoring math — and why it's defensible
-
-```
-Fit = 0.45 · semantic_similarity + 0.35 · keyword_alignment + 0.20 · resume_quality
-```
-
-All three sub-scores are on a 0–100 scale and the weights sum to 1.0, so **the headline
-number is exactly the weighted average of the three bars shown in the UI**. There is no
-hidden multiplier. (An earlier version multiplied the blend by 1.6 to inflate scores —
-that was removed precisely because it broke this "explainable" promise.)
-
-**Semantic similarity.** Raw TF-IDF cosine between two short documents is inherently tiny
-(~0.04 for an off-target resume, ~0.24 for a strong one) because IDF is nearly meaningless
-with only two documents. So we blend cosine 50/50 with the token-overlap ratio and
-normalize against a documented reference band so the signal spreads across 0–100. The
-optional embeddings backend has a *high* baseline instead (any resume vs any JD ≈ 0.45+),
-so its discriminative band (0.45–0.72) is what gets mapped to 0–100.
-
-**Keyword alignment.** The share of the weighted job-description keyword mass that the
-resume covers. Job terms are weighted by frequency, so covering common role terms counts
-more than rare ones. Interpretable as "you cover X% of the weighted job vocabulary."
-
-**Resume quality.** Heuristics: length in a healthy band, presence of the 5 standard
-sections, bullet density, and count of strong action verbs. This is deliberately a *minor*
-20% weight — it's a tie-breaker, not the main signal.
-
-**Tiers.** Strong ≥ 50, Moderate ≥ 30, Weak below. These cutoffs are **not guessed** — see §5.
-
----
-
-## 4. Key engineering decisions (the "why", for when they push)
-
-1. **Shared core, thin frontends.** Lets one implementation serve both UI and API and keeps
-   logic testable in isolation. This is the strongest signal that it's real software, not a script.
-2. **Pluggable semantic backend with graceful fallback.** `semantic.py` tries embeddings,
-   falls back to TF-IDF if `sentence-transformers` isn't installed or the model can't load —
-   it never crashes on a missing optional dependency.
-3. **TF-IDF is the default, not embeddings — on purpose.** See §5: embeddings didn't beat
-   TF-IDF on the eval set, and torch exceeds Streamlit Cloud's free-tier memory. So the heavy
-   tool stays optional. This is a *measured* decision.
-4. **OpenAI rewrites are opt-in even when a key exists.** Public demo usage shouldn't silently
-   spend API credits — a small but real product decision.
-5. **Explainability is enforced in the math** (weights sum to 1.0), not just claimed in copy.
-
----
-
-## 5. Evaluation — the part that separates this from a toy
-
-`scripts/evaluate.py` scores the hand-labeled `eval/labeled_pairs.json` (12 resume/JD pairs
-across SWE, ML, and Product roles, each with a ground-truth rank and tier) and reports:
-
-| Backend | Mean Spearman (ranking quality) | Tier accuracy |
+| Decision | Reason | Tradeoff |
 | --- | --- | --- |
-| TF-IDF (default) | **0.93** | **100%** |
-| Embeddings (optional) | 0.87 | 83% |
+| TF-IDF default | Lightweight, inspectable, no model download | Misses synonyms and deeper context |
+| Streamlit | Straightforward Python product demo | Limited browser-side engineering |
+| Shared core | Avoid duplicated scoring in UI/API | Interfaces still need their own tests |
+| Session-local history | Prevent accidental cross-user disclosure without accounts | Results are not durable |
+| Explicit AI flag | Credentials must not override the user's choice | Rewrites require a separate opt-in |
+| Sync API handlers | Blocking parsing/scoring can run in FastAPI's thread pool | This is not a scalable job system |
+| Optional local SQLite | Demonstrates persistence where access is trusted | Shared database needs access control before public use |
 
-Two things this lets you *defend with data*:
+Optional embeddings remain an experiment. Do not claim that the old embedding comparison establishes superiority of the current TF-IDF implementation.
 
-- **Threshold calibration:** the original hand-picked cutoffs (65/40) gave only 33% tier
-  accuracy on the eval set. Recalibrating to 50/30 brought it to 100%. "I measured, then tuned."
-- **Backend choice:** embeddings are the fancier tool but did **not** improve ranking here, so
-  I kept the lightweight default. Knowing when *not* to reach for the heavy solution is the point.
+## Bugs worth understanding
 
-> Talking point: "Ranking correlation is the metric I trust most, because tier boundaries are
-> inherently fuzzy — a 49 vs 51 is nearly the same resume. So the product leads with a ranked
-> list, and tiers are a coarse label on top."
+- Short skills such as C# and ML were filtered out: preserve a small explicit vocabulary.
+- A present skill outside the resume's top 45 tokens was called missing: match against all tokens.
+- Gaps were alphabetical despite being called priorities: sort by job frequency.
+- Truncated lists produced misleading counts: keep full results and limit only display.
+- “Built” normalized to “build” but the verb dictionary did not: normalize both sides.
+- Disabling AI still allowed environment credentials to trigger a request: add an explicit boolean gate.
+- Shared SQLite history exposed other sessions' results: keep public results session-local.
+- API batch rows were dictionaries despite a dataclass type declaration: return the declared type.
 
----
+For any example, explain the trigger, old behavior, fix, and regression test. This is stronger evidence of ownership than reciting a technology list.
 
-## 6. Known limitations (say these before they find them)
+## Evaluation you can defend honestly
 
-- **"Semantic" is shallow by default.** TF-IDF is really weighted term overlap, not deep meaning.
-  The embeddings backend addresses this but isn't the default. Honest framing: applied ML
-  engineering, not novel ML research.
-- **Small eval set (12 pairs, partly synthetic).** Good enough to calibrate and sanity-check,
-  not to make strong statistical claims. Next step: more pairs, ideally real anonymized data.
-- **Name/role inference is heuristic** — it grabs the first short, digit-free line, which can
-  misfire on resumes that lead with a headline or address.
-- **SQLite history is ephemeral on Streamlit Cloud** — resets on container restart.
-- **No auth / rate limiting on the API** — it's a portfolio demo, not production.
+| Set | Size | Mean rank correlation | Tier agreement |
+| --- | --- | --- | --- |
+| Development | 12 pairs, 3 jobs | 0.933 | 100% |
+| Separate synthetic checks | 9 pairs, 3 jobs | 0.833 | 77.8% |
 
----
+The first set influenced threshold selection. The second was AI-authored with labels fixed before scoring, and no retuning to the results. Neither provides independent human or real-world validation.
 
-## 7. Likely interview questions + strong answers
+An instructive error: a product candidate with relevant paraphrased experience gets 29.31/100 (Weak), while a coursework candidate repeating role wording gets 35.24 (Moderate). This shows why lexical alignment is not qualification assessment.
 
-**Q: Walk me through what happens when I upload a resume.**
-Parse to text → infer candidate name & target role → compute three sub-scores → weighted
-blend into a 0–100 fit → derive tier, strengths, gaps, suggestions → time each stage → persist
-to SQLite → render ranking. All in `upload_handler.analyze_uploaded_bytes`.
+Spearman measures relative ordering; tier agreement measures agreement with subjective labels. Three jobs are far too few for broad performance claims. If these examples inform future tuning, create fresh checks.
 
-**Q: Is this real ML? (ML interviewer)**
-"The default is TF-IDF + cosine — classic IR, not deep learning. I also implemented a
-sentence-transformer embeddings backend and benchmarked it: it didn't improve ranking on my
-eval set for this keyword-heavy task, so I kept it optional. I'd reach for embeddings when
-resume and JD vocabulary diverge — synonyms and paraphrase — which my current eval doesn't
-stress. That's the honest boundary of the ML here."
+## Practice before interviews
 
-**Q: How do you know the scores are any good?**
-"I built a labeled eval set and measure rank correlation and tier accuracy. Ranking hits 0.93
-Spearman; tier accuracy is 100% after I calibrated the thresholds on that set — up from 33%."
+1. Draw the upload flow without looking at the repo.
+2. Trace one request through the functions and dataclasses.
+3. Calculate a score by hand and explain every constant.
+4. Reproduce the present-but-missing skill bug in a small example.
+5. Write a new regression test without generated code.
+6. Explain why public history was removed instead of adding authentication.
+7. Run both evaluations and discuss a failure before mentioning the best metric.
+8. Explain one change you personally implemented and reviewed.
 
-**Q: Why these weights (0.45/0.35/0.20)?**
-"Semantic and keyword signals are the actual match; quality is a tie-breaker, hence the small
-weight. The weights sum to 1 so the score stays interpretable. They're constants I can tune
-against the eval set rather than magic numbers buried in code."
+Useful questions:
 
-**Q: What would you do next?**
-"Grow the eval set with real data, add embedding-based *chunk* matching (bullet-level, not
-whole-doc), tune weights against that data, and deploy the FastAPI backend separately so the
-API isn't tied to the Streamlit process."
+- Why can copied job text score highly?
+- What happens when a PDF contains only images?
+- Why can an async handler still block if it calls synchronous code?
+- What remains in memory, what gets written to disk, and when?
+- What happens if the second file in an API batch fails?
+- How would you test that AI stays off when credentials exist?
+- When would embeddings be worth the additional dependency?
 
-**Q (Product): What user problem does this solve?**
-"Applicants get vague resume advice and black-box ATS scores. This shows *which* role terms
-are missing and *why* the fit is what it is, so tailoring becomes concrete. The demo mode and
-ranked view are built for a 60-second recruiter walkthrough."
+## AI-assisted development
 
-**Q (SWE): What's the best-engineered part?**
-"The shared core with two thin frontends, and the pluggable semantic backend with graceful
-degradation — a missing optional dependency downgrades the feature instead of crashing the app."
+A truthful explanation, once you have done the work:
+
+> I used AI to help scaffold and iterate on the implementation. I then traced the code, tested its assumptions, fixed concrete defects, and documented the limits. I can explain and modify the current system.
+
+Do not memorize an ownership claim you cannot demonstrate. Use AI as a reviewer while practicing small changes yourself.
+
+## Keep the scope manageable
+
+Prioritize reliable behavior, honest explanations, and a clear demo. A rewrite in another framework, authentication system, queue, or larger model is unnecessary for the current portfolio scope.

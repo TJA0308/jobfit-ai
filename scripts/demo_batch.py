@@ -35,7 +35,7 @@ def main() -> None:
     for index, analysis in enumerate(analyses, start=1):
         print(
             f"{index}. {analysis.candidate_name:18} "
-            f"{analysis.match_score:6.2f}%  {analysis.tier:8}  "
+            f"{analysis.match_score:6.2f}/100  {analysis.tier:8}  "
             f"Matches: {len(analysis.matching_keywords):2}  Missing: {len(analysis.missing_keywords):2}"
         )
 

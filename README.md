@@ -1,179 +1,98 @@
-<div align="center">
-
 # JobFit AI
 
-### Explainable resume-to-job matching for internship applicants
+An explainable resume-to-job matching app for internship applicants, built with Python, Streamlit, and scikit-learn.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-0A6E4E?style=for-the-badge&logo=streamlit&logoColor=white)](https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/)
-[![Tests](https://img.shields.io/github/actions/workflow/status/TJA0308/jobfit-ai/tests.yml?branch=main&style=for-the-badge&label=Tests)](https://github.com/TJA0308/jobfit-ai/actions/workflows/tests.yml)
-[![Streamlit](https://img.shields.io/badge/App-Streamlit-D8442F?style=for-the-badge&logo=streamlit&logoColor=white)](streamlit_app.py)
-[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](api_server.py)
-[![Python](https://img.shields.io/badge/Python-3.13-2E6E9E?style=for-the-badge&logo=python&logoColor=white)](runtime.txt)
-[![scikit-learn](https://img.shields.io/badge/ML-TF--IDF%20%2B%20scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](jobfit_ai/scoring.py)
-[![SQLite](https://img.shields.io/badge/Storage-SQLite-3B6EA5?style=for-the-badge&logo=sqlite&logoColor=white)](jobfit_ai/history_store.py)
+[Public demo](https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/) · [Interview walkthrough](DEFENSE.md) · [Tests](https://github.com/TJA0308/jobfit-ai/actions/workflows/tests.yml)
 
-Compare resumes against a target job description, rank fit, and explain the score with transparent matching signals.
+## What it does
 
-**Live app:** https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/
+Upload PDF, DOCX, or TXT resumes, paste a job description, and compare alignment scores. Each result shows text similarity, keyword coverage, document structure, terms not found, and editable bullet templates.
 
-</div>
+- Single and batch analysis: up to 10 resumes, 5 MB each.
+- Shared Python core used by Streamlit and an optional FastAPI interface.
+- Session-local recent results with a clear-results button.
+- No API key needed. Optional AI rewrites require an explicit toggle.
+- Demo resumes and reproducible evaluation scripts.
 
----
+This is a resume-tailoring aid. It does not verify qualifications, reproduce an employer's ATS, or predict hiring outcomes.
 
-## Overview
-
-JobFit AI helps students and early-career candidates understand how well a resume lines up with a role. Upload one or more resumes, paste a job description, and get a ranked analysis with keyword matches, missing skills, resume structure feedback, and concrete suggestions.
-
-This project was built as a practical portfolio piece for AI, software engineering, and product internships. It focuses on a real workflow: tailoring resumes without relying on vague advice or black-box scores.
-
-## Highlights
-
-| Area | What it does |
-| --- | --- |
-| Resume parsing | Supports `PDF`, `DOCX`, and `TXT` uploads |
-| Batch ranking | Compares multiple resumes against one job description |
-| Explainable scoring | Breaks fit into semantic similarity, keyword alignment, and resume quality |
-| Skill gaps | Shows missing role-specific terms from the job description |
-| Resume feedback | Flags missing sections and suggests concrete improvements |
-| Rewrite examples | Generates example bullets with optional OpenAI-powered rewrites |
-| Observability | Tracks parse, scoring, rewrite, and total analysis latency |
-| Persistence | Saves recent analyses locally with SQLite |
-| Deployment | Live Streamlit app with a simple root-level entry point |
-| Demo mode | Includes one-click demo job description and sample resume ranking |
-
-> **Deep dive:** [`DEFENSE.md`](DEFENSE.md) walks through the architecture, the scoring math, the key engineering tradeoffs, and interview-ready Q&A.
-
-## Portfolio Signals
-
-- Deployed, usable app with a public Streamlit URL
-- Shared core logic reused by both the UI and optional FastAPI backend
-- Explainable ML-style scoring instead of a black-box result
-- Local persistence with SQLite for recent analysis history
-- Demo dataset for quick evaluation and recruiter walkthroughs
-- Unit tests covering scoring, extraction, persistence, upload orchestration, API health, and evaluation regression
-
-## Why This Is Different
-
-Most beginner resume matchers only count shared words. JobFit AI combines multiple signals:
-
-- TF-IDF semantic similarity for broader text alignment
-- weighted keyword matching based on job-description terms
-- resume quality heuristics such as sections, bullets, and action verbs
-- batch comparison for a more realistic recruiting or applicant workflow
-- shared core logic that can power both the Streamlit app and FastAPI backend
-- optional AI rewrite coaching when an OpenAI API key is configured
-
-The result is still lightweight and explainable, but more useful than a basic keyword counter.
-
-## How The Score Is Computed
-
-The overall fit is a transparent weighted blend of three signals, each on a 0-100 scale:
+## How scoring works
 
 ```text
-Fit = 0.45 x semantic similarity
-    + 0.35 x keyword alignment
-    + 0.20 x resume quality
+Alignment = 0.45 × text similarity
+          + 0.35 × keyword coverage
+          + 0.20 × document structure
 ```
 
-- **Semantic similarity** has a pluggable backend (`jobfit_ai/semantic.py`). The default is TF-IDF cosine blended with token overlap; an optional sentence-transformer **embeddings** backend can be enabled. Both are normalized against a documented reference band because raw cosine is bounded well below 1.0 for short documents.
-- **Keyword alignment** is the share of the weighted job-description keyword mass the resume covers.
-- **Resume quality** scores length, sections, bullet density, and action verbs.
+All components are on a 0–100 scale:
 
-The weights sum to 1.0, so the headline percentage is exactly reconstructable from the three sub-scores shown in the app — there is no hidden scaling factor. Weights and tier thresholds live as named constants in `jobfit_ai/scoring.py`.
+1. **Text similarity:** fit TF-IDF on the resume and job description, compute cosine similarity, blend equally with job-vocabulary overlap, divide by a reference value of 0.45, and cap at 100.
+2. **Keyword coverage:** select up to 45 frequent job-description tokens and measure how much of their frequency-weighted vocabulary appears anywhere in the resume. Missing terms are ordered by frequency, then alphabetically.
+3. **Document structure:** combine length, detected section words, bullet count, and distinct action verbs.
 
-## Evaluation & Calibration
+Strong alignment starts at 50; Moderate starts at 30. These are heuristic thresholds originally selected using development examples. The weights are design choices. Reference scaling is not probability calibration, and cosine similarity itself can reach 1.
 
-Scoring is validated against a hand-labeled dataset (`eval/labeled_pairs.json`) of resume/JD pairs across Software Engineering, ML, and Product roles, each with a ground-truth ranking and tier. `scripts/evaluate.py` reports rank correlation and tier accuracy per backend:
+The default is lexical NLP, not a trained hiring model. An optional sentence-transformer backend remains available for local experiments; it is not enabled in the UI/API. The API field `semantic_similarity` retains its original name for compatibility; the UI calls it “Text similarity.”
 
-| Backend | Mean Spearman (ranking) | Tier accuracy |
-| --- | --- | --- |
-| TF-IDF (default) | 0.93 | 100% |
-| Embeddings (optional) | 0.87 | 83% |
+## Evaluation: development versus separate checks
 
-Two takeaways this project can defend with data:
-
-1. **Tier thresholds were calibrated on the eval set**, raising tier accuracy from 33% (hand-picked cutoffs) to 100%.
-2. **Embeddings did not beat TF-IDF** for this keyword-heavy matching task, so TF-IDF stays the lightweight default and embeddings remain an optional, benchmarked backend — a deliberate, measured tradeoff rather than reaching for the heavier tool by default.
+Run these from the repository root:
 
 ```bash
 python scripts/evaluate.py
+python scripts/evaluate.py --dataset eval/check_pairs.json
 ```
 
-## Product Flow
+Results with the current default scorer:
 
-```mermaid
-flowchart LR
-    A[Upload resumes] --> B[Paste job description]
-    B --> C[Parse resume text]
-    C --> D[Score fit]
-    D --> E[Rank candidates]
-    E --> F[Show strengths, gaps, and suggestions]
-    F --> G[Save recent analysis]
+| Dataset | Pairs / job descriptions | Mean Spearman | Tier agreement |
+| --- | --- | --- | --- |
+| Original development examples | 12 / 3 | 0.933 | 100% |
+| Separate synthetic checks | 9 / 3 | 0.833 | 77.8% |
+
+The original dataset helped select thresholds, so its results are not held-out accuracy. Its existing labels have no independently verified annotation provenance. The separate checks were AI-authored, with labels written before scoring; weights and thresholds were not retuned to them. They are a small behavioral check, not independent human validation.
+
+A useful failure: a product candidate describing relevant experience through paraphrases ranks below a candidate repeating the job's wording. Another candidate with adjacent backend experience is assigned Weak instead of the expected Moderate. These failures remain visible rather than being tuned away.
+
+Spearman measures ordering within each job, averaged across jobs. Tier agreement measures agreement with these subjective labels. Neither metric measures hiring success. Once these checks guide future tuning, new unseen examples will be needed.
+
+Optional embedding experiment:
+
+```bash
+pip install -r requirements-embeddings.txt
+python scripts/evaluate.py --dataset eval/check_pairs.json --embeddings
 ```
+
+Only `--embeddings` attempts to load/download the optional model. Historical embedding results are not claimed as results for the current scoring implementation.
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    UI[streamlit_app.py] --> SERVICE[jobfit_ai/upload_handler.py]
-    API[api_server.py] --> SERVICE
-    SERVICE --> PARSER[jobfit_ai/resume_parser.py]
-    SERVICE --> SCORING[jobfit_ai/scoring.py]
-    SERVICE --> STORE[jobfit_ai/history_store.py]
-    SCORING --> SEMANTIC[jobfit_ai/semantic.py]
-    SCORING --> FEATURES[jobfit_ai/text_features.py]
-    SCORING --> MODELS[jobfit_ai/models.py]
-    SEMANTIC -.optional.-> EMB[sentence-transformers]
-```
-
-## Tech Stack
-
-| Layer | Tools |
-| --- | --- |
-| App | Streamlit |
-| API | FastAPI, Uvicorn |
-| ML/NLP | scikit-learn, TF-IDF, cosine similarity |
-| Data | SQLite, pandas |
-| Parsing | PyPDF2, DOCX XML parsing, plain text |
-| Testing | Python `unittest` |
-| Deployment | Streamlit Community Cloud |
-
-## Project Structure
-
 ```text
-jobfit-ai/
-  jobfit_ai/
-    history_store.py      # SQLite save/load logic
-    models.py             # dataclass models used across the app
-    resume_parser.py      # PDF, DOCX, and TXT extraction
-    rewrite_coach.py      # template and optional OpenAI bullet rewrites
-    scoring.py            # matching and scoring logic
-    semantic.py           # pluggable semantic backend (TF-IDF / embeddings)
-    text_features.py      # keyword, section, and text helpers
-    upload_handler.py     # upload-to-analysis workflow
-  demo/
-    job_description_software_engineering_intern.txt
-    resume_ethan_brooks_weak.txt
-    resume_jordan_kim_strong.txt
-    resume_marcus_lee.txt
-    resume_maya_singh_moderate.txt
-  eval/
-    labeled_pairs.json    # hand-labeled resume/JD pairs for calibration
-  scripts/
-    demo_batch.py
-    evaluate.py           # backend comparison: rank correlation + tier accuracy
-  tests/
-    test_jobfit.py
-  api_server.py
-  streamlit_app.py
-  requirements.txt
-  requirements-api.txt
-  requirements-embeddings.txt
-  render.yaml
-  runtime.txt
+Streamlit UI / FastAPI
+        |
+        v
+upload_handler -> resume_parser -> scoring -> rewrite_coach
+                                      |
+                               text_features + semantic
+
+Streamlit: results in session state
+API: returns results without application-level persistence
+Trusted local callers: optional SQLite history
 ```
 
-## Quick Start
+| File | Responsibility |
+| --- | --- |
+| `streamlit_app.py` | UI, session state, demo, explicit rewrite choice |
+| `api_server.py` | Multipart HTTP endpoints and safe error responses |
+| `jobfit_ai/upload_handler.py` | Validate, parse, score, rewrite, clean temporary file |
+| `jobfit_ai/resume_parser.py` | PDF text extraction, DOCX XML, UTF-8 TXT |
+| `jobfit_ai/text_features.py` | Tokens, aliases, sections, names, action verbs |
+| `jobfit_ai/semantic.py` | TF-IDF default and optional embeddings |
+| `jobfit_ai/scoring.py` | Components, weighted score, tiers, suggestions |
+| `jobfit_ai/history_store.py` | Optional local SQLite persistence |
+| `scripts/evaluate.py` | Ranking and tier agreement reports |
+
+## Run locally
 
 ```bash
 python -m venv .venv
@@ -182,108 +101,60 @@ pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
 
-Then open:
+Use Python 3.13. On macOS/Linux, activate with `source .venv/bin/activate`.
 
-```text
-http://localhost:8501
-```
-
-## Try The Demo Data
-
-In the live app, click:
-
-```text
-Load demo job description
-Run demo ranking
-```
-
-You can also run the same sample flow locally:
+For the command-line demo:
 
 ```bash
 python scripts/demo_batch.py
 ```
 
-Sample output:
+The demo currently ranks Jordan, Maya, Marcus, and Ethan in that order. Scores can change when scoring bugs are fixed; the demo is illustrative.
 
-```text
-JobFit AI Demo Ranking
-============================================================
-1. Jordan Kim          65.61%  Strong    Matches: 15  Missing: 15
-2. Maya Singh          47.96%  Moderate  Matches: 11  Missing: 15
-3. Marcus Lee          31.21%  Moderate  Matches:  9  Missing: 15
-4. Ethan Brooks        21.77%  Weak      Matches:  5  Missing: 15
-```
-
-## Run Tests
+## Tests and optional API
 
 ```bash
+pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v
-```
-
-## Optional API
-
-The Streamlit app does not need the API to run. The API is included to show backend design and reusable business logic.
-The API requirements file includes the shared application dependencies.
-
-```bash
-pip install -r requirements-api.txt
 uvicorn api_server:app --reload
 ```
 
-Routes:
+For API-only installation, use `requirements-api.txt`. HTTP tests additionally require `httpx`, included in `requirements-dev.txt`.
 
 | Method | Route | Purpose |
 | --- | --- | --- |
-| `GET` | `/health` | Health check |
-| `GET` | `/history` | Recent analyses |
-| `POST` | `/match` | Analyze one resume |
-| `POST` | `/match/batch` | Analyze multiple resumes |
+| GET | `/health` | Health response |
+| POST | `/match` | Analyze one upload |
+| POST | `/match/batch` | Analyze and rank up to 10 uploads |
 
-## Deployment
+The old public `/history` route has been removed to prevent cross-user disclosure. API batches fail as a whole if a file is invalid; no analysis history is persisted. Streamlit reports individual file failures and shows successful results. Sync API handlers allow FastAPI to run blocking work in its thread pool.
 
-Streamlit Community Cloud settings:
+Tests cover scoring regressions, parser behavior, upload cleanup/limits, explicit AI opt-in, session isolation, multipart API requests, and the demo. CI runs the same suite.
 
-| Setting | Value |
-| --- | --- |
-| Repository | `TJA0308/jobfit-ai` |
-| Branch | `main` |
-| App file | `streamlit_app.py` |
-| Python | `3.13` |
+## Privacy and optional features
 
-No API key is required. The app runs on uploaded files and pasted job descriptions.
+The app processes uploads on the server. Its extraction temporary file is removed after processing. Recent results live in the current Streamlit session; “Clear session results” removes those results, not the contents of the upload widget. Refreshing/disconnecting can lose the session.
 
-Optional AI rewrite suggestions can be enabled with Streamlit secrets:
+Public UI/API requests do not write analyses to SQLite or read shared history. Existing local databases are not deleted. Trusted local scripts can call `analyze_uploaded_bytes(..., persist_history=True)`; this stores analysis metadata and generated feedback, so do not expose that database publicly.
 
-```toml
-OPENAI_API_KEY = "your-api-key"
-OPENAI_MODEL = "gpt-4o-mini"
-```
+Optional AI rewrites use configured `OPENAI_API_KEY` and `OPENAI_MODEL` settings. Enabling the UI toggle sends resume/job excerpts to the external service and may spend credits. Credentials alone never enable requests. The public API uses local templates. Review any generated text for truthfulness before using it.
 
-Without a key, the app still shows template rewrite examples.
+Timing measures the analysis pipeline before optional SQLite storage, not end-to-end network latency.
 
-When a key is configured, OpenAI rewrites are still opt-in from the app sidebar so public demo usage does not automatically spend API credits.
+## Known limits and scope
 
-## Resume Bullet
+- Lexical matching can reward copied job descriptions and miss paraphrases.
+- “Terms not found” is not proof of missing ability; Go, C, and R can also be ambiguous words.
+- Whole-document section detection and candidate-name inference are simple heuristics.
+- PDFs need extractable text; OCR is not included. Complex layouts may parse poorly.
+- No user accounts, distributed processing, or production-scale traffic guarantees.
+- API size checks occur after multipart handling; a public API deployment would also need proxy/request limits and abuse controls.
+- Small synthetic datasets do not establish fairness or suitability for hiring decisions.
 
-```text
-Built and deployed JobFit AI, a resume matching app using Python, Streamlit, SQLite, and scikit-learn to rank resumes against job descriptions and explain fit using semantic similarity, keyword alignment, and resume quality signals.
-```
+The next useful improvement is better evidence and evaluation, not more infrastructure.
 
-## What I Learned
+## Resume description
 
-- How to structure a Python project beyond a single script
-- How to separate UI, parsing, scoring, persistence, and upload handling
-- How to deploy a Streamlit app from GitHub
-- How to debug dependency/runtime issues in a cloud environment
-- How to add lightweight observability for latency and rewrite mode
-- How to frame technical output around a real user workflow
+> Built a Python resume-matching application with shared Streamlit/FastAPI logic, explainable NLP scoring, session-local results, and automated regression tests.
 
-## Roadmap
-
-- Improve the rewrite coach with user-selected tone and bullet style
-- Expand the labeled evaluation set with real anonymized resume/job pairs
-- Add chunk-level semantic matching for individual experience bullets
-- Move batch processing to a background worker if the app grows beyond Streamlit Cloud
-- Add downloadable CSV or PDF reports
-- Add screenshots and a short demo GIF to the README
-- Deploy the FastAPI backend separately on Render
+Use the accompanying walkthrough to explain the implementation and limitations in your own words.

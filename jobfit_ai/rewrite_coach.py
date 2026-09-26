@@ -28,7 +28,12 @@ def generate_rewrites(
     analysis: ResumeAnalysis,
     api_key: str | None = None,
     model: str | None = None,
+    *,
+    enabled: bool = False,
 ) -> RewriteResult:
+    # Credentials alone never authorize sending resume content or spending credits.
+    if not enabled:
+        return RewriteResult(bullets=analysis.rewrite_suggestions, mode="template")
     resolved_key = (api_key or os.getenv("OPENAI_API_KEY") or "").strip()
     if not resolved_key:
         return RewriteResult(bullets=analysis.rewrite_suggestions, mode="template")

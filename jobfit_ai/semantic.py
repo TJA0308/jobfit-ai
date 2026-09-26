@@ -1,22 +1,8 @@
-"""Semantic similarity scoring with a pluggable backend.
+"""Text similarity: lightweight TF-IDF by default, optional embeddings.
 
-Two backends are supported:
-
-* ``tfidf`` -- TF-IDF cosine blended with token overlap. Lightweight, no heavy
-  dependencies, and the DEFAULT: on the labeled eval set (scripts/evaluate.py)
-  it ranks candidates at least as well as embeddings for this keyword-heavy
-  matching task (mean Spearman 0.93 vs 0.87), so it is the sensible production
-  choice and keeps the deployed app within free-tier memory limits.
-* ``embeddings`` -- sentence-transformer embeddings + cosine similarity. Captures
-  meaning and survives synonym/paraphrase gaps that TF-IDF misses, but pulls in a
-  heavy ``torch`` dependency. Implemented, benchmarked, and kept as an OPTIONAL,
-  opt-in backend (loaded lazily) rather than the default -- a deliberate,
-  measured tradeoff, not an oversight.
-
-Both backends return a 0-100 score. Each raw cosine range is inherently bounded
-below 1.0, so each is normalized against a documented reference band chosen so a
-strong resume/JD match lands high and a weak one lands low. The active backend
-name is returned alongside the score so the UI/API can be transparent about it.
+Reference bands are heuristic scaling choices from development examples, not
+mathematical cosine limits or calibrated probabilities. TF-IDF measures lexical
+similarity, not whether a candidate actually has the required experience.
 """
 
 from __future__ import annotations
@@ -29,18 +15,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 from jobfit_ai.text_features import tokenize
 
 # --- TF-IDF backend -------------------------------------------------------
-# TF-IDF cosine between two short documents is empirically ~0.25 even for a
-# strong match, so we blend it 50/50 with the token-overlap ratio and normalize
-# against this reference ceiling to spread the signal across 0-100.
+# Blend cosine and job-vocabulary coverage, then scale and cap at 100.
+# Cosine can reach 1; this reference is an empirical choice, not an upper bound.
 TFIDF_MATCH_REFERENCE = 0.45
 
 # --- Embedding backend ----------------------------------------------------
-# Sentence-transformer cosine has a HIGH baseline for this task: any resume vs
-# any job description scores ~0.45+ simply because both are professional prose.
-# The *discriminative* band -- weak match to strong match -- sits at roughly
-# 0.45 to 0.72, so we map that band (not 0..1) linearly to 0-100. Below 0.45 is
-# an off-target resume and floors at 0. Calibrated against the eval dataset
-# (see scripts/evaluate.py).
+# Optional backend's development reference band; may not transfer to new roles.
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 EMBEDDING_LOW = 0.45
 EMBEDDING_HIGH = 0.72
@@ -51,7 +31,10 @@ def _clamp(value: float, lower: float = 0.0, upper: float = 100.0) -> float:
 
 
 def _tfidf_similarity(resume_text: str, job_description: str) -> float:
-    vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=1)
+    # Use the same skill-preserving tokenizer as keyword matching.
+    if not tokenize(resume_text) or not tokenize(job_description):
+        raise ValueError("Resume and job description must contain meaningful words or skills.")
+    vectorizer = TfidfVectorizer(tokenizer=tokenize, token_pattern=None, lowercase=False, ngram_range=(1, 2))
     matrix = vectorizer.fit_transform([resume_text, job_description])
     cosine = float(cosine_similarity(matrix[0:1], matrix[1:2])[0][0])
     resume_tokens = set(tokenize(resume_text))
@@ -93,7 +76,7 @@ def embeddings_available() -> bool:
 def semantic_similarity(
     resume_text: str,
     job_description: str,
-    prefer_embeddings: bool = True,
+    prefer_embeddings: bool = False,
 ) -> tuple[float, str]:
     """Return (score_0_100, backend_name).
 

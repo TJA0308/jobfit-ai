@@ -8,13 +8,11 @@ import streamlit as st
 from streamlit.errors import StreamlitSecretNotFoundError
 
 from jobfit_ai.scoring import analyze_resume_fit
-from jobfit_ai.history_store import fetch_recent_analyses, initialize_database
 from jobfit_ai.models import ResumeAnalysis
 from jobfit_ai.rewrite_coach import has_openai_key
 from jobfit_ai.upload_handler import analyze_uploaded_bytes
 
 st.set_page_config(page_title="JobFit AI", page_icon=":briefcase:", layout="wide")
-initialize_database()
 
 ROOT_DIR = Path(__file__).resolve().parent
 DEMO_DIR = ROOT_DIR / "demo"
@@ -310,10 +308,10 @@ def analyze_demo_resumes(job_description: str) -> list[ResumeAnalysis]:
 
 def tier_label(score: float, tier: str) -> str:
     if tier == "Strong":
-        return f"Strong fit ({score}%)"
+        return f"Strong alignment ({score}/100)"
     if tier == "Moderate":
-        return f"Moderate fit ({score}%)"
-    return f"Weak fit ({score}%)"
+        return f"Moderate alignment ({score}/100)"
+    return f"Weak alignment ({score}/100)"
 
 
 def tier_class(tier: str) -> str:
@@ -376,7 +374,7 @@ def render_top_candidate_cards(analyses: list[ResumeAnalysis]) -> None:
                     <div class="jobfit-card-title">{escape(analysis.candidate_name)}</div>
                     <span class="fit-badge {tier_class(analysis.tier)}">{escape(tier_label(analysis.match_score, analysis.tier))}</span>
                     <div class="jobfit-card-copy" style="margin-top: 0.8rem;">
-                        {len(analysis.matching_keywords)} keyword matches &middot; {len(analysis.skill_gaps)} priority gaps
+                        {len(analysis.matching_keywords)} keyword matches &middot; {len(analysis.missing_keywords)} terms not found
                     </div>
                 </div>
                 """,
@@ -391,7 +389,7 @@ def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
     top_candidate = analyses[0]
     metric_columns = st.columns(4)
     metric_columns[0].metric("Top candidate", top_candidate.candidate_name)
-    metric_columns[1].metric("Top score", f"{top_candidate.match_score}%")
+    metric_columns[1].metric("Top score", f"{top_candidate.match_score}/100")
     metric_columns[2].metric("Candidates", len(analyses))
     metric_columns[3].metric("Top tier", top_candidate.tier)
     render_top_candidate_cards(analyses)
@@ -414,12 +412,12 @@ def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
         use_container_width=True,
         hide_index=True,
         column_config={
-            "Score": st.column_config.ProgressColumn("Score", min_value=0, max_value=100, format="%.1f%%"),
+            "Score": st.column_config.ProgressColumn("Score / 100", min_value=0, max_value=100, format="%.1f"),
         },
     )
 
     st.subheader("Candidate reviews")
-    tabs = st.tabs([f"{item.candidate_name} ({item.match_score}%)" for item in analyses])
+    tabs = st.tabs([f"{item.candidate_name} ({item.match_score}/100)" for item in analyses])
     for tab, analysis in zip(tabs, analyses):
         with tab:
             render_analysis_panel(analysis)
@@ -444,21 +442,23 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
             for item in analysis.suggestions:
                 st.write(f"- {item}")
         with rewrite_tab:
+            st.caption("Adapt these examples only to experience you actually have. Replace placeholders with verified facts.")
             for item in analysis.rewrite_suggestions:
                 st.write(f"- {item}")
     with right_column:
         render_score_gauge(analysis.match_score, analysis.tier)
         st.write("**Score breakdown**")
-        st.progress(analysis.breakdown.semantic_similarity / 100, text=f"Semantic similarity: {analysis.breakdown.semantic_similarity}%")
-        st.progress(analysis.breakdown.keyword_alignment / 100, text=f"Keyword alignment: {analysis.breakdown.keyword_alignment}%")
-        st.progress(analysis.breakdown.resume_quality / 100, text=f"Resume quality: {analysis.breakdown.resume_quality}%")
+        st.progress(analysis.breakdown.semantic_similarity / 100, text=f"Text similarity: {analysis.breakdown.semantic_similarity}/100")
+        st.progress(analysis.breakdown.keyword_alignment / 100, text=f"Keyword coverage: {analysis.breakdown.keyword_alignment}/100")
+        st.progress(analysis.breakdown.resume_quality / 100, text=f"Document structure: {analysis.breakdown.resume_quality}/100")
         st.caption(
-            f"Fit {analysis.match_score}% = 0.45 x semantic + 0.35 x keyword + 0.20 x quality "
-            "(no hidden scaling)."
+            f"Alignment {analysis.match_score}/100 = 0.45 x text similarity + 0.35 x keyword coverage + 0.20 x structure. "
+            "This is a heuristic score, not a hiring probability."
         )
         st.write("**Matched keywords**")
         render_keyword_cloud(analysis.matching_keywords)
-        st.write("**Missing skills**")
+        st.write("**Priority terms not found**")
+        st.caption("Ordered by frequency in the job description. Missing wording does not prove a missing skill.")
         render_keyword_cloud([skill.skill for skill in analysis.skill_gaps], missing=True)
         st.write("**Resume insights**")
         st.write(
@@ -474,7 +474,7 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
         if has_runtime_metrics:
             with st.expander("Technical details", expanded=False):
                 st.write(
-                    f"{runtime_metrics.total_ms} ms total | "
+                    f"{runtime_metrics.total_ms} ms analysis | "
                     f"parse {runtime_metrics.parse_ms} ms | "
                     f"score {runtime_metrics.scoring_ms} ms | "
                     f"rewrite {runtime_metrics.rewrite_ms} ms | "
@@ -536,25 +536,23 @@ status_columns[3].metric("Rewrites", "Opt-in AI")
 with st.expander("How the fit score is computed"):
     st.markdown(
         """
-        The headline fit is a **transparent weighted blend** of three 0-100 signals
-        — no hidden scaling, so the three bars in each result reconstruct the score exactly:
+        The alignment score combines three signals on a 0-100 scale:
 
-        `Fit = 0.45 x semantic similarity + 0.35 x keyword alignment + 0.20 x resume quality`
+        `Alignment = 0.45 x text similarity + 0.35 x keyword coverage + 0.20 x document structure`
 
-        - **Semantic similarity** — TF-IDF cosine blended with token overlap (default). An optional
-          sentence-transformer embeddings backend is implemented and benchmarked.
-        - **Keyword alignment** — share of the weighted job-description keyword mass the resume covers.
-        - **Resume quality** — length, sections, bullet density, and action verbs.
+        - **Text similarity** — TF-IDF cosine blended with job-vocabulary overlap, scaled to 0-100.
+        - **Keyword coverage** — coverage of up to 45 frequent job-description terms, weighted by frequency.
+        - **Document structure** — length, sections, bullets, and action verbs.
 
-        Tier thresholds and the weights were **calibrated on a hand-labeled evaluation set**
-        (Spearman rank correlation 0.93, tier accuracy 100% on the default backend).
-        On that set, embeddings did not beat TF-IDF for this keyword-heavy task, so the
-        lightweight backend stays the default — a measured tradeoff.
+        The weights are design choices; tiers are Strong at 50+, Moderate at 30+, and Weak below 30.
+        Small synthetic examples help check behavior, but do not establish hiring accuracy.
+        Keyword repetition, copied job descriptions, and paraphrases can mislead the score.
+        Use this as a tailoring aid, not an automated hiring decision.
         """
     )
 
 with st.sidebar:
-    st.header("Recent analyses")
+    st.header("This session")
     openai_api_key = get_optional_secret("OPENAI_API_KEY")
     openai_model = get_optional_secret("OPENAI_MODEL")
     api_key_configured = has_openai_key(openai_api_key)
@@ -563,22 +561,22 @@ with st.sidebar:
         use_ai_rewrites = st.toggle(
             "Use OpenAI rewrites",
             value=False,
-            help="Uses your configured OpenAI API key. Leave off for template rewrite examples.",
+            help="Sends resume and job-description excerpts to OpenAI and uses API credits. Leave off for local templates.",
         )
     st.caption("AI rewrites: enabled" if use_ai_rewrites else "AI rewrites: template mode")
-    recent_items = fetch_recent_analyses(limit=8)
-    if recent_items:
-        for item in recent_items:
-            st.write(f"{item.candidate_name}: {item.match_score}%")
-            st.caption(f"{item.target_role} | {item.created_at}")
-    else:
-        st.caption("No analyses saved yet.")
+    st.caption("Recent results stay in this browser session; uploads are not saved to shared history.")
+    history_container = st.container()
+    if st.button("Clear session results"):
+        st.session_state.pop("results", None)
+        st.session_state.pop("recent_analyses", None)
+        st.rerun()
 
 uploaded_resumes = st.file_uploader(
     "Upload resumes",
     type=["pdf", "docx", "txt"],
     accept_multiple_files=True,
 )
+st.caption("Up to 10 resumes, 5 MB each. Use text-based PDFs; scanned images are not supported.")
 
 if "job_description" not in st.session_state:
     st.session_state.job_description = ""
@@ -588,6 +586,7 @@ with input_left:
     job_description = st.text_area(
         "Target job description",
         height=300,
+        max_chars=20_000,
         key="job_description",
         placeholder="Paste the internship or full-time role description here...",
     )
@@ -614,9 +613,12 @@ if run_demo:
 elif analyze_uploaded:
     if not uploaded_resumes:
         st.error("Upload at least one resume before analyzing.")
+    elif len(uploaded_resumes) > 10:
+        st.error("Analyze at most 10 resumes per batch.")
     elif not job_description.strip():
         st.error("Paste a job description before analyzing.")
     else:
+        st.session_state.pop("results", None)
         analyses: list[ResumeAnalysis] = []
         progress = st.progress(0.0, text="Starting analysis...")
 
@@ -628,6 +630,7 @@ elif analyze_uploaded:
                     job_description=job_description,
                     openai_api_key=openai_api_key if use_ai_rewrites else None,
                     openai_model=openai_model if use_ai_rewrites else None,
+                    use_ai_rewrites=use_ai_rewrites,
                 )
                 analyses.append(analysis)
             except Exception as exc:
@@ -636,8 +639,20 @@ elif analyze_uploaded:
 
         if analyses:
             st.session_state.results = (analyses, "Candidate ranking")
+            st.session_state.recent_analyses = (analyses + st.session_state.get("recent_analyses", []))[:8]
 
 # Render the most recent results on every rerun so they survive incidental
 # widget interactions (a Streamlit button is only truthy on its own click).
 if st.session_state.get("results"):
     render_ranking(*st.session_state.results)
+
+# Fill the sidebar after processing so history updates without a rerun that
+# would erase per-file error messages from a partially successful batch.
+with history_container:
+    recent_items = st.session_state.get("recent_analyses", [])
+    if recent_items:
+        for item in recent_items:
+            st.write(f"{item.candidate_name}: {item.match_score}/100")
+            st.caption(f"{item.target_role} | {item.created_at}")
+    else:
+        st.caption("No uploads analyzed in this session yet.")

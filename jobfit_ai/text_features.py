@@ -54,6 +54,10 @@ TOKEN_ALIASES = {
     "workflows": "workflow",
 }
 
+# Short technical names would otherwise be lost to length/stopword filtering.
+# These are vocabulary matches, so ambiguous terms such as Go still need context.
+SHORT_SKILLS = {"c", "c#", "r", "go", "ai", "ml", "js", "ts", "ui", "ux"}
+
 
 def normalize_text(text: str) -> str:
     normalized = text.lower()
@@ -67,7 +71,8 @@ def tokenize(text: str) -> list[str]:
     return [
         normalize_token(token)
         for token in normalized.split()
-        if len(token) > 2 and token not in ENGLISH_STOP_WORDS and any(char.isalpha() for char in token)
+        if token in SHORT_SKILLS
+        or (len(token) > 2 and token not in ENGLISH_STOP_WORDS and any(char.isalpha() for char in token))
     ]
 
 
@@ -105,7 +110,7 @@ def detect_sections(text: str) -> tuple[list[str], list[str]]:
 
 
 def action_verb_hits(text: str) -> int:
-    return len(set(tokenize(text)) & ACTION_VERBS)
+    return len(set(tokenize(text)) & {normalize_token(verb) for verb in ACTION_VERBS})
 
 
 def infer_candidate_name(text: str, fallback_filename: str) -> str:

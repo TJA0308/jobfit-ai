@@ -1,51 +1,31 @@
-# JobFit AI Status
+# JobFit AI status
 
-## Current State
+Local portfolio-quality improvements are implemented. Publishing these changes is a separate step; the public deployment has not been verified against this revision.
 
-- Project name: `JobFit AI`
-- Goal: explainable resume-to-job matching for internship applications
-- Deployment: Streamlit Cloud
-- Live app: https://jobfit-ai-u9cgsvbwqbduxbhfpbsbls.streamlit.app/
-- GitHub repo: https://github.com/TJA0308/jobfit-ai.git
-- Main app entrypoint: `streamlit_app.py`
-- Backend API entrypoint: `api_server.py`
+## Current behavior
 
-## What It Does
+- Shared Python scoring for Streamlit and FastAPI.
+- Session-local UI results; public requests do not read/write shared SQLite history.
+- Public API history endpoint removed; SQLite remains opt-in for trusted local scripts.
+- AI rewrites default off even with environment credentials.
+- Technical skill tokens, complete keyword counts, gap priority, action verbs, and word counts corrected.
+- Scores presented as alignment out of 100, with limitations explained.
+- Upload limits: 10 files per batch, 5 MB per file, 20,000-character job description.
+- Two evaluation datasets reported separately; no tuning to the new check results.
 
-- Accepts `PDF`, `DOCX`, and `TXT` resumes
-- Compares them against a pasted job description
-- Ranks candidates by fit
-- Shows matching keywords, missing skills, resume quality signals, and rewrite suggestions
-- Supports optional OpenAI rewrites when a secret key is configured
-- Includes a demo benchmark dataset for software engineering internships
+## Verification
 
-## Project Structure
+All 33 tests pass locally, including HTTP uploads, session isolation, partial UI batches, and PDF extraction.
 
-- `streamlit_app.py`: Streamlit UI
-- `jobfit_ai/`: shared parsing, scoring, storage, and rewrite logic
-- `demo/`: benchmark resumes and job description text
-- `tests/`: unit tests
-- `scripts/demo_batch.py`: command-line demo ranking
-
-## Important Notes
-
-- The app is designed to work without an OpenAI API key.
-- Runtime metrics only show when a live upload analysis is performed.
-- Streamlit Cloud should redeploy automatically when `main` is updated on GitHub.
-- If the app is edited locally, Streamlit usually hot-reloads; otherwise restart it with `streamlit run streamlit_app.py`.
-
-## Useful Commands
-
-```powershell
-git status
+```bash
+pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v
-python -m compileall jobfit_ai tests scripts streamlit_app.py api_server.py
-streamlit run streamlit_app.py
+python scripts/evaluate.py
+python scripts/evaluate.py --dataset eval/check_pairs.json
+python scripts/demo_batch.py
 ```
 
-## Next Good Improvements
+Development: mean Spearman 0.933, tier agreement 100%.
+Separate synthetic checks: mean Spearman 0.833, tier agreement 77.8%.
 
-- Tighten mobile responsiveness
-- Add more polished empty states
-- Improve candidate cards and ranking presentation
-- Add more tests around edge cases and UI behavior
+See README.md for setup and DEFENSE.md for the interview walkthrough.

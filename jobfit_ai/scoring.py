@@ -8,7 +8,6 @@ from jobfit_ai.text_features import (
     action_verb_hits,
     count_bullets,
     detect_sections,
-    extract_keywords,
     infer_candidate_name,
     infer_target_role,
     keyword_weights,
@@ -23,9 +22,8 @@ SEMANTIC_WEIGHT = 0.45
 KEYWORD_WEIGHT = 0.35
 QUALITY_WEIGHT = 0.20
 
-# Tier thresholds on the final 0-100 score. Calibrated against the labeled eval
-# dataset (scripts/evaluate.py) -- these values give 100% tier accuracy on the
-# TF-IDF backend, up from 33% with the original hand-picked cutoffs.
+# Heuristic tiers originally selected using the development examples.
+# They are not hiring probabilities or independently validated thresholds.
 STRONG_TIER_MIN = 50.0
 MODERATE_TIER_MIN = 30.0
 
@@ -38,24 +36,27 @@ def _keyword_alignment_score(
     resume_text: str,
     job_description: str,
 ) -> tuple[float, list[str], list[str], list[SkillGap]]:
-    resume_tokens = set(extract_keywords(resume_text, top_n=45))
+    resume_tokens = set(tokenize(resume_text))
     weighted_job_keywords = keyword_weights(job_description, top_n=45)
 
     if not weighted_job_keywords:
         return 0.0, [], [], []
 
     matching_keywords = sorted(word for word in weighted_job_keywords if word in resume_tokens)
-    missing_keywords = sorted(word for word in weighted_job_keywords if word not in resume_tokens)
+    missing_keywords = sorted(
+        (word for word in weighted_job_keywords if word not in resume_tokens),
+        key=lambda word: (-weighted_job_keywords[word], word),
+    )
     matched_weight = sum(weighted_job_keywords[word] for word in matching_keywords)
     skill_gaps = [
         SkillGap(skill=word, importance=round(weighted_job_keywords[word], 3))
         for word in missing_keywords[:10]
     ]
-    return _clamp(matched_weight * 100), matching_keywords[:15], missing_keywords[:15], skill_gaps
+    return _clamp(matched_weight * 100), matching_keywords, missing_keywords, skill_gaps
 
 
 def _resume_quality_score(resume_text: str) -> tuple[float, ResumeInsights]:
-    word_count = len(tokenize(resume_text))
+    word_count = sum(any(char.isalnum() for char in word) for word in resume_text.split())
     bullet_count = count_bullets(resume_text)
     detected_sections, missing_sections = detect_sections(resume_text)
     action_hits = action_verb_hits(resume_text)
@@ -131,9 +132,9 @@ def _rewrite_suggestions(target_role: str, matching_keywords: list[str], missing
     role_terms = matching_keywords[:3] or ["role requirements"]
     gap_terms = missing_keywords[:3] or ["target skills"]
     return [
-        f"Built a project aligned with {target_role} using {', '.join(role_terms)} to improve a measurable product or engineering workflow.",
-        f"Improved resume alignment by adding evidence for {', '.join(gap_terms)} through project work, coursework, or internship experience.",
-        f"Collaborated across product and engineering to ship a feature involving {', '.join(role_terms[:2])}, documenting tradeoffs and outcomes.",
+        f"Built [actual project] using [tools you used, possibly {', '.join(role_terms)}] to [verified outcome].",
+        "Improved [actual process] by [your contribution], resulting in [measured outcome, if available].",
+        f"For {target_role}, describe [real experience] demonstrating [relevant terms such as {', '.join(gap_terms)}, only if true].",
     ]
 
 
