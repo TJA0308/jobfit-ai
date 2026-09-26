@@ -1,6 +1,6 @@
 # JobFit AI status
 
-Local portfolio-quality improvements are implemented. Publishing these changes is a separate step; the public deployment has not been verified against this revision.
+This file records the committed project behavior and local verification. Check the [GitHub workflow](https://github.com/TJA0308/jobfit-ai/actions/workflows/tests.yml) for CI status and the [deployment guide](docs/DEPLOYMENT.md) for the live smoke check. Repository publication and live deployment verification are separate checks.
 
 ## Current behavior
 
@@ -28,4 +28,4 @@ python scripts/demo_batch.py
 Development: mean Spearman 0.933, tier agreement 100%.
 Separate synthetic checks: mean Spearman 0.833, tier agreement 77.8%.
 
-See README.md for setup and DEFENSE.md for the interview walkthrough.
+See [README.md](README.md) for the project tour, [DEFENSE.md](DEFENSE.md) for the interview walkthrough, and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for publishing and compatibility notes.
