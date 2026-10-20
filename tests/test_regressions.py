@@ -131,13 +131,14 @@ class PrivacyAndUploadTests(unittest.TestCase):
         first.session_state["results"] = ([analysis], "Candidate ranking")
         first.run(timeout=30)
         self.assertEqual(list(first.exception), [])
-        self.assertTrue(any("Jane Doe" in item.value for item in first.sidebar.markdown))
+        self.assertTrue(any("Jane Doe" in item.value for item in first.sidebar.text))
         second = AppTest.from_file("streamlit_app.py").run(timeout=30)
-        self.assertFalse(any("Jane Doe" in item.value for item in second.sidebar.markdown))
+        self.assertFalse(any("Jane Doe" in item.value for item in second.sidebar.text))
         next(button for button in first.button if button.label == "Clear session results").click().run(timeout=30)
         self.assertEqual(list(first.exception), [])
-        self.assertFalse(any("Jane Doe" in item.value for item in first.sidebar.markdown))
+        self.assertFalse(any("Jane Doe" in item.value for item in first.sidebar.text))
         self.assertEqual(len(first.dataframe), 0)
+        self.assertEqual(len(first.get("download_button")), 0)
 
     def test_ui_partial_batch_keeps_errors_and_updates_history(self):
         uploads = [
@@ -151,7 +152,7 @@ class PrivacyAndUploadTests(unittest.TestCase):
             next(button for button in ui.button if button.label == "Analyze uploaded resumes").click().run(timeout=30)
         self.assertEqual(list(ui.exception), [])
         self.assertTrue(any("broken.pdf" in item.value for item in ui.error))
-        self.assertTrue(any("Jane Doe" in item.value for item in ui.sidebar.markdown))
+        self.assertTrue(any("Jane Doe" in item.value for item in ui.sidebar.text))
         self.assertEqual(len(ui.dataframe), 1)
 
 

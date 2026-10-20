@@ -20,8 +20,8 @@ A Python resume-tailoring application with passage retrieval, source attribution
 ## Try it in 60 seconds
 
 1. Open the app and click **Run demo ranking**. No upload or API key is needed.
-2. Open a candidate review, then expand a **Requirement evidence** row.
-3. Compare the requirement with the exact resume excerpt and section.
+2. Choose a candidate under **Review a resume**.
+3. Filter the requirement table, then use **Inspect a requirement** to compare the job text with its exact resume excerpt and section.
 4. Inspect a gap or review flag, then download the text review or JSON evidence.
 
 The cloud app follows the deployed `main` branch. A local checkout can contain newer features; see [release verification](docs/DEPLOYMENT.md).
@@ -53,6 +53,8 @@ Each extracted requirement is paired with an exact resume passage, its section, 
 For example, `Build Python services with SQL storage` can retrieve `Built a Python service with SQL storage for cafe orders` from Projects. A bare `Python SQL` skills list remains a partial mention. `No experience with Python or SQL` is flagged for review.
 
 Reviews also include matching vocabulary, priority terms not found, separate document-structure advice, editable bullet templates, and downloadable TXT/JSON reports. Compare up to 10 PDF/DOCX/TXT resumes in one batch.
+
+The interface uses a native Streamlit theme and form inputs. Only the selected candidate and requirement excerpt are rendered; **Evidence**, **Tailoring**, and **Score details** are separate views. Downloads avoid a full app rerun. Private analyses remain in session state and are not placed in a shared cache. See [UI design and verification](docs/UI.md).
 
 ## How matching works
 

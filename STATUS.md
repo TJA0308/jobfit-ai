@@ -1,6 +1,6 @@
 # JobFit AI status
 
-This records local verification of the scoring-v2 portfolio revision. Local completion, GitHub publication, and live deployment are separate checks.
+This records local verification of the scoring-v2 portfolio revision and focused review interface. Local completion, GitHub publication, and live deployment are separate checks.
 
 ## Implemented
 
@@ -16,12 +16,17 @@ This records local verification of the scoring-v2 portfolio revision. Local comp
 - Baseline comparison, NDCG, actual backend counts, dataset hashes, runtime manifests, and per-example failure reports.
 - Updated architecture, evaluation protocol, 90-second demo script, and interview practice guide.
 - Public requests retain session-local results; no shared SQLite history or automatic paid requests.
+- Native Streamlit theme and form inputs replace custom HTML/CSS. Only the selected candidate, review view, and requirement excerpt are rendered; downloads avoid a full rerun.
+- Filters, empty states, and per-file errors remain usable while switching reviews; invalid submissions preserve the previous review.
+- Non-experience headings reset section attribution. Role-title filtering preserves explicit experience and credential qualifications.
 
 ## Verification
 
 A fresh Python 3.13.6 virtual environment was created from `requirements-dev.txt`. The pinned default dependencies install, and `python -m pip check` reports no broken requirements.
 
-All 55 tests pass in that clean environment. The suite covers scoring, source attribution, copy/negation handling, aliases, truncation, compressed DOCX/PDF/text limits, HTTP uploads, UI downloads, session isolation, cleanup, and opt-in behavior.
+All 62 tests pass using that pinned environment. The suite covers scoring, source attribution, copy/negation handling, aliases, truncation, compressed DOCX/PDF/text limits, HTTP uploads, UI downloads, session isolation, cleanup, opt-in behavior, conditional review views, filtering, stale selections, and the two reviewed extraction defects.
+
+For the four-resume demo's Evidence view, AppTest component counts decreased from eight to two downloads and twenty to four metrics. Review interactions do not rerun scoring. This is a structural observation, not a browser latency benchmark. See [UI design and verification](docs/UI.md).
 
 ```bash
 python -m unittest discover -s tests -v
@@ -39,7 +44,7 @@ Actual local dense inference was run with cached weights and offline network set
 
 ## Release boundary and remaining evidence
 
-- These changes are local until committed and published. Existing hosted content may still be the previous revision.
+- Publication status is recorded in Git history and CI. Existing hosted content may still be an older revision until the cloud deployment and browser smoke check are verified.
 - Streamlit AppTest verifies application behavior, but browser visual QA and the deployed upload/download smoke check remain unverified in this session.
 - The demo recording is scripted in `docs/DEMO.md`; no video or screenshots are claimed to have been recorded.
 - A human-annotated held-out evaluation remains outstanding. All current benchmark labels are synthetic or lack independently verified annotation provenance.

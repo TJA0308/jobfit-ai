@@ -35,6 +35,22 @@ JOB_HEADINGS = {
     "required qualifications", "preferred skills", "required skills", "about us", "about the role",
     "benefits", "compensation", "how to apply",
 }
+NON_EXPERIENCE_HEADINGS = {
+    "certifications": {"certifications", "certificates", "licenses", "licenses and certifications", "certifications and licenses"},
+    "awards": {"awards", "honors", "honours", "awards and honors", "honors and awards", "achievements"},
+    "languages": {"languages", "spoken languages"},
+    "interests": {"interests", "hobbies", "hobbies and interests"},
+    "publications": {"publications", "papers", "patents"},
+    "coursework": {"coursework", "relevant coursework", "courses", "training", "professional development"},
+    "activities": {"activities", "extracurricular activities", "volunteer activities", "volunteering", "leadership", "memberships"},
+    "references": {"references", "contact", "contact information", "additional information"},
+}
+ROLE_TITLE = re.compile(
+    r"(?:(?:senior|junior|lead|staff|principal|associate|graduate|student|software|hardware|"
+    r"data|machine|learning|ai|ml|backend|front[- ]end|full[- ]stack|platform|cloud|security|"
+    r"systems?|research|product|engineering|management|tools|analytics|discovery|qa|test|mobile|web|devops|sre)\s+){0,7}"
+    r"(?:intern|internship|engineer|developer|analyst|manager|scientist)", re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -62,7 +78,24 @@ class _Candidate:
 
 def _section_heading(line: str) -> str | None:
     clean = line.strip().rstrip(":")
-    return next((name for name, pattern in SECTION_PATTERNS.items() if pattern.fullmatch(clean)), None)
+    known = next((name for name, pattern in SECTION_PATTERNS.items() if pattern.fullmatch(clean)), None)
+    if known:
+        return known
+    return next((name for name, variants in NON_EXPERIENCE_HEADINGS.items() if clean.casefold() in variants), None)
+
+
+def _is_role_title(text: str) -> bool:
+    # A small noun-phrase vocabulary keeps explicit experience/credential
+    # sentences even when they end in a role name. Never use token count alone.
+    parts = re.split(r"\s+[-–—|]\s+", text.strip().rstrip("."), maxsplit=1)
+    if len(parts) == 2 and not re.fullmatch(
+        r"(?:(?:summer|fall|winter|spring|autumn)(?:\s+20\d{2})?|20\d{2}|remote|hybrid|on[- ]site|full[- ]time|part[- ]time)",
+        parts[1], re.IGNORECASE,
+    ):
+        return False
+    title = parts[0]
+    title = re.sub(r"\s*/\s*", " ", title)
+    return ROLE_TITLE.fullmatch(title) is not None
 
 
 def split_spans(text: str, *, resume: bool = False) -> list[TextSpan]:
@@ -116,7 +149,7 @@ def extract_requirements(job_description: str) -> tuple[list[TextSpan], bool]:
         # Exclude short titles/headings, but retain short explicit skill lists.
         if not tokens or (len(tokens) < 2 and tokens[0] not in STANDALONE_SKILLS) or tokens in seen:
             continue
-        if not unique and len(tokens) <= 8 and re.search(r"\b(?:intern|internship|engineer|developer|analyst|manager|scientist)\b(?:\s*[-–—|].*)?\.?$", span.text, re.I):
+        if not unique and _is_role_title(span.text):
             continue
         seen.add(tokens)
         unique.append(span)

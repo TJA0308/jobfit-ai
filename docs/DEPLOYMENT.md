@@ -34,10 +34,13 @@ Without opt-in, local templates are used. The FastAPI endpoints also use templat
 
 - Sidebar says **This session** and includes **Clear session results**.
 - Demo controls load and rank the four sample resumes without an exception.
-- Candidate reviews include **Requirement evidence**, exact excerpts, and text/JSON downloads.
+- **Review a resume** switches the focused candidate and its two downloads. Other candidates' excerpts should not remain in the review.
+- The **Evidence** view includes a requirement table, category filter, and **Inspect a requirement** selector. Verify an exact excerpt and **Source details**.
+- **Tailoring** and **Score details** render their respective content; return to Evidence without repeating analysis.
+- Submit an upload form once, then change the candidate or evidence filter. Existing reviews should remain; downloads should not trigger analysis.
 - The score explanation says **60% text similarity + 40% keyword coverage**, with structure separate and scoring version **2.0**.
 - Upload `demo/adversarial/copied_role.txt` with the demo job description and inspect the copy warning. A high wording score is not qualification evidence.
-- Scores appear as `/100`; candidate reviews say **Text similarity** and **Priority terms not found**.
+- Scores appear as `/100`; **Score details** includes **Text similarity** and **Priority terms not found**.
 - An uploaded TXT file produces a result and updates session history.
 - A second browser session does not display the first session's upload history.
 - **Clear session results** removes reviews/history; it does not empty the upload widget.
@@ -80,7 +83,7 @@ The portfolio-quality revision changed public behavior intentionally:
 - Old local database files are retained but are no longer displayed by the public entry points.
 - AI rewrites require `use_ai_rewrites=True` in the upload handler or `enabled=True` in the rewrite helper, plus credentials.
 - Limits are 5 MB per resume, 10 resumes per batch, and 20,000 characters per job description.
-- Scores changed after matching fixes. The formula weights and tier thresholds remain unchanged.
+- Earlier matching fixes changed scores. The v2 formula is documented separately above; tier thresholds remain Strong at 50 and Moderate at 30.
 
 ## Optional FastAPI / Render deployment
 

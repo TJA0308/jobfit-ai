@@ -1,9 +1,23 @@
 [theme]
 base = "light"
-primaryColor = "#0A6E4E"
-backgroundColor = "#F3F1EA"
-secondaryBackgroundColor = "#E1DED5"
-textColor = "#102217"
+primaryColor = "#176B52"
+backgroundColor = "#FCFDFB"
+secondaryBackgroundColor = "#F0F5F1"
+textColor = "#20382B"
+linkColor = "#176B52"
+borderColor = "#D6E1D8"
+dataframeBorderColor = "#D6E1D8"
+codeBackgroundColor = "#EDF3EF"
+baseRadius = "0.75rem"
+buttonRadius = "0.5rem"
+showWidgetBorder = true
+showSidebarBorder = true
+
+[theme.sidebar]
+backgroundColor = "#F0F5F1"
+secondaryBackgroundColor = "#E6EEE8"
+textColor = "#20382B"
+borderColor = "#D6E1D8"
 
 [server]
 maxUploadSize = 5

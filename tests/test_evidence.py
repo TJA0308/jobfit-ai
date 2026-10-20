@@ -134,6 +134,33 @@ class EvidenceTests(unittest.TestCase):
         detected, _ = detect_sections("I have experience on projects with Python skills.")
         self.assertEqual(detected, [])
 
+    def test_non_experience_headings_end_project_attribution(self):
+        for heading in ("Certifications", "Awards", "Languages", "Interests", "Publications", "Coursework", "Volunteer activities"):
+            with self.subTest(heading=heading):
+                resume = f"Projects\nBuilt a React frontend.\n{heading}\nPython SQL"
+                matches, *_ = match_evidence(resume, "Python SQL")
+                self.assertEqual(matches[0].status, "partial")
+                self.assertNotIn(matches[0].section, {"projects", "experience"})
+                self.assertEqual(resume[matches[0].evidence_start:matches[0].evidence_end], "Python SQL")
+
+    def test_experience_qualifications_are_preserved_in_review_and_export(self):
+        sentences = (
+            "3 years of experience as a software engineer.",
+            "Experience as a backend developer.",
+            "Must have worked as a data analyst.",
+            "Be a licensed professional engineer.",
+            "Software engineer - 3 years of experience required.",
+        )
+        for prefix in ("", "Requirements\n"):
+            for sentence in sentences:
+                with self.subTest(prefix=prefix, sentence=sentence):
+                    job = prefix + sentence
+                    requirements, _ = extract_requirements(job)
+                    self.assertEqual([r.text for r in requirements], [sentence])
+                    result = analyze_resume_fit(RESUME, job, "resume.txt", "txt")
+                    self.assertEqual(result.evidence_matches[0].requirement, sentence)
+                    self.assertIn(sentence, analysis_text(result))
+
     def test_export_has_attribution_version_and_warning(self):
         result = analyze_resume_fit(RESUME, JOB, "resume.txt", "txt")
         payload = json.loads(analysis_json(result))
@@ -196,8 +223,8 @@ class ReliabilityTests(unittest.TestCase):
         next(b for b in ui.button if b.label == "Run demo ranking").click().run(timeout=30)
         self.assertEqual(list(ui.exception), [])
         self.assertTrue(any(h.value == "Requirement evidence" for h in ui.subheader))
-        self.assertTrue(any("Requirement 1" in item.label for item in ui.expander))
-        self.assertEqual(len(ui.get("download_button")), 8)
+        self.assertTrue(any(item.label == "Inspect a requirement" for item in ui.selectbox))
+        self.assertEqual(len(ui.get("download_button")), 2)
 
 
 if __name__ == "__main__":

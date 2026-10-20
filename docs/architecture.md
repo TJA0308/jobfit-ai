@@ -26,6 +26,8 @@ The invariant is `resume_text[start:end] == evidence`. A no-match row uses null 
 
 Paragraph/sentence splitting preserves original text rather than joining lines into generated prose. This makes attribution simple but can miss context in hard-wrapped or multi-column resumes. Section detection requires standalone headings. A phrase such as “experience with Python” inside a sentence is not a section heading.
 
+Common non-experience headings, including certifications, awards, coursework, and interests, reset the section. These passages may be related wording but cannot inherit the experience/project support label. Unknown headings remain a heuristic limitation.
+
 ## Lexical retrieval
 
 1. Normalize technical names and aliases consistently across scoring and retrieval. Preserve C++, C#, .NET, and Node.js; split slash-separated skills; map JS/TS/Postgres/sklearn to their canonical forms.
@@ -36,6 +38,8 @@ Paragraph/sentence splitting preserves original text rather than joining lines i
 6. A supported status means experience **wording** was found, not that all clauses are established. Partial matches may cover only a subset of a compound requirement. Skill-list matches stay partial.
 
 Thresholds are inspectable design choices. They are not fitted likelihoods. A requirement with many clauses should be split more finely in a future extraction comparison.
+
+Title removal uses a restricted role noun phrase with optional seasonal/location suffix. Explicit qualification sentences such as “3 years of experience as a software engineer” are preserved, even when they are the first passage after a Requirements heading.
 
 ## Copy and negation review
 
@@ -66,6 +70,8 @@ Document structure remains 35% length, 30% standalone section headings, 20% bull
 `scoring_version` is included in results because v1 scores (45/35/20 with structure) are not comparable to v2 scores.
 
 ## Bounded work and deployment limits
+
+The [focused UI](UI.md) renders one candidate and one requirement excerpt, with conditional Evidence/Tailoring/Score details views. Form submissions trigger analysis; selectors reuse existing session results. Downloads opt out of a full app rerun. Resume content is not placed in shared Streamlit caches.
 
 Retrieval caps work at 30 requirements × 200 passages, each at most 600 characters. Truncation is disclosed. Default TF-IDF is lightweight and needs no model download. API routes are synchronous so FastAPI runs blocking processing through its thread pool.
 

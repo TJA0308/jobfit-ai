@@ -58,6 +58,7 @@ The optional dense retriever uses normalized MiniLM vectors and cosine. It searc
 | Shared dataclasses/core | One response contract across UI/API/export | Interface behavior still needs separate tests |
 | Session-local results | Avoid cross-user history disclosure without accounts | Results are not durable |
 | Sync FastAPI routes | Blocking processing runs in its thread pool | Does not make CPU inference infinitely concurrent |
+| Focused native UI | One candidate/excerpt at a time, forms, and downloads without reruns | Users switch views to inspect other details |
 
 ## Measurements you can defend
 
@@ -83,6 +84,8 @@ Do not say “100% accurate,” “bias-free,” “production-grade ATS,” or 
 | Compressed oversized DOCX | Small upload could expand into large XML | Expanded XML cap and bounded read |
 | Dense model unavailable | Optional request could silently become lexical | Actual backend and fallback warning |
 | External rewrite returns malformed text | Partial/overlong output accepted | Enforce exactly three bullets of at most 28 words, otherwise templates |
+| Certifications follow Projects | Certification mentions inherited project attribution | Reset common non-experience headings; test exact source and partial status |
+| First requirement ends with “engineer” | An experience qualification was removed as a title | Restrict filtering to title noun phrases; retain qualification in exports |
 
 Understand a trigger, fix, and test for at least three of these without reading the table.
 
