@@ -42,7 +42,7 @@ class FocusedReviewTests(unittest.TestCase):
             ui = demo(AppTest.from_file(Path(__file__).resolve().parents[1] / "streamlit_app.py").run(timeout=30))
             self.assertEqual(report.call_count, 1)
             ui.selectbox(key="evidence_filter").set_value("Needs attention").run(timeout=30)
-            ui.radio(key="review_view").set_value("Tailoring").run(timeout=30)
+            ui.button_group(key="review_view").set_value("Tailoring").run(timeout=30)
             self.assertEqual(report.call_count, 1)
             analysis = next(item for item in ui.session_state["results"][0]
                             if item.analysis_id == ui.session_state["selected_analysis_id"])

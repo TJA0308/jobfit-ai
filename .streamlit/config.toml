@@ -1,23 +1,22 @@
 [theme]
 base = "light"
-primaryColor = "#176B52"
-backgroundColor = "#FCFDFB"
-secondaryBackgroundColor = "#F0F5F1"
-textColor = "#20382B"
-linkColor = "#176B52"
-borderColor = "#D6E1D8"
-dataframeBorderColor = "#D6E1D8"
-codeBackgroundColor = "#EDF3EF"
-baseRadius = "0.75rem"
-buttonRadius = "0.5rem"
+primaryColor = "#1B654B"
+backgroundColor = "#FAF8F4"
+secondaryBackgroundColor = "#F0EDE6"
+textColor = "#232D29"
+linkColor = "#1B654B"
+borderColor = "#DCD9D0"
+dataframeBorderColor = "#DCD9D0"
+dataframeHeaderBackgroundColor = "#F0EDE6"
+codeBackgroundColor = "#F0EDE6"
+font = "sans-serif"
+headingFont = "serif"
+headingFontSizes = ["2.75rem", "1.9rem", "1.4rem", "1.1rem", "1rem", "0.9rem"]
+headingFontWeights = [500, 500, 500, 600, 600, 600]
+baseRadius = "0.25rem"
+buttonRadius = "0.25rem"
 showWidgetBorder = true
-showSidebarBorder = true
-
-[theme.sidebar]
-backgroundColor = "#F0F5F1"
-secondaryBackgroundColor = "#E6EEE8"
-textColor = "#20382B"
-borderColor = "#D6E1D8"
+showSidebarBorder = false
 
 [server]
 maxUploadSize = 5

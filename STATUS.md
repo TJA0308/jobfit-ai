@@ -17,6 +17,7 @@ This records local verification of the scoring-v2 portfolio revision and focused
 - Updated architecture, evaluation protocol, 90-second demo script, and interview practice guide.
 - Public requests retain session-local results; no shared SQLite history or automatic paid requests.
 - Native Streamlit theme/form inputs with a packaged Components v2 evidence workspace: browser-local search, filtering, and requirement selection alongside exact excerpts.
+- Sidebar removed in favor of a header session popover. Warm paper theme, serif headings, flat sections, inline evidence counts, segmented review views, and an on-demand comparison table reduce dashboard clutter.
 - A review fragment limits Python reruns; one session-local export entry reuses unchanged reports, invalidates on content/candidate changes, and clears with results.
 - Filters, empty states, and per-file errors remain usable while switching reviews; invalid submissions preserve the previous review.
 - Non-experience headings reset section attribution. Role-title filtering preserves explicit experience and credential qualifications.

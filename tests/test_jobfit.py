@@ -212,9 +212,13 @@ class JobFitTests(unittest.TestCase):
         app = AppTest.from_file(Path(__file__).resolve().parents[1] / "streamlit_app.py")
         app.run(timeout=30)
         self.assertEqual(list(app.exception), [])
+        self.assertEqual(len(app.sidebar), 0)
+        self.assertEqual(len(app.title), 1)
 
         next(button for button in app.button if button.label == "Run demo ranking").click().run(timeout=30)
         self.assertEqual(list(app.exception), [])
+        self.assertEqual(len(app.title), 0)
+        app.toggle(key="show_comparison").set_value(True).run(timeout=30)
         self.assertGreaterEqual(len(app.dataframe), 1)
 
 

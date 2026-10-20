@@ -34,9 +34,10 @@ Without opt-in, local templates are used. The FastAPI endpoints also use templat
 
 ## Live smoke check
 
-- Sidebar says **This session** and includes **Clear session results**.
+- The page has no sidebar. **Session & options** in the header opens **This session**, analysis options, recent uploads, and **Clear session results**.
 - Demo controls load and rank the four sample resumes without an exception.
 - **Review a resume** switches the focused candidate and its two downloads. Other candidates' excerpts should not remain in the review.
+- **Compare all resumes** reveals the full ranking table; the default view focuses on the selected candidate. The introduction disappears once results are available.
 - The **Evidence** view includes a side-by-side requirement list and excerpt panel. Search requirements/excerpts, change a category, and select a requirement; these actions should stay local without an app rerun. Verify an exact excerpt and **Source details**.
 - Check keyboard focus, selection, empty search results, narrow layouts, and the **Use native evidence controls** alternative. Native controls use Python fragment reruns.
 - **Tailoring** and **Score details** render their respective content; return to Evidence without repeating analysis.

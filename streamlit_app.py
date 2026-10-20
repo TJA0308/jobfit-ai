@@ -40,7 +40,7 @@ def set_demo_job_description() -> None:
 def clear_session_results() -> None:
     for key in ("results", "recent_analyses", "upload_errors", "selected_analysis_id",
                 "selected_requirement_index", "review_context_id", "review_view", "evidence_filter",
-                "report_payload", "native_evidence", "evidence_workspace"):
+                "report_payload", "native_evidence", "evidence_workspace", "show_comparison"):
         st.session_state.pop(key, None)
 
 
@@ -82,10 +82,11 @@ def render_evidence(analysis: ResumeAnalysis) -> None:
         st.info("No requirement passages were identified. Try separate responsibilities or skill lists.")
         return
 
-    counts = st.columns(3)
-    counts[0].metric("Experience wording", sum(m.status == "supported" for m in matches), border=True)
-    counts[1].metric("Partial mentions", sum(m.status == "partial" for m in matches), border=True)
-    counts[2].metric("Needs attention", sum(m.status in {"not_found", "review"} for m in matches), border=True)
+    st.caption(
+        f"**{sum(m.status == 'supported' for m in matches)}** experience wording · "
+        f"**{sum(m.status == 'partial' for m in matches)}** partial mentions · "
+        f"**{sum(m.status in {'not_found', 'review'} for m in matches)}** need attention"
+    )
 
     if not st.toggle("Use native evidence controls", key="native_evidence",
                      help="An alternative to the interactive evidence workspace."):
@@ -117,7 +118,7 @@ def render_evidence(analysis: ResumeAnalysis) -> None:
         key="selected_requirement_index",
     )
     match = matches[selected]
-    with st.container(border=True):
+    with st.container(border=False):
         st.badge(STATUS_LABELS[match.status], color=STATUS_COLORS[match.status])
         st.markdown("**Job requirement**")
         st.text(match.requirement)
@@ -150,7 +151,7 @@ def render_tailoring(analysis: ResumeAnalysis) -> None:
         st.markdown("**Suggested next edits**")
         for item in analysis.suggestions:
             st.text("• " + item)
-    with st.container(border=True):
+    with st.container(border=False):
         st.markdown("**Bullet examples**")
         st.caption("Adapt only to work you actually did. Replace placeholders with verified facts.")
         for item in analysis.rewrite_suggestions:
@@ -216,12 +217,11 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
         st.session_state.pop("selected_requirement_index", None)
         st.session_state.review_context_id = analysis.analysis_id
 
-    with st.container(border=True):
+    with st.container(border=False):
         identity, score = st.columns([3, 1])
         with identity:
             st.subheader(analysis.candidate_name)
-            st.text(analysis.source_filename)
-            st.text(analysis.target_role)
+            st.caption(f"{analysis.source_filename} · {analysis.target_role}")
         with score:
             st.metric("Wording alignment", f"{analysis.match_score:.2f}/100")
             st.badge(analysis.tier + " wording overlap",
@@ -229,8 +229,9 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
     for warning in analysis.warnings:
         st.warning(warning.message)
 
-    view = st.radio(
-        "Review view", ["Evidence", "Tailoring", "Score details"], horizontal=True, key="review_view",
+    view = st.segmented_control(
+        "Review view", ["Evidence", "Tailoring", "Score details"], default="Evidence",
+        required=True, key="review_view", label_visibility="collapsed",
     )
     if view == "Tailoring":
         render_tailoring(analysis)
@@ -239,18 +240,17 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
     else:
         render_evidence(analysis)
 
-    st.markdown("**Take your review with you**")
     text_report, json_report = report_payloads(analysis)
-    downloads = st.columns(2)
-    downloads[0].download_button(
+    downloads = st.container(horizontal=True)
+    downloads.download_button(
         "Download review (.txt)", text_report, file_name="jobfit-review.txt",
         mime="text/plain", key=f"text-{analysis.analysis_id}", on_click="ignore",
-        icon=":material/download:", width="stretch",
+        icon=":material/download:", width="content",
     )
-    downloads[1].download_button(
+    downloads.download_button(
         "Download evidence (.json)", json_report, file_name="jobfit-evidence.json",
         mime="application/json", key=f"json-{analysis.analysis_id}", on_click="ignore",
-        icon=":material/data_object:", width="stretch",
+        icon=":material/data_object:", width="content",
     )
     st.caption("Reports contain resume excerpts. Results stay in this browser session.")
 
@@ -260,9 +260,16 @@ def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
     analyses = sorted(analyses, key=lambda item: item.match_score, reverse=True)
     if not analyses:
         return
-    st.subheader(title)
-    st.caption("Wording alignment helps you inspect a resume. It does not verify experience or predict hiring.")
-    if len(analyses) > 1:
+    st.caption(f"{title} · Wording alignment does not verify experience or predict hiring.")
+    ids = [item.analysis_id for item in analyses]
+    labels = {item.analysis_id: f"{index:02d} · {item.candidate_name} · {item.match_score:.2f}/100"
+              for index, item in enumerate(analyses, 1)}
+    if st.session_state.get("selected_analysis_id") not in ids:
+        st.session_state.selected_analysis_id = ids[0]
+    chooser, comparison = st.columns([4, 1.4], vertical_alignment="bottom")
+    selected = chooser.selectbox("Review a resume", ids, format_func=labels.__getitem__, key="selected_analysis_id")
+    show_comparison = len(analyses) > 1 and comparison.toggle("Compare all resumes", key="show_comparison")
+    if show_comparison:
         st.dataframe(
             pd.DataFrame([
                 {"Rank": index, "Candidate": item.candidate_name, "Wording alignment": item.match_score,
@@ -273,19 +280,16 @@ def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
             column_config={"Wording alignment": st.column_config.ProgressColumn(
                 "Wording / 100", min_value=0, max_value=100, format="%.2f")},
         )
-    ids = [item.analysis_id for item in analyses]
-    labels = {item.analysis_id: f"{index:02d} · {item.candidate_name} · {item.match_score:.2f}/100"
-              for index, item in enumerate(analyses, 1)}
-    if st.session_state.get("selected_analysis_id") not in ids:
-        st.session_state.selected_analysis_id = ids[0]
-    selected = st.selectbox("Review a resume", ids, format_func=labels.__getitem__, key="selected_analysis_id")
     render_analysis_panel(next(item for item in analyses if item.analysis_id == selected))
 
 
 if "job_description" not in st.session_state:
     st.session_state.job_description = ""
 
-with st.sidebar:
+brand, utilities = st.columns([5, 1.5], vertical_alignment="center")
+brand.markdown("**JobFit AI** · Resume evidence review")
+run_demo = False
+with utilities.popover("Session & options", icon=":material/tune:", width="stretch"):
     st.header("This session")
     st.caption("Uploads are processed on this app's server. Reviews are not saved to shared history.")
     with st.expander("Analysis options", icon=":material/tune:"):
@@ -308,20 +312,17 @@ with st.sidebar:
         st.caption("Rewrites: external AI enabled" if use_ai_rewrites else "Rewrites: local templates")
     st.button("Clear session results", on_click=clear_session_results, icon=":material/delete:")
     st.caption("Clears reviews and recent results. Files in the upload widget remain selected.")
+    if st.session_state.get("results"):
+        run_demo = st.button("Run demo ranking", icon=":material/play_arrow:", type="tertiary", key="run_demo")
     st.markdown("**Recent uploads**")
     history_container = st.container()
 
-intro, demo = st.columns([2.5, 1])
-with intro:
-    st.badge("Resume evidence review", icon=":material/find_in_page:", color="primary")
-    st.title("JobFit AI")
-    st.write("See how your experience reads against a role. Inspect the evidence, find gaps, and plan truthful edits.")
-    st.caption("PDF, DOCX or TXT · No API key needed · Session-local results")
-with demo:
-    with st.container(border=True):
-        st.markdown("**Try a sample review**")
-        st.caption("Four fictional resumes. One software engineering internship.")
-        run_demo = st.button("Run demo ranking", icon=":material/play_arrow:", width="stretch")
+intro_container = st.container()
+
+if not st.session_state.get("results"):
+    with st.container(horizontal=True, vertical_alignment="center"):
+        run_demo = st.button("Run demo ranking", icon=":material/play_arrow:", type="tertiary", key="run_demo")
+        st.caption("Four fictional resumes · One SWE internship")
 
 if run_demo:
     st.session_state.pop("report_payload", None)
@@ -387,6 +388,12 @@ if analyze_uploaded:
 
 for error in st.session_state.get("upload_errors", []):
     st.error(error)
+
+if not st.session_state.get("results"):
+    with intro_container:
+        st.title("Your resume. The evidence.")
+        st.write("Read a role's requirements alongside your own experience. Find wording to strengthen and claims to check.")
+        st.caption("PDF, DOCX or TXT · No API key needed · Session-local results")
 
 if st.session_state.get("results"):
     render_ranking(*st.session_state.results)

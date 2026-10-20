@@ -4,7 +4,7 @@
 
 Upload resumes and paste a role in one form, then submit. A separate demo button reviews four fictional SWE resumes. The demo uses its built-in job description and preserves an existing upload draft.
 
-A batch comparison lists candidates and wording scores. **Review a resume** selects one candidate. Three conditional views keep the review focused:
+**Review a resume** selects one candidate, with rank and wording score in each option. **Compare all resumes** reveals the full batch table on demand. Three conditional views keep the review focused:
 
 - **Evidence:** three counts and a custom workspace with searchable requirements on the left and the selected exact excerpt on the right. Filters highlight mentions and gaps. **Source details** retains offsets, retrieval cosine, and matched terms.
 - **Tailoring:** strengths, suggested edits, and truthful bullet templates.
@@ -13,6 +13,12 @@ A batch comparison lists candidates and wording scores. **Review a resume** sele
 The workspace stacks on narrow viewports. Standard input, select, button, and details elements provide keyboard interaction, visible focus, text status labels, and a result-count announcement. These design choices still require browser and assistive-technology verification. **Use native evidence controls** provides the previous table/selectbox workflow as an alternative. Empty filters and no-match states have explicit messages.
 
 New batches replace stale selections. Per-file failures persist through review interactions until another batch/demo or **Clear session results**. Invalid submissions preserve the current review.
+
+## Visual direction
+
+The page has no sidebar. **Session & options** opens a compact header popover containing matching/rewrite options, recent uploads, and session clearing. A warm paper background and dark ink text pair built-in serif headings with sans-serif controls; the palette and typography live in native theme configuration. No external font request is needed.
+
+Candidate identity, evidence counts, bullet examples, and export controls sit directly on the page rather than in bordered cards. Evidence counts use one quiet text line. A segmented switch changes review views, and compact downloads sit together beneath the review. The landing introduction disappears as soon as results are available so the evidence takes priority. The custom workspace uses list rows and a document excerpt panel instead of a grid of cards.
 
 ## Execution boundaries
 
