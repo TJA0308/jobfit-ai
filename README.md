@@ -21,7 +21,7 @@ A Python resume-tailoring application with passage retrieval, source attribution
 
 1. Open the app and click **Run demo ranking**. No upload or API key is needed.
 2. Choose a candidate under **Review a resume**.
-3. Filter the requirement table, then use **Inspect a requirement** to compare the job text with its exact resume excerpt and section.
+3. Search or filter requirements, then click one to compare the job text with its exact resume excerpt and section.
 4. Inspect a gap or review flag, then download the text review or JSON evidence.
 
 The cloud app follows the deployed `main` branch. A local checkout can contain newer features; see [release verification](docs/DEPLOYMENT.md).
@@ -54,7 +54,7 @@ For example, `Build Python services with SQL storage` can retrieve `Built a Pyth
 
 Reviews also include matching vocabulary, priority terms not found, separate document-structure advice, editable bullet templates, and downloadable TXT/JSON reports. Compare up to 10 PDF/DOCX/TXT resumes in one batch.
 
-The interface uses a native Streamlit theme and form inputs. Only the selected candidate and requirement excerpt are rendered; **Evidence**, **Tailoring**, and **Score details** are separate views. Downloads avoid a full app rerun. Private analyses remain in session state and are not placed in a shared cache. See [UI design and verification](docs/UI.md).
+The interface pairs a native Streamlit theme with a custom Components v2 evidence workspace. Search, filters, and requirement selection run in the browser. The requirement list and selected excerpt sit side by side, stacking on smaller screens. **Evidence**, **Tailoring**, and **Score details** are conditional views inside a review fragment. Downloads reuse session-local reports and avoid a rerun. Private analyses are not placed in shared caches. See [UI design and verification](docs/UI.md).
 
 ## How matching works
 
@@ -150,6 +150,8 @@ python -m streamlit run streamlit_app.py
 ```
 
 On macOS/Linux, use `python3 -m venv .venv` and `source .venv/bin/activate`. Open `http://localhost:8501`. UI-only installation uses `requirements.txt`.
+
+Run installation from the repository root: requirements include the local `components/jobfit-evidence` package. Its small frontend bundle is committed, so Python deployment needs no Node build. To edit the component, use Node 24, run `npm ci`, `npm test`, and `npm run build` in `components/jobfit-evidence/jobfit_evidence/frontend`, then reinstall the local package. See the [component guide](components/jobfit-evidence/README.md).
 
 ```bash
 python -m unittest discover -s tests -v

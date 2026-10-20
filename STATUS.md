@@ -16,17 +16,18 @@ This records local verification of the scoring-v2 portfolio revision and focused
 - Baseline comparison, NDCG, actual backend counts, dataset hashes, runtime manifests, and per-example failure reports.
 - Updated architecture, evaluation protocol, 90-second demo script, and interview practice guide.
 - Public requests retain session-local results; no shared SQLite history or automatic paid requests.
-- Native Streamlit theme and form inputs replace custom HTML/CSS. Only the selected candidate, review view, and requirement excerpt are rendered; downloads avoid a full rerun.
+- Native Streamlit theme/form inputs with a packaged Components v2 evidence workspace: browser-local search, filtering, and requirement selection alongside exact excerpts.
+- A review fragment limits Python reruns; one session-local export entry reuses unchanged reports, invalidates on content/candidate changes, and clears with results.
 - Filters, empty states, and per-file errors remain usable while switching reviews; invalid submissions preserve the previous review.
 - Non-experience headings reset section attribution. Role-title filtering preserves explicit experience and credential qualifications.
 
 ## Verification
 
-A fresh Python 3.13.6 virtual environment was created from `requirements-dev.txt`. The pinned default dependencies install, and `python -m pip check` reports no broken requirements.
+A Python 3.13.6 virtual environment was updated to Streamlit 1.66.0, the local component, and Uvicorn 0.54.0 from the pinned requirements. `python -m pip check` reports no broken requirements. Node 24 builds the frontend; built assets are committed for Python-only deployment.
 
-All 62 tests pass using that pinned environment. The suite covers scoring, source attribution, copy/negation handling, aliases, truncation, compressed DOCX/PDF/text limits, HTTP uploads, UI downloads, session isolation, cleanup, opt-in behavior, conditional review views, filtering, stale selections, and the two reviewed extraction defects.
+All 64 Python tests and 5 frontend DOM tests pass. They cover scoring, attribution, limits, HTTP uploads, UI payloads/downloads, session isolation, export reuse/invalidation/cleanup, conditional views, the native alternative, and both reviewed extraction defects. Frontend tests cover local search/filter/selection, exact text, hostile input, empty states, instance isolation, and cleanup.
 
-For the four-resume demo's Evidence view, AppTest component counts decreased from eight to two downloads and twenty to four metrics. Review interactions do not rerun scoring. This is a structural observation, not a browser latency benchmark. See [UI design and verification](docs/UI.md).
+Review interactions do not rerun scoring; unchanged reports serialize once per selected analysis. The custom workspace emits no Python events for navigation. This reduces repeated work; browser latency and memory gains have not been measured. See [UI design and verification](docs/UI.md).
 
 ```bash
 python -m unittest discover -s tests -v

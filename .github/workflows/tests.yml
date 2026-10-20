@@ -23,6 +23,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: components/jobfit-evidence/jobfit_evidence/frontend/package-lock.json
+
+      - name: Verify evidence component
+        working-directory: components/jobfit-evidence/jobfit_evidence/frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+          git diff --exit-code -- build
+
+      - name: Verify packaged assets
+        run: python scripts/verify_component.py
+
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 

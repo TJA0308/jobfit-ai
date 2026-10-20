@@ -8,7 +8,7 @@ Run the tests and `python scripts/demo_batch.py`, then start `python -m streamli
 
 **0–15 seconds:** “This helps applicants compare job requirements with the wording in their resume. It shows exact source evidence so a score is inspectable.” Click **Run demo ranking**.
 
-**15–40 seconds:** Choose Jordan under **Review a resume**, keep the **Evidence** view, and select **Inspect a requirement**. Point to the job text, resume excerpt, and section. Open **Source details** for offsets. Explain that experience wording is not verified employment and a partial match may cover only part of the requirement.
+**15–40 seconds:** Choose Jordan under **Review a resume**, keep the **Evidence** view, and click a requirement in the left list. Point to the job text, resume excerpt, and section on the right. Try searching for Python, then clear the filters. Open **Source details** for offsets. Explain that experience wording is not verified employment and a partial match may cover only part of the requirement.
 
 **40–55 seconds:** Choose another candidate and filter **Show requirements** to **Needs attention**. Explain why a missing excerpt does not prove missing ability. Switch to **Score details** to show structure advice separately from wording alignment.
 

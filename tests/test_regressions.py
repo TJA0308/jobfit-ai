@@ -126,13 +126,13 @@ class PrivacyAndUploadTests(unittest.TestCase):
 
     def test_ui_history_is_session_local_and_can_be_cleared(self):
         analysis = analyze_resume_fit(RESUME, JOB, "resume.txt", "txt")
-        first = AppTest.from_file("streamlit_app.py")
+        first = AppTest.from_file(Path(__file__).resolve().parents[1] / "streamlit_app.py")
         first.session_state["recent_analyses"] = [analysis]
         first.session_state["results"] = ([analysis], "Candidate ranking")
         first.run(timeout=30)
         self.assertEqual(list(first.exception), [])
         self.assertTrue(any("Jane Doe" in item.value for item in first.sidebar.text))
-        second = AppTest.from_file("streamlit_app.py").run(timeout=30)
+        second = AppTest.from_file(Path(__file__).resolve().parents[1] / "streamlit_app.py").run(timeout=30)
         self.assertFalse(any("Jane Doe" in item.value for item in second.sidebar.text))
         next(button for button in first.button if button.label == "Clear session results").click().run(timeout=30)
         self.assertEqual(list(first.exception), [])
@@ -146,14 +146,15 @@ class PrivacyAndUploadTests(unittest.TestCase):
             SimpleNamespace(name="broken.pdf", getvalue=lambda: b"not pdf"),
         ]
         with patch("streamlit.file_uploader", return_value=uploads):
-            ui = AppTest.from_file("streamlit_app.py")
+            ui = AppTest.from_file(Path(__file__).resolve().parents[1] / "streamlit_app.py")
             ui.session_state["job_description"] = JOB
             ui.run(timeout=30)
             next(button for button in ui.button if button.label == "Analyze uploaded resumes").click().run(timeout=30)
         self.assertEqual(list(ui.exception), [])
         self.assertTrue(any("broken.pdf" in item.value for item in ui.error))
         self.assertTrue(any("Jane Doe" in item.value for item in ui.sidebar.text))
-        self.assertEqual(len(ui.dataframe), 1)
+        self.assertEqual(len(ui.get("bidi_component")), 1)
+        self.assertEqual(len(ui.get("download_button")), 2)
 
 
 class ApiTests(unittest.TestCase):

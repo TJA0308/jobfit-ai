@@ -1,38 +1,44 @@
-# Focused review interface
+# Evidence workspace and performance
 
-## Interaction design
+## Review workflow
 
-The primary path is one form: upload resumes, paste a role, and submit. A separate demo button reviews four fictional SWE resumes immediately. The demo always uses the built-in job description; an existing upload draft is preserved.
+Upload resumes and paste a role in one form, then submit. A separate demo button reviews four fictional SWE resumes. The demo uses its built-in job description and preserves an existing upload draft.
 
-A batch comparison lists candidates and wording scores. **Review a resume** chooses one candidate. Three conditional views keep the review focused:
+A batch comparison lists candidates and wording scores. **Review a resume** selects one candidate. Three conditional views keep the review focused:
 
-- **Evidence:** counts, a filterable requirement table, and one selected exact excerpt. Source offsets and shared terms are in **Source details**.
+- **Evidence:** three counts and a custom workspace with searchable requirements on the left and the selected exact excerpt on the right. Filters highlight mentions and gaps. **Source details** retains offsets, retrieval cosine, and matched terms.
 - **Tailoring:** strengths, suggested edits, and truthful bullet templates.
-- **Score details:** the two wording signals, separate structure advice, priority terms, and technical metadata.
+- **Score details:** wording signals, separate structure advice, priority terms, and metadata.
 
-No-match and empty-filter states have explicit messages. New analyses replace stale candidate/requirement selections. Per-file failures persist through review interactions until another batch/demo or **Clear session results**. Invalid submissions preserve an existing review.
+The workspace stacks on narrow viewports. Standard input, select, button, and details elements provide keyboard interaction, visible focus, text status labels, and a result-count announcement. These design choices still require browser and assistive-technology verification. **Use native evidence controls** provides the previous table/selectbox workflow as an alternative. Empty filters and no-match states have explicit messages.
 
-## Native theme
+New batches replace stale selections. Per-file failures persist through review interactions until another batch/demo or **Clear session results**. Invalid submissions preserve the current review.
 
-Colors, borders, radii, and sidebar appearance live in `.streamlit/config.toml`. The custom CSS, HTML badges, gradients, font imports, and circular gauge have been removed. Native controls provide consistent focus, keyboard behavior, and theme integration.
+## Execution boundaries
 
-The palette uses a green accent on a near-white main surface and a muted sidebar. Status badges include words as well as colors. Built-in typography avoids external font requests. Configuration options were checked against the installed Streamlit **1.46.0**; no dependency upgrade is required.
+| Action | Work performed |
+| --- | --- |
+| Edit upload/role form | Inputs batch until submit |
+| Submit / run demo | Parse and analyze requested resumes |
+| Change candidate or review view | Python review fragment reruns; scoring is reused |
+| Search, filter, or select a custom requirement | Local DOM update; no Python event, network request, or app rerun |
+| Use native evidence selectors | Review fragment reruns; scoring is reused |
+| Download TXT/JSON | Client download, `on_click="ignore"` |
 
-## Work performed per interaction
+The custom workspace receives only the selected candidate's bounded evidence matches (at most 30 requirements). Only one full excerpt is displayed at a time. Navigation resets when the component unmounts, including changing review views or candidates; selection is not saved as an annotation.
 
-Form inputs batch changes before submission. Upload analysis runs only on form submit; the demo runs only on its explicit button. Selection/filter/view changes reuse session results and never call the scoring pipeline. Only the selected candidate is serialized for downloads, and only the selected requirement's full excerpt is rendered.
+One session-local export entry stores TXT, JSON, and a snapshot of the current analysis. Repeated view/filter changes reuse it. Candidate/content changes invalidate it; the snapshot catches mutations of the mutable analysis dataclass. New batches and clearing results release it. Private resume data is not cached through shared `st.cache_data` or `st.cache_resource`. Model weights remain separate from request data.
 
-Downloads use the supported `on_click="ignore"` client behavior. There is no shared cache of resumes, analyses, or report payloads. Model weight caching remains separate from private request data.
+## Component and theme
 
-The four-resume demo previously created eight download widgets and twenty metrics across all candidate panels. The focused Evidence view creates **two downloads and four metrics**. These are component counts measured with AppTest, not a latency, memory, or browser-rendering benchmark.
+Streamlit **1.66.0** supplies Components v2. The packaged TypeScript/Vite component was generated from the [official v2 template](https://github.com/streamlit/component-template/tree/master/cookiecutter/v2). It uses `st.components.v2.component`, isolated styles, and Streamlit's `--st-*` theme variables. The native theme stays in `.streamlit/config.toml`; no page-wide CSS overrides or external fonts are injected.
 
-## Correctness fixes included
-
-- Common non-experience headings (certifications, awards, languages, interests, publications, coursework, activities, and references) terminate experience/project attribution. A certification skill mention cannot inherit a prior project's experience label.
-- Role-title filtering now matches short title noun phrases rather than any short passage ending in “engineer” or “developer.” Explicit qualifications such as “3 years of experience as a software engineer” remain in review and exports.
+Resume strings travel through `data` and are inserted with `textContent`, never untrusted HTML. Component interactions have no storage or external calls. Event handlers use an AbortController and are removed on unmount. There is no React dependency. The production build currently contains about **4.0 KB JavaScript and 2.5 KB CSS**, before compression. Built assets are committed for Python-only deployment; Node 24 is used for development and CI.
 
 ## Verification and limits
 
-Automated tests exercise candidate/report switching, requirement filters, empty states, conditional views, stale-selection reset, invalid submissions, persistent partial-batch errors, and session clearing. Spies verify that reviewing existing results does not rerun scoring. The extraction fixes have regressions that failed before the fixes and pass afterward.
+Python AppTest checks mounting and candidate-specific payloads, conditional views, the native alternative, persistent errors, stale selections, session isolation, exports, and cleanup. Spies verify no rescoring during review and no repeated export serialization for unchanged content. Frontend DOM tests execute the actual workspace for search, filtering, exact excerpts/offsets, hostile text, empty results, instance isolation, and event cleanup. CI rebuilds the frontend and checks that committed assets match.
 
-Streamlit AppTest validates behavior, not pixels. Browser screenshot/viewport QA remains a separate release step when a browser connection is available. Use the [live smoke check](DEPLOYMENT.md) after deployment; no screenshots or browser latency measurements are claimed here.
+Before this optimization, every Python review rerun serialized both exports. Tests now show one serialization per unchanged selected analysis. The custom requirement interactions emit no server event. These are verified reductions in repeated work, **not measured browser latency or memory gains**.
+
+The running Streamlit server's health and both packaged asset endpoints were checked locally. No browser surface was available for screenshot, responsive-layout, assistive-technology, or end-to-end download QA. Follow the [live smoke check](DEPLOYMENT.md) when a browser is connected. AppTest and jsdom do not prove pixel layout or execution inside Streamlit's real browser host.

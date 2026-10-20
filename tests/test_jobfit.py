@@ -209,7 +209,7 @@ class JobFitTests(unittest.TestCase):
         self.assertEqual(health_check(), {"status": "ok"})
 
     def test_streamlit_app_renders_demo_without_exceptions(self) -> None:
-        app = AppTest.from_file("streamlit_app.py")
+        app = AppTest.from_file(Path(__file__).resolve().parents[1] / "streamlit_app.py")
         app.run(timeout=30)
         self.assertEqual(list(app.exception), [])
 

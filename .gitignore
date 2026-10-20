@@ -14,3 +14,7 @@ api.err.log
 .env.*
 !.env.example
 .streamlit/secrets.toml
+node_modules/
+*.egg-info/
+components/jobfit-evidence/build/
+components/jobfit-evidence/dist/

@@ -1,0 +1,2 @@
+recursive-include jobfit_evidence/frontend/build *
+include pyproject.toml

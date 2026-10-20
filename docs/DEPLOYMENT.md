@@ -16,6 +16,8 @@ With the app connected to this branch, pushing to `main` should trigger Streamli
 
 The default app needs no external API credentials or database configuration. Do not install the optional embedding requirements for the normal demo.
 
+Streamlit is pinned to **1.66.0** for Components v2. Root requirements install `./components/jobfit-evidence`; keep that directory and its committed `frontend/build` assets in the deployment. No Node build is needed at startup. When modifying frontend sources, use Node 24 and run `npm ci`, `npm test`, and `npm run build` in `components/jobfit-evidence/jobfit_evidence/frontend`. Commit the rebuilt assets with the source; CI checks their reproducibility. API/dev installations pin Uvicorn 0.54.0 to avoid the older server's WebSocket handshake compatibility warning.
+
 ## Optional AI rewrites
 
 Configure `OPENAI_API_KEY` and optionally `OPENAI_MODEL` through Streamlit's secrets settings. Never commit actual credentials. A configured key alone does not enable rewrites: the user must switch on **Use OpenAI rewrites** before analyzing uploads. This sends resume and job-description excerpts to the external provider and can consume API credits.
@@ -35,7 +37,8 @@ Without opt-in, local templates are used. The FastAPI endpoints also use templat
 - Sidebar says **This session** and includes **Clear session results**.
 - Demo controls load and rank the four sample resumes without an exception.
 - **Review a resume** switches the focused candidate and its two downloads. Other candidates' excerpts should not remain in the review.
-- The **Evidence** view includes a requirement table, category filter, and **Inspect a requirement** selector. Verify an exact excerpt and **Source details**.
+- The **Evidence** view includes a side-by-side requirement list and excerpt panel. Search requirements/excerpts, change a category, and select a requirement; these actions should stay local without an app rerun. Verify an exact excerpt and **Source details**.
+- Check keyboard focus, selection, empty search results, narrow layouts, and the **Use native evidence controls** alternative. Native controls use Python fragment reruns.
 - **Tailoring** and **Score details** render their respective content; return to Evidence without repeating analysis.
 - Submit an upload form once, then change the candidate or evidence filter. Existing reviews should remain; downloads should not trigger analysis.
 - The score explanation says **60% text similarity + 40% keyword coverage**, with structure separate and scoring version **2.0**.

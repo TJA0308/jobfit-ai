@@ -71,7 +71,7 @@ Document structure remains 35% length, 30% standalone section headings, 20% bull
 
 ## Bounded work and deployment limits
 
-The [focused UI](UI.md) renders one candidate and one requirement excerpt, with conditional Evidence/Tailoring/Score details views. Form submissions trigger analysis; selectors reuse existing session results. Downloads opt out of a full app rerun. Resume content is not placed in shared Streamlit caches.
+The [focused UI](UI.md) renders one candidate with conditional Evidence/Tailoring/Score details views inside `@st.fragment`. Form submissions trigger analysis. A packaged TypeScript Components v2 workspace receives only that candidate's bounded evidence matches; local search, filtering, and selection emit no Python events. Untrusted text is inserted through `textContent`, and styles are isolated in a shadow root using Streamlit theme variables. The native alternative uses fragment widgets. A single session-local export entry holds a snapshot and TXT/JSON payloads; candidate/content changes invalidate it, and new batches/clearing release it. Downloads opt out of reruns. Resume content is not placed in shared Streamlit caches.
 
 Retrieval caps work at 30 requirements × 200 passages, each at most 600 characters. Truncation is disclosed. Default TF-IDF is lightweight and needs no model download. API routes are synchronous so FastAPI runs blocking processing through its thread pool.
 

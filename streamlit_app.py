@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+from copy import deepcopy
+from dataclasses import asdict
 
 import pandas as pd
 import streamlit as st
 from streamlit.errors import StreamlitSecretNotFoundError
+from jobfit_evidence import evidence_browser
 
 from jobfit_ai.config import embeddings_enabled
 from jobfit_ai.models import ResumeAnalysis
@@ -36,7 +39,8 @@ def set_demo_job_description() -> None:
 
 def clear_session_results() -> None:
     for key in ("results", "recent_analyses", "upload_errors", "selected_analysis_id",
-                "selected_requirement_index", "review_context_id", "review_view", "evidence_filter"):
+                "selected_requirement_index", "review_context_id", "review_view", "evidence_filter",
+                "report_payload", "native_evidence", "evidence_workspace"):
         st.session_state.pop(key, None)
 
 
@@ -83,6 +87,15 @@ def render_evidence(analysis: ResumeAnalysis) -> None:
     counts[1].metric("Partial mentions", sum(m.status == "partial" for m in matches), border=True)
     counts[2].metric("Needs attention", sum(m.status in {"not_found", "review"} for m in matches), border=True)
 
+    if not st.toggle("Use native evidence controls", key="native_evidence",
+                     help="An alternative to the interactive evidence workspace."):
+        evidence_browser(
+            {"analysis_id": analysis.analysis_id, "filename": analysis.source_filename,
+             "matches": [asdict(match) for match in matches]},
+            key="evidence_workspace",
+        )
+        return
+
     evidence_filter = st.selectbox("Show requirements", list(EVIDENCE_FILTERS), key="evidence_filter")
     visible = [(index, match) for index, match in enumerate(matches)
                if match.status in EVIDENCE_FILTERS[evidence_filter]]
@@ -93,7 +106,7 @@ def render_evidence(analysis: ResumeAnalysis) -> None:
     st.dataframe(
         pd.DataFrame([{"#": index + 1, "Requirement": match.requirement,
                        "Result": STATUS_LABELS[match.status]} for index, match in visible]),
-        hide_index=True, use_container_width=True, height=min(320, 38 + 35 * len(visible)),
+        hide_index=True, width="stretch", height=min(320, 38 + 35 * len(visible)),
     )
     options = [index for index, _ in visible]
     if st.session_state.get("selected_requirement_index") not in options:
@@ -185,6 +198,19 @@ def render_score_details(analysis: ResumeAnalysis) -> None:
             st.caption("Pipeline timings are available after an upload.")
 
 
+def report_payloads(analysis: ResumeAnalysis) -> tuple[str, str]:
+    """Reuse only the current candidate's exports in this session.
+
+    A snapshot detects later mutations of the mutable analysis dataclass.
+    Candidate changes replace this single entry; clearing results releases it.
+    """
+    cached = st.session_state.get("report_payload")
+    if cached is None or cached[0] != analysis:
+        cached = (deepcopy(analysis), analysis_text(analysis), analysis_json(analysis))
+        st.session_state.report_payload = cached
+    return cached[1], cached[2]
+
+
 def render_analysis_panel(analysis: ResumeAnalysis) -> None:
     if st.session_state.get("review_context_id") != analysis.analysis_id:
         st.session_state.pop("selected_requirement_index", None)
@@ -214,20 +240,22 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
         render_evidence(analysis)
 
     st.markdown("**Take your review with you**")
+    text_report, json_report = report_payloads(analysis)
     downloads = st.columns(2)
     downloads[0].download_button(
-        "Download review (.txt)", analysis_text(analysis), file_name="jobfit-review.txt",
+        "Download review (.txt)", text_report, file_name="jobfit-review.txt",
         mime="text/plain", key=f"text-{analysis.analysis_id}", on_click="ignore",
-        icon=":material/download:", use_container_width=True,
+        icon=":material/download:", width="stretch",
     )
     downloads[1].download_button(
-        "Download evidence (.json)", analysis_json(analysis), file_name="jobfit-evidence.json",
+        "Download evidence (.json)", json_report, file_name="jobfit-evidence.json",
         mime="application/json", key=f"json-{analysis.analysis_id}", on_click="ignore",
-        icon=":material/data_object:", use_container_width=True,
+        icon=":material/data_object:", width="stretch",
     )
     st.caption("Reports contain resume excerpts. Results stay in this browser session.")
 
 
+@st.fragment
 def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
     analyses = sorted(analyses, key=lambda item: item.match_score, reverse=True)
     if not analyses:
@@ -241,7 +269,7 @@ def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
                  "Matched terms": len(item.matching_keywords), "Review flags": len(item.warnings)}
                 for index, item in enumerate(analyses, 1)
             ]),
-            hide_index=True, use_container_width=True,
+            hide_index=True, width="stretch",
             column_config={"Wording alignment": st.column_config.ProgressColumn(
                 "Wording / 100", min_value=0, max_value=100, format="%.2f")},
         )
@@ -293,9 +321,10 @@ with demo:
     with st.container(border=True):
         st.markdown("**Try a sample review**")
         st.caption("Four fictional resumes. One software engineering internship.")
-        run_demo = st.button("Run demo ranking", icon=":material/play_arrow:", use_container_width=True)
+        run_demo = st.button("Run demo ranking", icon=":material/play_arrow:", width="stretch")
 
 if run_demo:
+    st.session_state.pop("report_payload", None)
     demo_job = load_demo_job_description()
     if not st.session_state.job_description.strip():
         st.session_state.job_description = demo_job
@@ -322,7 +351,7 @@ with st.expander("Review your resumes" if not st.session_state.get("results") el
                 placeholder="Paste the responsibilities and qualifications…",
             )
         analyze_uploaded = st.form_submit_button(
-            "Analyze uploaded resumes", type="primary", icon=":material/analytics:", use_container_width=True,
+            "Analyze uploaded resumes", type="primary", icon=":material/analytics:", width="stretch",
         )
 
 if analyze_uploaded:
@@ -335,6 +364,7 @@ if analyze_uploaded:
         st.error(validation_error)
     else:
         st.session_state.pop("results", None)
+        st.session_state.pop("report_payload", None)
         analyses, errors = [], []
         progress = st.progress(0.0, text="Starting your review…")
         for index, uploaded_resume in enumerate(uploaded_resumes, 1):

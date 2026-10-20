@@ -219,10 +219,12 @@ class ReliabilityTests(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
     def test_ui_renders_evidence_and_downloads(self):
-        ui = AppTest.from_file("streamlit_app.py").run(timeout=30)
+        ui = AppTest.from_file(Path(__file__).resolve().parents[1] / "streamlit_app.py").run(timeout=30)
         next(b for b in ui.button if b.label == "Run demo ranking").click().run(timeout=30)
         self.assertEqual(list(ui.exception), [])
         self.assertTrue(any(h.value == "Requirement evidence" for h in ui.subheader))
+        self.assertEqual(len(ui.get("bidi_component")), 1)
+        ui.toggle(key="native_evidence").set_value(True).run(timeout=30)
         self.assertTrue(any(item.label == "Inspect a requirement" for item in ui.selectbox))
         self.assertEqual(len(ui.get("download_button")), 2)
 

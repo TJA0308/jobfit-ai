@@ -109,6 +109,8 @@ Useful interview follow-ups:
 - What limits occur after multipart parsing, and what would a gateway add?
 - What is the first change you would make if inference became the bottleneck?
 
+For the UI performance change, explain the three execution boundaries: forms batch upload inputs, `@st.fragment` limits Python review reruns, and the Components v2 workspace handles requirement navigation locally with no Python events. Only the selected candidate's bounded evidence is sent to the component. This trades a small TypeScript build and DOM test suite for immediate browsing; a native alternative remains available. The custom component is based on Streamlit's official template, uses isolated theme tokens, and inserts resume data as text. Export reuse is a single session-local entry with content invalidation and explicit cleanup. These are reductions in repeated work, not measured browser latency improvements.
+
 ## AI-assisted development
 
 A truthful explanation after doing the practice:
