@@ -8,10 +8,8 @@ from jobfit_ai.history_store import save_analysis
 from jobfit_ai.models import AnalysisMetrics, ResumeAnalysis
 from jobfit_ai.rewrite_coach import generate_rewrites
 from jobfit_ai.scoring import analyze_resume_fit
-from jobfit_ai.resume_parser import SUPPORTED_FILE_TYPES, extract_resume_text
-
-MAX_UPLOAD_BYTES = 5 * 1024 * 1024
-MAX_JOB_DESCRIPTION_CHARS = 20_000
+from jobfit_ai.resume_parser import SUPPORTED_FILE_TYPES, ResumeLimitError, extract_resume_text
+from jobfit_ai.limits import MAX_UPLOAD_BYTES, MAX_JOB_DESCRIPTION_CHARS
 
 
 def infer_source_type(filename: str) -> str:
@@ -30,6 +28,7 @@ def analyze_uploaded_bytes(
     *,
     use_ai_rewrites: bool = False,
     persist_history: bool = False,
+    prefer_embeddings: bool = False,
 ) -> ResumeAnalysis:
     started_at = perf_counter()
     if not file_bytes:
@@ -49,6 +48,8 @@ def analyze_uploaded_bytes(
         parse_started_at = perf_counter()
         try:
             resume_text = extract_resume_text(temp_path, source_type)
+        except ResumeLimitError as exc:
+            raise ValueError(str(exc)) from exc
         except Exception as exc:
             raise ValueError("Unable to read this file. Try a text-based PDF, DOCX, or UTF-8 TXT file.") from exc
         if not resume_text.strip():
@@ -61,6 +62,7 @@ def analyze_uploaded_bytes(
             job_description=job_description,
             source_filename=filename,
             source_type=source_type,
+            prefer_embeddings=prefer_embeddings,
         )
         scoring_ms = (perf_counter() - scoring_started_at) * 1000
 

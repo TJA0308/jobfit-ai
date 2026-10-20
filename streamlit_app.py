@@ -11,6 +11,8 @@ from jobfit_ai.scoring import analyze_resume_fit
 from jobfit_ai.models import ResumeAnalysis
 from jobfit_ai.rewrite_coach import has_openai_key
 from jobfit_ai.upload_handler import analyze_uploaded_bytes
+from jobfit_ai.config import embeddings_enabled
+from jobfit_ai.reports import STATUS_LABELS, analysis_json, analysis_text
 
 st.set_page_config(page_title="JobFit AI", page_icon=":briefcase:", layout="wide")
 
@@ -291,7 +293,7 @@ def get_optional_secret(name: str) -> str | None:
         return None
 
 
-def analyze_demo_resumes(job_description: str) -> list[ResumeAnalysis]:
+def analyze_demo_resumes(job_description: str, prefer_embeddings: bool = False) -> list[ResumeAnalysis]:
     analyses: list[ResumeAnalysis] = []
     for resume_path in sorted(DEMO_DIR.glob("resume_*.txt")):
         resume_text = resume_path.read_text(encoding="utf-8")
@@ -301,6 +303,7 @@ def analyze_demo_resumes(job_description: str) -> list[ResumeAnalysis]:
                 job_description=job_description,
                 source_filename=resume_path.name,
                 source_type="txt",
+                prefer_embeddings=prefer_embeddings,
             )
         )
     return analyses
@@ -308,10 +311,10 @@ def analyze_demo_resumes(job_description: str) -> list[ResumeAnalysis]:
 
 def tier_label(score: float, tier: str) -> str:
     if tier == "Strong":
-        return f"Strong alignment ({score}/100)"
+        return f"Strong wording alignment ({score}/100)"
     if tier == "Moderate":
-        return f"Moderate alignment ({score}/100)"
-    return f"Weak alignment ({score}/100)"
+        return f"Moderate wording alignment ({score}/100)"
+    return f"Weak wording alignment ({score}/100)"
 
 
 def tier_class(tier: str) -> str:
@@ -332,7 +335,7 @@ def render_score_gauge(score: float, tier: str) -> None:
         <div class="score-gauge" style="--pct: {score}%; --gauge-color: {tier_color(tier)};">
             <div class="score-gauge-inner">
                 <span class="score-gauge-value">{round(score)}</span>
-                <span class="score-gauge-label">FIT</span>
+                <span class="score-gauge-label">WORDING</span>
             </div>
         </div>
         """,
@@ -350,16 +353,10 @@ def render_keyword_cloud(keywords: list[str], missing: bool = False, limit: int 
     hidden_count = max(len(keywords) - limit, 0)
     cloud_container = st.container()
     with cloud_container:
-        st.markdown('<div class="keyword-cloud">', unsafe_allow_html=True)
-        for keyword in visible_keywords:
-            if len(keyword) <= 28:
-                st.markdown(f'<span class="{css_class}" title="{escape(keyword)}">{escape(keyword)}</span>', unsafe_allow_html=True)
-            else:
-                with st.popover(f"{keyword[:25].rstrip()}..."):
-                    st.write(keyword)
+        pills = [f'<span class="{css_class}" title="{escape(keyword)}">{escape(keyword)}</span>' for keyword in visible_keywords]
         if hidden_count:
-            st.markdown(f'<span class="{css_class}">+{hidden_count} more</span>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            pills.append(f'<span class="{css_class}">+{hidden_count} more</span>')
+        st.markdown('<div class="keyword-cloud">' + ''.join(pills) + '</div>', unsafe_allow_html=True)
 
 
 def render_top_candidate_cards(analyses: list[ResumeAnalysis]) -> None:
@@ -385,6 +382,8 @@ def render_top_candidate_cards(analyses: list[ResumeAnalysis]) -> None:
 def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
     analyses = sorted(analyses, key=lambda item: item.match_score, reverse=True)
     st.subheader(title)
+    if any(w.code in {"copied_wording", "negated_experience"} for a in analyses for w in a.warnings):
+        st.warning("Some reviews contain copied job wording or explicit negation. High wording scores can be misleading; inspect the flagged excerpts.")
 
     top_candidate = analyses[0]
     metric_columns = st.columns(4)
@@ -403,6 +402,7 @@ def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
                 "Tier": item.tier,
                 "Keyword matches": len(item.matching_keywords),
                 "Missing keywords": len(item.missing_keywords),
+                "Review flags": ", ".join(w.code for w in item.warnings),
             }
             for index, item in enumerate(analyses, start=1)
         ]
@@ -424,6 +424,35 @@ def render_ranking(analyses: list[ResumeAnalysis], title: str) -> None:
 
 
 def render_analysis_panel(analysis: ResumeAnalysis) -> None:
+    for warning in analysis.warnings:
+        st.warning(warning.message)
+    st.subheader("Requirement evidence")
+    st.caption(
+        "Exact excerpts from extracted resume text. Related wording is a review aid, not verified experience. "
+        "A partial match may cover only part of a requirement; no match does not prove missing ability."
+    )
+    if analysis.evidence_matches:
+        counts = st.columns(3)
+        counts[0].metric("Experience wording found", sum(m.status == "supported" for m in analysis.evidence_matches))
+        counts[1].metric("Partial matches", sum(m.status == "partial" for m in analysis.evidence_matches))
+        counts[2].metric("Needs attention", sum(m.status in {"not_found", "review"} for m in analysis.evidence_matches))
+        for index, match in enumerate(analysis.evidence_matches, 1):
+            label_text = ''.join(char for char in match.requirement[:80] if char not in '[]!*`')
+            with st.expander(f"Requirement {index} · {STATUS_LABELS[match.status]} · {label_text}", expanded=index == 1):
+                st.text(match.requirement)
+                st.caption(match.explanation)
+                if match.evidence is not None:
+                    st.text(match.evidence)
+                    st.caption(f"Resume section: {match.section} | extracted-text characters {match.evidence_start}–{match.evidence_end}")
+                    if match.matched_terms:
+                        st.caption("Shared terms: " + ", ".join(match.matched_terms))
+    else:
+        st.info("No requirement passages could be identified. Try a job description with separate responsibilities or skill lists.")
+    downloads = st.columns(2)
+    downloads[0].download_button("Download review (.txt)", analysis_text(analysis),
+                                 file_name="jobfit-review.txt", mime="text/plain", key=f"text-{analysis.analysis_id}")
+    downloads[1].download_button("Download evidence (.json)", analysis_json(analysis),
+                                 file_name="jobfit-evidence.json", mime="application/json", key=f"json-{analysis.analysis_id}")
     left_column, right_column = st.columns([1.35, 1])
     with left_column:
         st.subheader(analysis.candidate_name)
@@ -450,11 +479,12 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
         st.write("**Score breakdown**")
         st.progress(analysis.breakdown.semantic_similarity / 100, text=f"Text similarity: {analysis.breakdown.semantic_similarity}/100")
         st.progress(analysis.breakdown.keyword_alignment / 100, text=f"Keyword coverage: {analysis.breakdown.keyword_alignment}/100")
-        st.progress(analysis.breakdown.resume_quality / 100, text=f"Document structure: {analysis.breakdown.resume_quality}/100")
         st.caption(
-            f"Alignment {analysis.match_score}/100 = 0.45 x text similarity + 0.35 x keyword coverage + 0.20 x structure. "
+            f"Wording alignment {analysis.match_score}/100 = 0.60 x text similarity + 0.40 x keyword coverage. "
             "This is a heuristic score, not a hiring probability."
         )
+        st.progress(analysis.breakdown.resume_quality / 100, text=f"Document structure (separate): {analysis.breakdown.resume_quality}/100")
+        st.caption("Formatting advice does not affect role alignment. Scoring version " + analysis.scoring_version + ".")
         st.write("**Matched keywords**")
         render_keyword_cloud(analysis.matching_keywords)
         st.write("**Priority terms not found**")
@@ -483,6 +513,7 @@ def render_analysis_panel(analysis: ResumeAnalysis) -> None:
                 )
         else:
             st.caption("Runtime metrics appear after a live upload analysis.")
+        st.caption(f"Scoring backend: {analysis.breakdown.semantic_backend} | evidence retrieval: {analysis.evidence_backend}")
 
 
 inject_app_styles()
@@ -493,13 +524,13 @@ st.markdown(
         <div class="jobfit-eyebrow">Resume intelligence for internship applicants</div>
         <h1 class="jobfit-title jobfit-display">JobFit AI</h1>
         <p class="jobfit-subtitle">
-            Upload resumes, paste a role description, and get an explainable ranking with skill gaps,
-            score breakdowns, and rewrite suggestions you can actually act on.
+            Compare a resume with a role description. Inspect exact passages for each requirement,
+            review gaps and partial matches, and download a source-attributed review.
         </p>
         <div class="jobfit-chip-row">
             <span class="jobfit-chip">Batch resume ranking</span>
             <span class="jobfit-chip">Transparent scoring</span>
-            <span class="jobfit-chip">AI rewrite coach</span>
+            <span class="jobfit-chip">Requirement evidence</span>
             <span class="jobfit-chip">Demo benchmark included</span>
         </div>
     </section>
@@ -511,8 +542,8 @@ workflow_columns = st.columns(4)
 workflow_items = [
     ("01", "Upload", "Drop PDF, DOCX, or TXT resumes."),
     ("02", "Paste role", "Use a real internship description."),
-    ("03", "Rank fit", "Compare candidates with three scoring signals."),
-    ("04", "Improve", "Review gaps, strengths, and rewrite examples."),
+    ("03", "Inspect evidence", "Compare requirements with exact resume excerpts."),
+    ("04", "Review", "Inspect gaps and download your review."),
 ]
 for column, (step, title, copy) in zip(workflow_columns, workflow_items):
     with column:
@@ -530,19 +561,19 @@ for column, (step, title, copy) in zip(workflow_columns, workflow_items):
 status_columns = st.columns(4)
 status_columns[0].metric("Formats", "PDF / DOCX / TXT")
 status_columns[1].metric("Mode", "Single + Batch")
-status_columns[2].metric("Scoring", "3 signals")
+status_columns[2].metric("Review", "Cited evidence")
 status_columns[3].metric("Rewrites", "Opt-in AI")
 
 with st.expander("How the fit score is computed"):
     st.markdown(
         """
-        The alignment score combines three signals on a 0-100 scale:
+        Wording alignment combines two signals on a 0-100 scale:
 
-        `Alignment = 0.45 x text similarity + 0.35 x keyword coverage + 0.20 x document structure`
+        `Wording alignment = 0.60 x text similarity + 0.40 x keyword coverage`
 
         - **Text similarity** — TF-IDF cosine blended with job-vocabulary overlap, scaled to 0-100.
         - **Keyword coverage** — coverage of up to 45 frequent job-description terms, weighted by frequency.
-        - **Document structure** — length, sections, bullets, and action verbs.
+        - **Document structure** — length, sections, bullets, and action verbs, shown separately from alignment.
 
         The weights are design choices; tiers are Strong at 50+, Moderate at 30+, and Weak below 30.
         Small synthetic examples help check behavior, but do not establish hiring accuracy.
@@ -553,6 +584,10 @@ with st.expander("How the fit score is computed"):
 
 with st.sidebar:
     st.header("This session")
+    prefer_embeddings = False
+    if embeddings_enabled():
+        prefer_embeddings = st.toggle("Use local semantic matching", value=False,
+                                      help="Optional local model; first use may download model weights. Fallbacks are reported in the review.")
     openai_api_key = get_optional_secret("OPENAI_API_KEY")
     openai_model = get_optional_secret("OPENAI_MODEL")
     api_key_configured = has_openai_key(openai_api_key)
@@ -592,7 +627,7 @@ with input_left:
     )
 with input_right:
     st.write("**Demo controls**")
-    st.caption("Use the built-in SWE internship benchmark to see a strong, moderate, and weak resume comparison.")
+    st.caption("Compare four sample resumes, then inspect the requirement evidence for each one.")
     st.button("Load demo job description", use_container_width=True, on_click=set_demo_job_description)
     run_demo = st.button("Run demo ranking", use_container_width=True)
     st.divider()
@@ -607,7 +642,7 @@ if run_demo:
     active_job_description = job_description if job_description.strip() else load_demo_job_description()
 
     with st.spinner("Ranking demo candidates..."):
-        analyses = analyze_demo_resumes(active_job_description)
+        analyses = analyze_demo_resumes(active_job_description, prefer_embeddings=prefer_embeddings)
     st.session_state.results = (analyses, "Demo candidate ranking")
 
 elif analyze_uploaded:
@@ -631,6 +666,7 @@ elif analyze_uploaded:
                     openai_api_key=openai_api_key if use_ai_rewrites else None,
                     openai_model=openai_model if use_ai_rewrites else None,
                     use_ai_rewrites=use_ai_rewrites,
+                    prefer_embeddings=prefer_embeddings,
                 )
                 analyses.append(analysis)
             except Exception as exc:

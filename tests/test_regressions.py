@@ -56,7 +56,7 @@ class ScoringRegressionTests(unittest.TestCase):
     def test_breakdown_reconstructs_score(self):
         result = analyze_resume_fit(RESUME, JOB, "resume.txt", "txt")
         b = result.breakdown
-        self.assertAlmostEqual(result.match_score, round(.45 * b.semantic_similarity + .35 * b.keyword_alignment + .20 * b.resume_quality, 2))
+        self.assertAlmostEqual(result.match_score, round(.60 * b.semantic_similarity + .40 * b.keyword_alignment, 2))
 
     def test_stopword_only_input_has_clear_error(self):
         with self.assertRaisesRegex(ValueError, "meaningful words"):

@@ -42,6 +42,27 @@ class AnalysisMetrics:
 
 
 @dataclass
+class EvidenceMatch:
+    requirement: str
+    requirement_start: int
+    requirement_end: int
+    status: Literal["supported", "partial", "not_found", "review"]
+    evidence: str | None
+    evidence_start: int | None
+    evidence_end: int | None
+    section: str | None
+    retrieval_score: float
+    matched_terms: list[str]
+    explanation: str
+
+
+@dataclass
+class AnalysisWarning:
+    code: str
+    message: str
+
+
+@dataclass
 class ResumeAnalysis:
     analysis_id: str
     candidate_name: str
@@ -61,6 +82,11 @@ class ResumeAnalysis:
     insights: ResumeInsights
     metrics: AnalysisMetrics = field(default_factory=AnalysisMetrics)
     created_at: str = field(default_factory=utc_now_iso)
+    scoring_version: str = "2.0"
+    evidence_matches: list[EvidenceMatch] = field(default_factory=list)
+    warnings: list[AnalysisWarning] = field(default_factory=list)
+    evidence_backend: str = "tfidf"
+    requirements_truncated: bool = False
 
 
 @dataclass

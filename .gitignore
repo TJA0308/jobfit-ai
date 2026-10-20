@@ -10,3 +10,7 @@ api.out.log
 api.err.log
 .pytest_cache/
 .claude/
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml

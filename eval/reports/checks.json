@@ -1,0 +1,388 @@
+{
+  "scoring_version": "2.0",
+  "dataset": "check_pairs.json",
+  "dataset_sha256": "f4f2a7f933d1af8f14f3f7f1c1b3d2c9333eb256d6c680be6ec28a0a6d0d78e2",
+  "description": "Separate synthetic check set: 9 AI-authored examples across 3 new job descriptions. Labels were written before running the updated scorer; weights and thresholds were not tuned to these results. This is a small sanity check, not independent human validation or evidence of hiring accuracy.",
+  "runtime": {
+    "python": "3.13.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "scikit-learn": "1.7.0",
+      "numpy": "2.3.1",
+      "streamlit": "1.46.0",
+      "fastapi": "0.139.0",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0",
+      "transformers": "5.16.1"
+    },
+    "embedding_model": "all-MiniLM-L6-v2",
+    "embedding_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+  },
+  "reports": {
+    "Hybrid lexical": {
+      "mean_spearman": 0.8333333333333331,
+      "tier_accuracy": 0.7777777777777778,
+      "per_role": [
+        {
+          "role": "Backend Tools Intern",
+          "spearman": 0.9999999999999998,
+          "ndcg_at_3": 1.0,
+          "rows": [
+            [
+              "Backend direct experience",
+              78.27,
+              "Strong",
+              "Strong"
+            ],
+            [
+              "Backend adjacent experience",
+              18.05,
+              "Weak",
+              "Moderate"
+            ],
+            [
+              "Backend unrelated experience",
+              0.0,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        },
+        {
+          "role": "Analytics Intern",
+          "spearman": 0.9999999999999998,
+          "ndcg_at_3": 1.0,
+          "rows": [
+            [
+              "Analytics direct experience",
+              90.0,
+              "Strong",
+              "Strong"
+            ],
+            [
+              "Analytics adjacent experience",
+              34.64,
+              "Moderate",
+              "Moderate"
+            ],
+            [
+              "Analytics unrelated experience",
+              4.6,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        },
+        {
+          "role": "Product Discovery Intern",
+          "spearman": 0.4999999999999999,
+          "ndcg_at_3": 0.9224945116765986,
+          "rows": [
+            [
+              "Product paraphrased experience",
+              23.72,
+              "Weak",
+              "Strong"
+            ],
+            [
+              "Product coursework experience",
+              35.93,
+              "Moderate",
+              "Moderate"
+            ],
+            [
+              "Product unrelated experience",
+              0.0,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        }
+      ],
+      "mean_ndcg_at_3": 0.9741648372255328,
+      "pair_count": 9,
+      "role_count": 3,
+      "actual_backend_counts": {
+        "tfidf": 9
+      },
+      "requested_embeddings": false,
+      "scorer": "hybrid",
+      "mean_analysis_ms": 11.88,
+      "p95_analysis_ms": 21.69
+    },
+    "Keyword only": {
+      "mean_spearman": 0.8333333333333331,
+      "tier_accuracy": 0.5555555555555556,
+      "per_role": [
+        {
+          "role": "Backend Tools Intern",
+          "spearman": 0.9999999999999998,
+          "ndcg_at_3": 1.0,
+          "rows": [
+            [
+              "Backend direct experience",
+              60.0,
+              "Strong",
+              "Strong"
+            ],
+            [
+              "Backend adjacent experience",
+              13.33,
+              "Weak",
+              "Moderate"
+            ],
+            [
+              "Backend unrelated experience",
+              0.0,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        },
+        {
+          "role": "Analytics Intern",
+          "spearman": 0.9999999999999998,
+          "ndcg_at_3": 1.0,
+          "rows": [
+            [
+              "Analytics direct experience",
+              75.0,
+              "Strong",
+              "Strong"
+            ],
+            [
+              "Analytics adjacent experience",
+              25.0,
+              "Weak",
+              "Moderate"
+            ],
+            [
+              "Analytics unrelated experience",
+              3.57,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        },
+        {
+          "role": "Product Discovery Intern",
+          "spearman": 0.4999999999999999,
+          "ndcg_at_3": 0.9224945116765986,
+          "rows": [
+            [
+              "Product paraphrased experience",
+              21.43,
+              "Weak",
+              "Strong"
+            ],
+            [
+              "Product coursework experience",
+              25.0,
+              "Weak",
+              "Moderate"
+            ],
+            [
+              "Product unrelated experience",
+              0.0,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        }
+      ],
+      "mean_ndcg_at_3": 0.9741648372255328,
+      "pair_count": 9,
+      "role_count": 3,
+      "actual_backend_counts": {
+        "tfidf": 9
+      },
+      "requested_embeddings": false,
+      "scorer": "keyword",
+      "mean_analysis_ms": 10.59,
+      "p95_analysis_ms": 16.59
+    },
+    "Raw TF-IDF cosine": {
+      "mean_spearman": 0.8333333333333331,
+      "tier_accuracy": 0.3333333333333333,
+      "per_role": [
+        {
+          "role": "Backend Tools Intern",
+          "spearman": 0.9999999999999998,
+          "ndcg_at_3": 1.0,
+          "rows": [
+            [
+              "Backend direct experience",
+              21.4,
+              "Weak",
+              "Strong"
+            ],
+            [
+              "Backend adjacent experience",
+              5.75,
+              "Weak",
+              "Moderate"
+            ],
+            [
+              "Backend unrelated experience",
+              0.0,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        },
+        {
+          "role": "Analytics Intern",
+          "spearman": 0.9999999999999998,
+          "ndcg_at_3": 1.0,
+          "rows": [
+            [
+              "Analytics direct experience",
+              35.33,
+              "Moderate",
+              "Strong"
+            ],
+            [
+              "Analytics adjacent experience",
+              11.04,
+              "Weak",
+              "Moderate"
+            ],
+            [
+              "Analytics unrelated experience",
+              1.06,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        },
+        {
+          "role": "Product Discovery Intern",
+          "spearman": 0.4999999999999999,
+          "ndcg_at_3": 0.9224945116765986,
+          "rows": [
+            [
+              "Product paraphrased experience",
+              4.2,
+              "Weak",
+              "Strong"
+            ],
+            [
+              "Product coursework experience",
+              16.67,
+              "Weak",
+              "Moderate"
+            ],
+            [
+              "Product unrelated experience",
+              0.0,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        }
+      ],
+      "mean_ndcg_at_3": 0.9741648372255328,
+      "pair_count": 9,
+      "role_count": 3,
+      "actual_backend_counts": {
+        "tfidf": 9
+      },
+      "requested_embeddings": false,
+      "scorer": "tfidf",
+      "mean_analysis_ms": 15.67,
+      "p95_analysis_ms": 22.41
+    },
+    "Hybrid local embeddings": {
+      "mean_spearman": 0.8333333333333331,
+      "tier_accuracy": 0.7777777777777778,
+      "per_role": [
+        {
+          "role": "Backend Tools Intern",
+          "spearman": 0.9999999999999998,
+          "ndcg_at_3": 1.0,
+          "rows": [
+            [
+              "Backend direct experience",
+              63.62,
+              "Strong",
+              "Strong"
+            ],
+            [
+              "Backend adjacent experience",
+              25.65,
+              "Weak",
+              "Moderate"
+            ],
+            [
+              "Backend unrelated experience",
+              8.06,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        },
+        {
+          "role": "Analytics Intern",
+          "spearman": 0.9999999999999998,
+          "ndcg_at_3": 1.0,
+          "rows": [
+            [
+              "Analytics direct experience",
+              67.12,
+              "Strong",
+              "Strong"
+            ],
+            [
+              "Analytics adjacent experience",
+              35.19,
+              "Moderate",
+              "Moderate"
+            ],
+            [
+              "Analytics unrelated experience",
+              7.75,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        },
+        {
+          "role": "Product Discovery Intern",
+          "spearman": 0.4999999999999999,
+          "ndcg_at_3": 0.9224945116765986,
+          "rows": [
+            [
+              "Product paraphrased experience",
+              36.67,
+              "Moderate",
+              "Strong"
+            ],
+            [
+              "Product coursework experience",
+              40.1,
+              "Moderate",
+              "Moderate"
+            ],
+            [
+              "Product unrelated experience",
+              11.93,
+              "Weak",
+              "Weak"
+            ]
+          ]
+        }
+      ],
+      "mean_ndcg_at_3": 0.9741648372255328,
+      "pair_count": 9,
+      "role_count": 3,
+      "actual_backend_counts": {
+        "embeddings": 9
+      },
+      "requested_embeddings": true,
+      "scorer": "hybrid",
+      "mean_analysis_ms": 172.86,
+      "p95_analysis_ms": 284.78
+    }
+  },
+  "limitations": "Synthetic reference labels; no hiring validation. Baseline tiers share heuristic thresholds and are not calibrated. Timing includes full analysis; no warm-up or concurrency."
+}

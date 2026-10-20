@@ -1,0 +1,5 @@
+﻿Taylor Sample
+Experience
+No experience with Python, JavaScript, React, REST APIs, SQL, Git, automated tests, backend services, database models, or API endpoints.
+Education
+History student

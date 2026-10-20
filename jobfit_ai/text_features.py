@@ -6,10 +6,10 @@ from collections import Counter
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 SECTION_PATTERNS = {
-    "summary": re.compile(r"\b(summary|profile|objective)\b", re.IGNORECASE),
-    "experience": re.compile(r"\b(experience|employment|work history)\b", re.IGNORECASE),
-    "projects": re.compile(r"\b(projects|project experience)\b", re.IGNORECASE),
-    "skills": re.compile(r"\b(skills|technical skills|tooling)\b", re.IGNORECASE),
+    "summary": re.compile(r"\b(summary|professional summary|profile|objective)\b", re.IGNORECASE),
+    "experience": re.compile(r"\b(experience|(?:professional|work|relevant) experience|employment|work history)\b", re.IGNORECASE),
+    "projects": re.compile(r"\b(projects|(?:personal|academic|selected) projects|project experience)\b", re.IGNORECASE),
+    "skills": re.compile(r"\b(skills|technical skills|technologies|tooling)\b", re.IGNORECASE),
     "education": re.compile(r"\b(education|academics)\b", re.IGNORECASE),
 }
 
@@ -52,6 +52,13 @@ TOKEN_ALIASES = {
     "tests": "test",
     "users": "user",
     "workflows": "workflow",
+    "js": "javascript",
+    "ts": "typescript",
+    "postgres": "postgresql",
+    "k8s": "kubernetes",
+    "sklearn": "scikit-learn",
+    "nodejs": "node.js",
+    "dotnet": ".net",
 }
 
 # Short technical names would otherwise be lost to length/stopword filtering.
@@ -61,7 +68,11 @@ SHORT_SKILLS = {"c", "c#", "r", "go", "ai", "ml", "js", "ts", "ui", "ux"}
 
 def normalize_text(text: str) -> str:
     normalized = text.lower()
-    normalized = re.sub(r"[^a-z0-9\s\-\+/#]", " ", normalized)
+    # Keep dotted technical names, but split punctuation and slash-separated skills.
+    normalized = re.sub(r"\bnode\.js\b", "nodejs", normalized)
+    normalized = re.sub(r"(?<!\w)\.net\b", "dotnet", normalized)
+    normalized = re.sub(r"\ba/b\b", "abtesting", normalized)
+    normalized = re.sub(r"[^a-z0-9\s\-\+#]", " ", normalized)
     normalized = re.sub(r"\s+", " ", normalized)
     return normalized.strip()
 
@@ -103,7 +114,8 @@ def count_bullets(text: str) -> int:
 
 def detect_sections(text: str) -> tuple[list[str], list[str]]:
     detected = [
-        section for section, pattern in SECTION_PATTERNS.items() if pattern.search(text)
+        section for section, pattern in SECTION_PATTERNS.items()
+        if any(pattern.fullmatch(line.strip().rstrip(":")) for line in text.splitlines())
     ]
     missing = [section for section in SECTION_PATTERNS if section not in detected]
     return detected, missing

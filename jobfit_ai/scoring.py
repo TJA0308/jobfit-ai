@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from jobfit_ai.models import AnalysisBreakdown, ResumeAnalysis, ResumeInsights, SkillGap
+from jobfit_ai.models import AnalysisBreakdown, AnalysisWarning, ResumeAnalysis, ResumeInsights, SkillGap
+from jobfit_ai.evidence import match_evidence
+from jobfit_ai.limits import MAX_JOB_DESCRIPTION_CHARS, MAX_RESUME_CHARS
 from jobfit_ai.semantic import semantic_similarity
 from jobfit_ai.text_features import (
     action_verb_hits,
@@ -15,12 +17,10 @@ from jobfit_ai.text_features import (
 )
 
 
-# Overall fit is a transparent weighted blend of three 0-100 signals. The
-# weights sum to 1.0, so the headline score is exactly reconstructable from the
-# three sub-scores shown in the UI -- there is no hidden scaling factor.
-SEMANTIC_WEIGHT = 0.45
-KEYWORD_WEIGHT = 0.35
-QUALITY_WEIGHT = 0.20
+# V2 separates role wording from document formatting. These are design weights,
+# not fitted parameters. Evidence retrieval is an independent, inspectable view.
+SEMANTIC_WEIGHT = 0.60
+KEYWORD_WEIGHT = 0.40
 
 # Heuristic tiers originally selected using the development examples.
 # They are not hiring probabilities or independently validated thresholds.
@@ -61,7 +61,8 @@ def _resume_quality_score(resume_text: str) -> tuple[float, ResumeInsights]:
     detected_sections, missing_sections = detect_sections(resume_text)
     action_hits = action_verb_hits(resume_text)
 
-    length_score = 100.0 if 250 <= word_count <= 900 else max(35.0, 100.0 - abs(word_count - 575) / 6)
+    distance = max(250 - word_count, 0, word_count - 900)
+    length_score = max(35.0, 100.0 - distance / 6)
     section_score = (len(detected_sections) / 5) * 100
     bullet_score = min(100.0, bullet_count * 12.5)
     action_score = min(100.0, action_hits * 12.5)
@@ -90,10 +91,10 @@ def _score_tier(score: float) -> str:
 def _summary(candidate_name: str, target_role: str, score: float) -> str:
     tier = _score_tier(score)
     if tier == "Strong":
-        return f"{candidate_name} is strongly aligned for {target_role} and already reflects much of the role language."
+        return f"{candidate_name}'s resume has strong wording alignment with {target_role}. Review the cited passages to assess the evidence."
     if tier == "Moderate":
-        return f"{candidate_name} shows decent alignment for {target_role}, but the resume can be tailored more precisely."
-    return f"{candidate_name} needs heavier tailoring for {target_role}, especially around missing skills and outcome framing."
+        return f"{candidate_name}'s resume has moderate wording alignment with {target_role}. Inspect partial matches before tailoring."
+    return f"{candidate_name}'s resume has limited wording alignment with {target_role}. Paraphrases and adjacent experience may be missed."
 
 
 def _strengths(resume_text: str, matching_keywords: list[str], insights: ResumeInsights) -> list[str]:
@@ -147,6 +148,8 @@ def analyze_resume_fit(
 ) -> ResumeAnalysis:
     if not resume_text.strip() or not job_description.strip():
         raise ValueError("Resume text and job description must not be empty.")
+    if len(resume_text) > MAX_RESUME_CHARS or len(job_description) > MAX_JOB_DESCRIPTION_CHARS:
+        raise ValueError("Resume text must be at most 100,000 characters and job descriptions at most 20,000.")
 
     candidate_name = infer_candidate_name(resume_text, source_filename)
     target_role = infer_target_role(job_description)
@@ -161,8 +164,12 @@ def analyze_resume_fit(
     overall_score = _clamp(
         (SEMANTIC_WEIGHT * semantic_score)
         + (KEYWORD_WEIGHT * keyword_alignment)
-        + (QUALITY_WEIGHT * resume_quality)
     )
+    evidence, warnings, evidence_backend, requirements_truncated = match_evidence(
+        resume_text, job_description, prefer_embeddings=prefer_embeddings,
+    )
+    if prefer_embeddings and semantic_backend != "embeddings" and not any(w.code == "embedding_fallback" for w in warnings):
+        warnings.append(AnalysisWarning("embedding_fallback", "Local embedding model unavailable; lexical scoring was used."))
 
     return ResumeAnalysis(
         analysis_id=str(uuid4()),
@@ -186,4 +193,8 @@ def analyze_resume_fit(
             semantic_backend=semantic_backend,
         ),
         insights=insights,
+        evidence_matches=evidence,
+        warnings=warnings,
+        evidence_backend=evidence_backend,
+        requirements_truncated=requirements_truncated,
     )

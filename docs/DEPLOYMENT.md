@@ -34,6 +34,9 @@ Without opt-in, local templates are used. The FastAPI endpoints also use templat
 
 - Sidebar says **This session** and includes **Clear session results**.
 - Demo controls load and rank the four sample resumes without an exception.
+- Candidate reviews include **Requirement evidence**, exact excerpts, and text/JSON downloads.
+- The score explanation says **60% text similarity + 40% keyword coverage**, with structure separate and scoring version **2.0**.
+- Upload `demo/adversarial/copied_role.txt` with the demo job description and inspect the copy warning. A high wording score is not qualification evidence.
 - Scores appear as `/100`; candidate reviews say **Text similarity** and **Priority terms not found**.
 - An uploaded TXT file produces a result and updates session history.
 - A second browser session does not display the first session's upload history.
@@ -41,6 +44,32 @@ Without opt-in, local templates are used. The FastAPI endpoints also use templat
 - Leave paid rewrites disabled when testing the public demo.
 
 An HTTP response or health check alone cannot verify these behaviors. If browser access is unavailable, report deployment confirmation as pending rather than claiming visual verification.
+
+## Optional local semantic matching
+
+The default deployment stays lexical and does not import/download the model during startup. To enable the local model on a machine with sufficient memory:
+
+```powershell
+python -m pip install -r requirements-embeddings.txt
+$env:JOBFIT_ENABLE_EMBEDDINGS='1'
+python -m streamlit run streamlit_app.py
+```
+
+Then switch on **Use local semantic matching**. On macOS/Linux use `export JOBFIT_ENABLE_EMBEDDINGS=1` before starting the server. Restart the API with the same flag to accept multipart `use_embeddings=true`; otherwise the API rejects that option with HTTP 400.
+
+The first request can download the pinned MiniLM model. Prewarm it for an interview with `python -c "from jobfit_ai.semantic import embeddings_available; print(embeddings_available())"`. After caching, offline runs can set `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`. Only weights are cached; resume vectors are not cached across requests. Unavailable models produce a visible lexical fallback and reports record actual backends.
+
+Dense evidence experiments were run locally; model startup/memory behavior on a hosted deployment still needs measurement before enabling it there. The default cloud demo does not require this option.
+
+## Scoring-v2 compatibility
+
+- `scoring_version` is now `2.0`. Alignment is 60% text similarity plus 40% keyword coverage. Document structure remains in the breakdown as separate advice.
+- Demo scores and tiers changed; v1/v2 scores are not directly comparable.
+- API results add `evidence_matches`, `warnings`, `evidence_backend`, and `requirements_truncated`. Existing fields remain available.
+- Evidence offsets index the extracted text, not PDF coordinates. Downloaded reports contain candidate excerpts and should be handled as the user's resume data.
+- Additional extraction limits: 30 PDF pages, 2 MB expanded DOCX document XML, and 100,000 extracted resume characters.
+- Retrieval caps at 30 distinct requirements and 200 resume passages, with visible truncation warnings.
+- A working local revision does not establish that the deployed app has been updated. Verify the deployed commit and run the browser smoke check after release.
 
 ## Compatibility notes
 

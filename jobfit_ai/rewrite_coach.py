@@ -124,4 +124,7 @@ def _parse_bullets(text: str) -> list[str]:
         line = raw_line.strip().lstrip("-*0123456789. ").strip()
         if line:
             bullets.append(line)
-    return bullets[:3]
+    # Enforce the requested output shape; malformed responses use local templates.
+    if len(bullets) != 3 or any(len(bullet.split()) > 28 for bullet in bullets):
+        return []
+    return bullets

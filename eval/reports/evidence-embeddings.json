@@ -1,0 +1,329 @@
+{
+  "dataset": "evidence_cases.json",
+  "dataset_sha256": "aeae93f7b8f3a6b5846d8cceed1cb5090bb1d6bbadd07a4d8680b2f211a81f24",
+  "description": "24 AI-authored development fixtures for requirement-to-passage retrieval. Expected excerpts/statuses were authored before the first benchmark run. These cases describe desired behavior and known hard cases, not independent human annotation. Any case used to guide a fix becomes development data. No resume belongs to a real person.",
+  "runtime": {
+    "python": "3.13.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "scikit-learn": "1.7.0",
+      "numpy": "2.3.1",
+      "streamlit": "1.46.0",
+      "fastapi": "0.139.0",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0",
+      "transformers": "5.16.1"
+    },
+    "embedding_model": "all-MiniLM-L6-v2",
+    "embedding_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+  },
+  "result": {
+    "case_count": 24,
+    "positive_case_count": 21,
+    "top_1_positive_retrieval": 1.0,
+    "exact_excerpt_or_abstention": 1.0,
+    "status_agreement": 0.7083333333333334,
+    "source_attribution": 1.0,
+    "false_support_count": 0,
+    "actual_backend_counts": {
+      "embeddings": 24
+    },
+    "requested_embeddings": true,
+    "cases": [
+      {
+        "id": "backend-direct",
+        "group": "backend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Built a Python service with SQL storage for cafe orders.",
+        "actual_evidence": "Built a Python service with SQL storage for cafe orders.",
+        "expected_status": "supported",
+        "actual_status": "supported",
+        "warning_codes": []
+      },
+      {
+        "id": "backend-skill-list",
+        "group": "backend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Python SQL",
+        "actual_evidence": "Python SQL",
+        "expected_status": "partial",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "backend-unrelated",
+        "group": "backend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": null,
+        "actual_evidence": null,
+        "expected_status": "not_found",
+        "actual_status": "not_found",
+        "warning_codes": []
+      },
+      {
+        "id": "backend-negation",
+        "group": "backend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "No experience with Python or SQL.",
+        "actual_evidence": "No experience with Python or SQL.",
+        "expected_status": "review",
+        "actual_status": "review",
+        "warning_codes": [
+          "negated_experience"
+        ]
+      },
+      {
+        "id": "backend-copy",
+        "group": "backend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Build reliable Python services with PostgreSQL storage and automated integration tests for library reservations.",
+        "actual_evidence": "Build reliable Python services with PostgreSQL storage and automated integration tests for library reservations.",
+        "expected_status": "review",
+        "actual_status": "review",
+        "warning_codes": [
+          "copied_wording"
+        ]
+      },
+      {
+        "id": "backend-real-work-over-mention",
+        "group": "backend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Built Python services with SQL storage for a clinic.",
+        "actual_evidence": "Built Python services with SQL storage for a clinic.",
+        "expected_status": "supported",
+        "actual_status": "supported",
+        "warning_codes": []
+      },
+      {
+        "id": "frontend-aliases",
+        "group": "frontend",
+        "retrieval_hit": true,
+        "status_hit": false,
+        "attributable": true,
+        "expected_evidence": "Built a dashboard using JS/TS for a club.",
+        "actual_evidence": "Built a dashboard using JS/TS for a club.",
+        "expected_status": "supported",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "frontend-dotted-names",
+        "group": "frontend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Created Node.js and .NET APIs for event registration.",
+        "actual_evidence": "Created Node.js and .NET APIs for event registration.",
+        "expected_status": "supported",
+        "actual_status": "supported",
+        "warning_codes": []
+      },
+      {
+        "id": "frontend-missing-framework",
+        "group": "frontend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": null,
+        "actual_evidence": null,
+        "expected_status": "not_found",
+        "actual_status": "not_found",
+        "warning_codes": []
+      },
+      {
+        "id": "frontend-coursework",
+        "group": "frontend",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Completed coursework in React and JavaScript.",
+        "actual_evidence": "Completed coursework in React and JavaScript.",
+        "expected_status": "partial",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "data-postgres-alias",
+        "group": "data",
+        "retrieval_hit": true,
+        "status_hit": false,
+        "attributable": true,
+        "expected_evidence": "Optimized Postgres SQL queries for a reporting dashboard.",
+        "actual_evidence": "Optimized Postgres SQL queries for a reporting dashboard.",
+        "expected_status": "supported",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "data-pandas",
+        "group": "data",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Cleaned missing values with pandas in ticket data.",
+        "actual_evidence": "Cleaned missing values with pandas in ticket data.",
+        "expected_status": "supported",
+        "actual_status": "supported",
+        "warning_codes": []
+      },
+      {
+        "id": "data-sklearn-alias",
+        "group": "data",
+        "retrieval_hit": true,
+        "status_hit": false,
+        "attributable": true,
+        "expected_evidence": "Evaluated sklearn classification models on survey data.",
+        "actual_evidence": "Evaluated sklearn classification models on survey data.",
+        "expected_status": "supported",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "data-not-used",
+        "group": "data",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "I have not used pandas or SQL.",
+        "actual_evidence": "I have not used pandas or SQL.",
+        "expected_status": "review",
+        "actual_status": "review",
+        "warning_codes": [
+          "negated_experience"
+        ]
+      },
+      {
+        "id": "quality-unit-tests",
+        "group": "quality",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Wrote unit tests for API validation in a library tool.",
+        "actual_evidence": "Wrote unit tests for API validation in a library tool.",
+        "expected_status": "supported",
+        "actual_status": "supported",
+        "warning_codes": []
+      },
+      {
+        "id": "quality-no-downtime",
+        "group": "quality",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Built Python SQL services with no downtime.",
+        "actual_evidence": "Built Python SQL services with no downtime.",
+        "expected_status": "supported",
+        "actual_status": "supported",
+        "warning_codes": []
+      },
+      {
+        "id": "quality-support-not-customer-support",
+        "group": "quality",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": null,
+        "actual_evidence": null,
+        "expected_status": "not_found",
+        "actual_status": "not_found",
+        "warning_codes": []
+      },
+      {
+        "id": "quality-heading",
+        "group": "quality",
+        "retrieval_hit": true,
+        "status_hit": false,
+        "attributable": true,
+        "expected_evidence": "Built Python SQL tools for attendance reporting.",
+        "actual_evidence": "Built Python SQL tools for attendance reporting.",
+        "expected_status": "supported",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "product-paraphrase",
+        "group": "hard-cases",
+        "retrieval_hit": true,
+        "status_hit": false,
+        "attributable": true,
+        "expected_evidence": "Spoke to commuters about buses.",
+        "actual_evidence": "Spoke to commuters about buses.",
+        "expected_status": "supported",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "product-prioritization-paraphrase",
+        "group": "hard-cases",
+        "retrieval_hit": true,
+        "status_hit": false,
+        "attributable": true,
+        "expected_evidence": "Selected the most valuable changes requested by riders.",
+        "actual_evidence": "Selected the most valuable changes requested by riders.",
+        "expected_status": "supported",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "backend-paraphrase",
+        "group": "hard-cases",
+        "retrieval_hit": true,
+        "status_hit": false,
+        "attributable": true,
+        "expected_evidence": "Diagnosed outages by tracing server logs.",
+        "actual_evidence": "Diagnosed outages by tracing server logs.",
+        "expected_status": "supported",
+        "actual_status": "partial",
+        "warning_codes": []
+      },
+      {
+        "id": "unicode-attribution",
+        "group": "formatting",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Built Python SQL software for caf\u00e9 orders in Montr\u00e9al.",
+        "actual_evidence": "Built Python SQL software for caf\u00e9 orders in Montr\u00e9al.",
+        "expected_status": "supported",
+        "actual_status": "supported",
+        "warning_codes": []
+      },
+      {
+        "id": "multi-sentence-attribution",
+        "group": "formatting",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Reduced database errors by 12.5 percent.",
+        "actual_evidence": "Reduced database errors by 12.5 percent.",
+        "expected_status": "supported",
+        "actual_status": "supported",
+        "warning_codes": []
+      },
+      {
+        "id": "standalone-skill",
+        "group": "formatting",
+        "retrieval_hit": true,
+        "status_hit": true,
+        "attributable": true,
+        "expected_evidence": "Python",
+        "actual_evidence": "Python",
+        "expected_status": "partial",
+        "actual_status": "partial",
+        "warning_codes": []
+      }
+    ]
+  }
+}

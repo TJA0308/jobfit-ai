@@ -2,4 +2,4 @@
 # scoring. Kept out of the default installation to avoid the heavy torch
 # dependency. Install locally to experiment; current results must be measured:
 #   pip install -r requirements-embeddings.txt
-sentence-transformers==5.6.0
+sentence-transformers==5.7.0

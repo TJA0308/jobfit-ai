@@ -4,6 +4,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
 from jobfit_ai.models import BatchAnalysisResponse, HistoryEntry, ResumeAnalysis
 from jobfit_ai.upload_handler import MAX_UPLOAD_BYTES, analyze_uploaded_bytes
+from jobfit_ai.config import embeddings_enabled
 
 
 app = FastAPI(title="JobFit AI API")
@@ -14,12 +15,15 @@ def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-def analyze_file(uploaded_file: UploadFile, job_description: str) -> ResumeAnalysis:
+def analyze_file(uploaded_file: UploadFile, job_description: str, use_embeddings: bool = False) -> ResumeAnalysis:
+    if use_embeddings and not embeddings_enabled():
+        raise HTTPException(status_code=400, detail="Local embeddings are not enabled on this deployment.")
     try:
         return analyze_uploaded_bytes(
             file_bytes=uploaded_file.file.read(MAX_UPLOAD_BYTES + 1),
             filename=uploaded_file.filename or "resume.pdf",
             job_description=job_description,
+            prefer_embeddings=use_embeddings,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -31,18 +35,20 @@ def analyze_file(uploaded_file: UploadFile, job_description: str) -> ResumeAnaly
 def match_single_resume(
     job_description: str = Form(...),
     resume_file: UploadFile = File(...),
+    use_embeddings: bool = Form(False),
 ) -> ResumeAnalysis:
-    return analyze_file(resume_file, job_description)
+    return analyze_file(resume_file, job_description, use_embeddings)
 
 
 @app.post("/match/batch")
 def match_multiple_resumes(
     job_description: str = Form(...),
     resume_files: list[UploadFile] = File(...),
+    use_embeddings: bool = Form(False),
 ) -> BatchAnalysisResponse:
     if len(resume_files) > 10:
         raise HTTPException(status_code=400, detail="Analyze at most 10 resumes per batch.")
-    analyses = [analyze_file(uploaded_file, job_description) for uploaded_file in resume_files]
+    analyses = [analyze_file(uploaded_file, job_description, use_embeddings) for uploaded_file in resume_files]
 
     analyses.sort(key=lambda item: item.match_score, reverse=True)
     ranking = [
