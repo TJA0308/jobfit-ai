@@ -24,9 +24,11 @@ Public interfaces neither read nor write shared SQLite history. Trusted scripts 
 
 The invariant is `resume_text[start:end] == evidence`. A no-match row uses null evidence/offsets. Tests include CRLF, accented characters, dotted technical names, and multiple sentences.
 
-Paragraph/sentence splitting preserves original text rather than joining lines into generated prose. This makes attribution simple but can miss context in hard-wrapped or multi-column resumes. Section detection requires standalone headings. A phrase such as “experience with Python” inside a sentence is not a section heading.
+Paragraph/sentence splitting preserves original text rather than joining lines into generated prose. This makes attribution simple but can miss context in hard-wrapped or multi-column resumes. A shared section parser recognizes standalone headings and explicit inline labels such as `Technical Skills: Python SQL`. Label normalization handles case, whitespace, ampersands, slashes, and full-width colons without normalizing the underlying excerpt. Inline content retains its exact original start/end offsets. A phrase such as “experience with Python” inside a sentence is not a section heading.
 
 Common non-experience headings, including certifications, awards, coursework, and interests, reset the section. These passages may be related wording but cannot inherit the experience/project support label. Unknown headings remain a heuristic limitation.
+
+DOCX extraction preserves explicit Word tabs, line breaks, and carriage returns while joining adjacent text runs without inserting spaces into words split by formatting. Candidate names retain Unicode letters, combining accents, initials, apostrophes, hyphens, and source casing; this identity cleanup is separate from the English lexical tokenizer. Names are canonically normalized to NFC, while evidence offsets continue to reference untouched extracted text.
 
 ## Lexical retrieval
 
@@ -39,7 +41,7 @@ Common non-experience headings, including certifications, awards, coursework, an
 
 Thresholds are inspectable design choices. They are not fitted likelihoods. A requirement with many clauses should be split more finely in a future extraction comparison.
 
-Title removal uses a restricted role noun phrase with optional seasonal/location suffix. Explicit qualification sentences such as “3 years of experience as a software engineer” are preserved, even when they are the first passage after a Requirements heading.
+Title removal uses a restricted role noun phrase with optional intern/internship and seasonal/location suffixes. Titles such as `Software Engineer Intern`, `Data Scientist Intern`, and `Product Manager Intern` are excluded from requirements. Explicit qualification sentences such as “3 years of experience as a software engineer” are preserved, even when they are the first passage after a Requirements heading.
 
 ## Copy and negation review
 
@@ -65,7 +67,7 @@ The experiment supports better paraphrase retrieval on a tiny fixture set, not u
 
 Default text similarity retains the lexical reference scaling of 0.45 from development. Keyword coverage is frequency-weighted over up to 45 job tokens. The signals overlap, so the formula is not independent evidence aggregation. Strong starts at 50, Moderate at 30. Calibration is future work requiring independent labels.
 
-Document structure remains 35% length, 30% standalone section headings, 20% bullet count, and 15% distinct normalized action verbs. Length uses distance from the 250–900-word interval, with a smooth taper outside it. Structure is advice only and cannot affect alignment.
+Document structure remains 35% length, 30% recognized section headings, 20% bullet count, and 15% distinct normalized action verbs. Length uses distance from the 250–900-word interval, with a smooth taper outside it. Structure is advice only and cannot affect alignment.
 
 `scoring_version` is included in results because v1 scores (45/35/20 with structure) are not comparable to v2 scores.
 

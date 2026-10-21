@@ -9,7 +9,7 @@ This records local verification of the scoring-v2 portfolio revision and focused
 - Visible warnings for obvious copied job wording, explicit negation, fallback backends, and retrieval caps.
 - Shared Streamlit/FastAPI responses plus session-local TXT/JSON report downloads.
 - Scoring version 2: 60% text similarity + 40% keyword coverage; document structure shown independently.
-- Smooth length advice, standalone section detection, common technical aliases, and slash-separated skill handling.
+- Smooth length advice, shared standalone/inline section detection, common technical aliases, and slash-separated skill handling.
 - Optional local MiniLM matching behind deployment and user opt-in, with a pinned model revision.
 - Bounded PDF pages, expanded DOCX XML, extracted text, and retrieval work.
 - Exactly-three/28-word output validation for optional external rewrites; local template fallback.
@@ -21,12 +21,17 @@ This records local verification of the scoring-v2 portfolio revision and focused
 - A review fragment limits Python reruns; one session-local export entry reuses unchanged reports, invalidates on content/candidate changes, and clears with results.
 - Filters, empty states, and per-file errors remain usable while switching reviews; invalid submissions preserve the previous review.
 - Non-experience headings reset section attribution. Role-title filtering preserves explicit experience and credential qualifications.
+- Heading labels normalize ampersands/slashes, spacing, and case; inline labels preserve exact content offsets. Certifications and skill lists cannot inherit prior project attribution through those recognized formats.
+- DOCX tabs and line breaks remain separators; formatting runs can split a word without breaking its spelling. Unicode candidate names, punctuation, and original casing survive UI/API/report output.
+- Common engineer/developer/scientist/manager intern titles are excluded from requirement rows while explicit qualification sentences are retained.
 
 ## Verification
 
 A Python 3.13.6 virtual environment was updated to Streamlit 1.66.0, the local component, and Uvicorn 0.54.0 from the pinned requirements. `python -m pip check` reports no broken requirements. Node 24 builds the frontend; built assets are committed for Python-only deployment.
 
-All 64 Python tests and 5 frontend DOM tests pass. They cover scoring, attribution, limits, HTTP uploads, UI payloads/downloads, session isolation, export reuse/invalidation/cleanup, conditional views, the native alternative, and both reviewed extraction defects. Frontend tests cover local search/filter/selection, exact text, hostile input, empty states, instance isolation, and cleanup.
+All 74 Python tests and 5 frontend DOM tests pass. They cover scoring, attribution, limits, HTTP uploads, UI payloads/downloads, session isolation, export reuse/invalidation/cleanup, conditional views, the native alternative, and the reviewed extraction defects. Ten input-fidelity regressions cover heading variants, inline labels and exact offsets, Word separators and formatting runs, Unicode identities, title/qualification separation, reports, multipart DOCX uploads, and the Streamlit upload workflow. Frontend tests cover local search/filter/selection, exact text, hostile input, empty states, instance isolation, and cleanup.
+
+A running local Uvicorn server was also checked over HTTP: multipart DOCX preserves `José García` and all three separated skills, a TXT certifications list remains a partial mention with exact offsets, a mixed DOCX/TXT batch ranks both results, and a corrupt PDF returns HTTP 400. The README demo was regenerated; its output and the existing lexical evaluation metrics are unchanged.
 
 Review interactions do not rerun scoring; unchanged reports serialize once per selected analysis. The custom workspace emits no Python events for navigation. This reduces repeated work; browser latency and memory gains have not been measured. See [UI design and verification](docs/UI.md).
 

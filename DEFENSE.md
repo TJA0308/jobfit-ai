@@ -33,7 +33,7 @@ Components of 60 and 40 produce 36 + 16 = 52/100. Document structure contributes
 - Coverage is frequency-weighted across up to 45 job tokens, checked against all resume tokens.
 - Signals overlap; they are not independent evidence or probabilities.
 - Strong starts at 50, Moderate at 30. These are design thresholds.
-- Structure advice uses length, standalone section headings, bullets, and action verbs. A smooth taper replaced a discontinuity at 249/250 and 900/901 words.
+- Structure advice uses length, recognized standalone/inline section headings, bullets, and action verbs. A smooth taper replaced a discontinuity at 249/250 and 900/901 words.
 - Version 2 removes the old 20% structure contribution. Old/new scores must not be compared as if the formula stayed the same.
 
 ## Explain evidence retrieval
@@ -86,6 +86,10 @@ Do not say “100% accurate,” “bias-free,” “production-grade ATS,” or 
 | External rewrite returns malformed text | Partial/overlong output accepted | Enforce exactly three bullets of at most 28 words, otherwise templates |
 | Certifications follow Projects | Certification mentions inherited project attribution | Reset common non-experience headings; test exact source and partial status |
 | First requirement ends with “engineer” | An experience qualification was removed as a title | Restrict filtering to title noun phrases; retain qualification in exports |
+| `Certifications & Licenses` or `Technical Skills: Python SQL` after Projects | A skill mention inherited project support | Shared label normalization and inline offsets; verify partial status in exports |
+| Word tabs/breaks separate Python, SQL, and Docker | Extraction merged distinct skills | Preserve explicit separators while joining formatting runs within words |
+| `José García`, `Zoë McDonald`, or initials | ASCII cleanup deleted letters and changed casing | Preserve Unicode names and punctuation through uploads, UI, API, and reports |
+| `Software Engineer Intern` starts a job description | Role title appeared as a qualification | Match intern role noun phrases while retaining explicit experience sentences |
 
 Understand a trigger, fix, and test for at least three of these without reading the table.
 

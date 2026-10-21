@@ -71,6 +71,8 @@ For example, `Build Python services with SQL storage` can retrieve `Built a Pyth
 
 Reviews also include matching vocabulary, priority terms not found, separate document-structure advice, editable bullet templates, and downloadable TXT/JSON reports. Compare up to 10 PDF/DOCX/TXT resumes in one batch.
 
+Input handling preserves Unicode candidate names and Word tabs/line breaks. Standalone and inline section labels keep skill lists and certifications separate from experience evidence. Common intern job titles are excluded from requirements while explicit experience qualifications remain in the review. [Input-fidelity regression tests](tests/test_input_fidelity.py) exercise these cases through uploads, API responses, UI payloads, and exports.
+
 The interface pairs a native Streamlit theme with a custom Components v2 evidence workspace. Search, filters, and requirement selection run in the browser. The requirement list and selected excerpt sit side by side, stacking on smaller screens. **Evidence**, **Tailoring**, and **Score details** are conditional views inside a review fragment. Downloads reuse session-local reports and avoid a rerun. Private analyses are not placed in shared caches. See [UI design and verification](docs/UI.md).
 
 The page uses a warm paper palette, serif headings, flat content sections, and compact controls. Session settings live in a header popover; there is no sidebar or grid of summary cards.

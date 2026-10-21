@@ -46,8 +46,18 @@ def extract_text_from_docx(file_path: str | Path) -> str:
     root = ElementTree.fromstring(xml_bytes)
     namespace = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
     paragraphs: list[str] = []
+    word_namespace = "{" + namespace["w"] + "}"
     for paragraph in root.findall(".//w:p", namespace):
-        chunks = [node.text for node in paragraph.findall(".//w:t", namespace) if node.text]
+        chunks: list[str] = []
+        # Traverse in document order: adjacent formatting runs can split a word,
+        # while explicit Word tabs/breaks are real separators, not empty tags.
+        for node in paragraph.iter():
+            if node.tag == word_namespace + "t" and node.text:
+                chunks.append(node.text)
+            elif node.tag == word_namespace + "tab":
+                chunks.append("\t")
+            elif node.tag in {word_namespace + "br", word_namespace + "cr"}:
+                chunks.append("\n")
         if chunks:
             paragraphs.append("".join(chunks))
     return _bounded_text("\n".join(paragraphs))

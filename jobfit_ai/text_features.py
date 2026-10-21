@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections import Counter
 
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
@@ -9,9 +10,48 @@ SECTION_PATTERNS = {
     "summary": re.compile(r"\b(summary|professional summary|profile|objective)\b", re.IGNORECASE),
     "experience": re.compile(r"\b(experience|(?:professional|work|relevant) experience|employment|work history)\b", re.IGNORECASE),
     "projects": re.compile(r"\b(projects|(?:personal|academic|selected) projects|project experience)\b", re.IGNORECASE),
-    "skills": re.compile(r"\b(skills|technical skills|technologies|tooling)\b", re.IGNORECASE),
+    "skills": re.compile(r"\b(skills|technical skills|technologies|tooling|skills and technologies|skills and tools)\b", re.IGNORECASE),
     "education": re.compile(r"\b(education|academics)\b", re.IGNORECASE),
 }
+
+NON_EXPERIENCE_HEADINGS = {
+    "certifications": {"certifications", "certificates", "licenses", "licenses and certifications", "certifications and licenses"},
+    "awards": {"awards", "honors", "honours", "awards and honors", "honors and awards", "awards and honours", "honours and awards", "achievements"},
+    "languages": {"languages", "spoken languages"},
+    "interests": {"interests", "hobbies", "hobbies and interests"},
+    "publications": {"publications", "papers", "patents"},
+    "coursework": {"coursework", "relevant coursework", "courses", "training", "professional development"},
+    "activities": {"activities", "extracurricular activities", "volunteer activities", "volunteering", "leadership", "memberships"},
+    "references": {"references", "contact", "contact information", "additional information"},
+}
+
+
+def _section_heading(label: str) -> str | None:
+    # Normalize labels only. Resume passages stay untouched for source offsets.
+    clean = unicodedata.normalize("NFKC", label).casefold().strip().rstrip(":")
+    clean = " ".join(re.sub(r"[&/]", " and ", clean).split())
+    known = next((name for name, pattern in SECTION_PATTERNS.items() if pattern.fullmatch(clean)), None)
+    if known:
+        return known
+    return next((name for name, variants in NON_EXPERIENCE_HEADINGS.items() if clean in variants), None)
+
+
+def parse_section_heading(line: str) -> tuple[str | None, int]:
+    """Return a recognized section and the content's original offset in a line.
+
+    Standalone headings return len(line); inline labels such as ``Skills: SQL``
+    return the position after the colon. Unknown prose returns (None, 0).
+    """
+    heading = _section_heading(line)
+    if heading:
+        return heading, len(line)
+    colon = re.search(r"[:：]", line)
+    if colon:
+        heading = _section_heading(line[:colon.start()])
+        if heading:
+            return heading, colon.end()
+    return None, 0
+
 
 ACTION_VERBS = {
     "built",
@@ -113,10 +153,8 @@ def count_bullets(text: str) -> int:
 
 
 def detect_sections(text: str) -> tuple[list[str], list[str]]:
-    detected = [
-        section for section, pattern in SECTION_PATTERNS.items()
-        if any(pattern.fullmatch(line.strip().rstrip(":")) for line in text.splitlines())
-    ]
+    headings = {parse_section_heading(line)[0] for line in text.splitlines()}
+    detected = [section for section in SECTION_PATTERNS if section in headings]
     missing = [section for section in SECTION_PATTERNS if section not in detected]
     return detected, missing
 
@@ -134,9 +172,17 @@ def infer_candidate_name(text: str, fallback_filename: str) -> str:
             continue
         if len(line.split()) > 5:
             continue
-        cleaned = re.sub(r"[^A-Za-z\s\-']", "", line).strip()
+        if parse_section_heading(line)[0] is not None:
+            continue
+        # Preserve the person's spelling, initials, and casing. Name cleanup
+        # must not reuse the ASCII-only tokenizer used for English role terms.
+        cleaned = "".join(
+            char for char in unicodedata.normalize("NFC", line)
+            if char.isalpha() or unicodedata.category(char).startswith("M")
+            or char.isspace() or char in ".-'’ʼ‐‑"
+        ).strip()
         if len(cleaned.split()) >= 2:
-            return cleaned.title()
+            return cleaned
     stem = fallback_filename.rsplit(".", 1)[0]
     return stem.replace("_", " ").replace("-", " ").title()
 

@@ -14,7 +14,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from jobfit_ai.models import AnalysisWarning, EvidenceMatch
-from jobfit_ai.text_features import SECTION_PATTERNS, tokenize
+from jobfit_ai.text_features import parse_section_heading, tokenize
 
 MAX_REQUIREMENTS = 30
 MAX_PASSAGES = 200
@@ -35,21 +35,11 @@ JOB_HEADINGS = {
     "required qualifications", "preferred skills", "required skills", "about us", "about the role",
     "benefits", "compensation", "how to apply",
 }
-NON_EXPERIENCE_HEADINGS = {
-    "certifications": {"certifications", "certificates", "licenses", "licenses and certifications", "certifications and licenses"},
-    "awards": {"awards", "honors", "honours", "awards and honors", "honors and awards", "achievements"},
-    "languages": {"languages", "spoken languages"},
-    "interests": {"interests", "hobbies", "hobbies and interests"},
-    "publications": {"publications", "papers", "patents"},
-    "coursework": {"coursework", "relevant coursework", "courses", "training", "professional development"},
-    "activities": {"activities", "extracurricular activities", "volunteer activities", "volunteering", "leadership", "memberships"},
-    "references": {"references", "contact", "contact information", "additional information"},
-}
 ROLE_TITLE = re.compile(
     r"(?:(?:senior|junior|lead|staff|principal|associate|graduate|student|software|hardware|"
-    r"data|machine|learning|ai|ml|backend|front[- ]end|full[- ]stack|platform|cloud|security|"
+    r"data|science|machine|learning|ai|ml|backend|front[- ]end|full[- ]stack|platform|cloud|security|"
     r"systems?|research|product|engineering|management|tools|analytics|discovery|qa|test|mobile|web|devops|sre)\s+){0,7}"
-    r"(?:intern|internship|engineer|developer|analyst|manager|scientist)", re.IGNORECASE,
+    r"(?:intern|internship|engineer|developer|analyst|manager|scientist)(?:\s+(?:intern|internship))?", re.IGNORECASE,
 )
 
 
@@ -76,14 +66,6 @@ class _Candidate:
         return not (self.copied or self.negated)
 
 
-def _section_heading(line: str) -> str | None:
-    clean = line.strip().rstrip(":")
-    known = next((name for name, pattern in SECTION_PATTERNS.items() if pattern.fullmatch(clean)), None)
-    if known:
-        return known
-    return next((name for name, variants in NON_EXPERIENCE_HEADINGS.items() if clean.casefold() in variants), None)
-
-
 def _is_role_title(text: str) -> bool:
     # A small noun-phrase vocabulary keeps explicit experience/credential
     # sentences even when they end in a role name. Never use token count alone.
@@ -108,15 +90,14 @@ def split_spans(text: str, *, resume: bool = False) -> list[TextSpan]:
     spans: list[TextSpan] = []
     section = "other"
     for line in re.finditer(r"[^\n\r]+", text):
-        heading = _section_heading(line.group())
+        heading, content_start = parse_section_heading(line.group())
         if heading:
             section = heading
-            continue
         # Sentence punctuation must be followed by whitespace and a new capital,
         # digit, or bullet. This preserves Node.js, .NET, C++, and decimal metrics.
-        for sentence in re.finditer(r".+?(?:[.!?;](?=\s+[A-Z0-9•*\-])|$)", line.group()):
-            start = line.start() + sentence.start()
-            end = line.start() + sentence.end()
+        for sentence in re.finditer(r".+?(?:[.!?;](?=\s+[A-Z0-9•*\-])|$)", line.group()[content_start:]):
+            start = line.start() + content_start + sentence.start()
+            end = line.start() + content_start + sentence.end()
             while start < end and text[start] in " \t-•*":
                 start += 1
             while start < end and text[end - 1].isspace():
