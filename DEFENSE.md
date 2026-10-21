@@ -1,4 +1,6 @@
-# JobFit AI: interview walkthrough
+# JobFit AI: technical interview walkthrough
+
+For the product story, SWE/PM answer outlines, fairness discussion, and rehearsal checklist, start with the separate [interview prep guide](docs/INTERVIEW_PREP.md). This walkthrough covers the implementation and technical evidence in more detail.
 
 ## Your 30-second explanation
 

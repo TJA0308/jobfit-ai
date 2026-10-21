@@ -11,7 +11,7 @@ A Python resume-tailoring application with passage retrieval, source attribution
 [![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)](runtime.txt)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](api_server.py)
 
-[Try it](#try-it-in-60-seconds) · [Evidence](#what-the-review-shows) · [Evaluation](#evaluation) · [Run locally](#run-locally) · [Interview walkthrough](DEFENSE.md)
+[Try it](#try-it-in-60-seconds) · [Evidence](#what-the-review-shows) · [Evaluation](#evaluation) · [Run locally](#run-locally) · [Interview prep](docs/INTERVIEW_PREP.md) · [Technical walkthrough](DEFENSE.md)
 
 </div>
 
@@ -204,7 +204,7 @@ Open `http://127.0.0.1:8000/docs` for interactive multipart requests. API batche
 
 ## Discuss the project
 
-Use the [interview walkthrough](DEFENSE.md) to trace a request, explain retrieval, show a failure, and practice a small code change. The [90-second demo script](docs/DEMO.md) provides a repeatable walkthrough.
+Start with the [interview prep guide](docs/INTERVIEW_PREP.md) for the product story, SWE/PM questions, fairness boundaries, evidence card, and rehearsal checklist. Use the [technical walkthrough](DEFENSE.md) to trace a request, explain retrieval, show a failure, and practice a small code change. The [90-second demo script](docs/DEMO.md) provides a repeatable presentation.
 
 A factual resume description:
 
