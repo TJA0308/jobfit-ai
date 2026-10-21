@@ -48,7 +48,7 @@ Actual local dense inference was run with cached weights and offline network set
 
 - Publication status is recorded in Git history and CI. Existing hosted content may still be an older revision until the cloud deployment and browser smoke check are verified.
 - Streamlit AppTest verifies application behavior, but browser visual QA and the deployed upload/download smoke check remain unverified in this session.
-- The demo recording is scripted in `docs/DEMO.md`; no video or screenshots are claimed to have been recorded.
+- The README includes an animated CLI walkthrough, static evidence preview, and transcript generated from actual fictional-sample analysis. The Streamlit browser recording is scripted in `docs/DEMO.md`; app capture approval timed out, so no browser video or screenshots are claimed.
 - A human-annotated held-out evaluation remains outstanding. All current benchmark labels are synthetic or lack independently verified annotation provenance.
 - Local dense inference measurements do not establish hosted startup/memory behavior or production performance.
 - Public API request limits and abuse controls remain deployment responsibilities.

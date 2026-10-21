@@ -1,0 +1,49 @@
+01 / Compare four sample resumes
+$ python scripts/demo_batch.py
+JobFit AI Demo Ranking
+============================================================
+1. Jordan Kim          74.06/100  Strong    Matches: 23  Missing: 22
+2. Maya Singh          52.48/100  Strong    Matches: 20  Missing: 25
+3. Marcus Lee          26.04/100  Weak      Matches:  9  Missing: 36
+4. Ethan Brooks        16.78/100  Weak      Matches:  8  Missing: 37
+
+02 / Inspect exact source evidence
+$ python scripts/demo_evidence.py --candidate jordan --status supported
+JobFit AI / requirement evidence
+Candidate: Jordan Kim (fictional sample)
+Wording alignment: 74.06/100 (Strong)
+Evidence backend: tfidf | scoring v2.0
+
+REQUIREMENT
+Build and ship full-stack product features using Python, JavaScript, React, and REST
+APIs.
+
+RESULT
+Experience wording found
+
+RESUME EXCERPT
+Built a full-stack internship tracker using React, Python, FastAPI, SQLite, and REST
+APIs to manage applications, deadlines, and interview notes.
+
+SOURCE
+experience | extracted characters 224:369
+resume_jordan_kim_strong.txt
+
+Experience wording is a claim to inspect, not verified qualification.
+
+03 / Inspect a requirement without evidence
+$ python scripts/demo_evidence.py --candidate ethan --status not_found
+JobFit AI / requirement evidence
+Candidate: Ethan Brooks (fictional sample)
+Wording alignment: 16.78/100 (Weak)
+Evidence backend: tfidf | scoring v2.0
+
+REQUIREMENT
+You will work with full-time engineers to design, build, test, and ship user-facing
+features used by customers and internal teams.
+
+RESULT
+No evidence found
+
+No sufficiently related resume passage was retrieved.
+This does not establish a missing ability.

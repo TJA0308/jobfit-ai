@@ -24,8 +24,10 @@ Repeat with `demo/adversarial/negated_experience.txt`. Inspect the explicit-nega
 
 ## Optional local semantic mode
 
-Install `requirements-embeddings.txt`, set `JOBFIT_ENABLE_EMBEDDINGS=1`, and restart Streamlit. Open **Analysis options** in the sidebar and switch on **Use local semantic matching** before analyzing. This uses local inference and may download the pinned model on first use. Do not enable it on a resource-constrained deployment without checking memory and startup behavior.
+Install `requirements-embeddings.txt`, set `JOBFIT_ENABLE_EMBEDDINGS=1`, and restart Streamlit. Open **Session & options** in the header, expand **Analysis options**, and switch on **Use local semantic matching** before analyzing. This uses local inference and may download the pinned model on first use. Do not enable it on a resource-constrained deployment without checking memory and startup behavior.
 
 ## What to capture for a portfolio recording
 
-Record the real running interface: one evidence row, one gap, a report download, and a failure case. A 60–90-second clip is sufficient. The committed SVG assets are illustrations and must not be described as screenshots. Recording/browser visual verification is a manual release step until a browser is available.
+Record the real running interface: one evidence row, one gap, a report download, and a failure case. A 60–90-second clip is sufficient. The README currently contains a generated CLI walkthrough, a static evidence frame, and a text transcript, all built from actual sample analysis. They demonstrate the core and must not be described as Streamlit screenshots or a browser recording. The committed SVG assets are illustrations. Recording/browser visual verification remains pending until browser capture is available.
+
+To reproduce the current README media, run `python scripts/build_readme_preview.py`. To inspect the same examples in a terminal, run `python scripts/demo_evidence.py --candidate jordan --status supported` or `--candidate ethan --status not_found`.
