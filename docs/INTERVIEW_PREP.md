@@ -4,6 +4,8 @@ Use this guide for the project story, SWE/PM questions, and rehearsal. Use the [
 
 These are answer outlines to adapt after studying the code. They do not establish personal ownership, completed user research, customer adoption, or interview readiness by themselves.
 
+For a quick rehearsal, start with the [25 follow-up questions](#follow-up-question-bank): questions 1–5 cover ownership and decisions, 6–20 cover technical depth, and 21–25 cover product judgment. Structure each answer as **decision → reason → evidence → limitation → next step**.
+
 ## The story in 30 seconds
 
 > JobFit AI helps applicants understand how their resume expresses a job's requirements. It retrieves exact resume passages, identifies partial mentions and gaps, and provides downloadable reviews. Streamlit and FastAPI share a typed Python core. The project focuses on inspectable evidence, reliable document processing, privacy, and evaluating lexical retrieval against a local embedding model.
@@ -145,6 +147,116 @@ Candidate measures are time to first useful review, correct interpretation of la
 ### What would you prioritize next?
 
 Combine observed usability failures with human-reviewed retrieval errors. Prioritize changes that improve the central review loop and can be evaluated against a clear baseline. Better independent evaluation and clearer interpretation are stronger next hypotheses than an unvalidated feature list.
+
+## Follow-up question bank
+
+These extend the core answers above. Rehearse the first five first, then follow the questions relevant to the role. Show a file, test, example, or measurement whenever possible.
+
+### Ownership and engineering decisions
+
+1. **What did you personally implement, and how did you use AI?**
+
+   Separate the work you personally implemented, investigated, reviewed, and practiced from AI-generated assistance. Choose a concrete change you can explain and maintain; do not imply sole authorship or personal testing you did not perform.
+
+2. **Can you open the code and trace one upload through the system?**
+
+   Start at [the upload handler](../jobfit_ai/upload_handler.py), follow parsing and scoring/retrieval, and end with the typed result and report serialization. Explain validation, temporary-file cleanup, and session storage. Use the [technical trace](../DEFENSE.md#trace-one-upload) to prepare, then demonstrate it without reading the guide.
+
+3. **What was the hardest bug, and why didn't the original tests catch it?**
+
+   The Word separator defect is a useful example: the original DOCX fixture contained simple text and did not exercise tabs, breaks, or words split across formatting runs. Explain how [input-fidelity regressions](../tests/test_input_fidelity.py) extended coverage through uploads, API responses, the UI, and reports. Choose the bug that reflects your actual involvement.
+
+4. **Which design decision would you change if you rebuilt the project?**
+
+   A defensible answer is to establish a broader input-format matrix and an independently annotated evaluation earlier. Explain the failure that motivates the change, the cost, and what evidence would show it helped. Avoid proposing a larger architecture without a demonstrated problem.
+
+5. **What evidence shows the project is useful, and what remains untested?**
+
+   Demonstrate a requirement linked to an inspectable passage and cite the software/retrieval checks in the evidence card. Those establish functionality and fixture performance. User comprehension, useful edits, adoption, and hiring outcomes have not been measured; propose a study instead of inventing impact.
+
+### Technical depth and reliability
+
+6. **Why did you choose Streamlit and FastAPI? Why have both?**
+
+   Streamlit provides the interactive review experience; FastAPI exposes the same core as a reusable HTTP interface. Sharing functions and dataclasses keeps their analysis behavior consistent. The Streamlit app calls the core directly, so a running API server is not required for the UI.
+
+7. **Why are the scoring weights 60/40 and the tier thresholds 50/30?**
+
+   These are heuristic design choices informed by development examples, not learned or independently calibrated parameters. Explain the [formula](../DEFENSE.md#explain-the-score), acknowledge that alternative weights need comparison, and propose evaluation against a defined human-review rubric before claiming optimality.
+
+8. **Text similarity and keyword coverage overlap—does combining them double-count information?**
+
+   The signals overlap: the similarity component already blends TF-IDF cosine and job-vocabulary overlap, while keyword coverage weights vocabulary by frequency. They are not independent evidence. Baseline comparisons currently have the same ranking order, so the experiments do not establish a benefit from these particular weights.
+
+9. **How would the system handle “five years of Python experience” when the resume shows only one?**
+
+   Current matching does not reliably validate tenure, numeric constraints, or logical entailment. Shared wording can still retrieve an excerpt without establishing the required duration. Explain the manual-review boundary; a future duration check would need structured extraction and tests for dates and overlapping experience.
+
+10. **What happens when a requirement contains several skills but the excerpt supports only one?**
+
+    One passage can cover only part of a compound requirement. The current experience-wording label does not certify every clause, and its coverage threshold is a heuristic. Splitting requirements into smaller units or collecting multiple citations are possible changes to evaluate for precision and usability.
+
+11. **Can keyword stuffing or copied job descriptions manipulate the score?**
+
+    Yes. Wording alignment can be inflated. Show the [copied-role fixture](../demo/adversarial/copied_role.txt), the warning, and the evidence review. Obvious copying cannot become experience support, but there is no calibrated fraud score or guarantee against manipulation.
+
+12. **Does preserving Unicode names mean the matching system supports multiple languages?**
+
+    No. Identity preservation and multilingual matching are separate capabilities. Name handling preserves Unicode letters, while the lexical [normalizer and stopwords](../jobfit_ai/text_features.py) are oriented toward English role text. Multilingual retrieval would need its own data, tokenizer/model choices, and evaluation.
+
+13. **How would you distinguish a retrieval failure from genuinely absent resume evidence?**
+
+    An abstention alone cannot distinguish them. Inspect extracted text, parsing quality, disclosed truncation, and possible paraphrases; compare retrieval backends where available. Human review of the original document is needed to label the error, and document absence still does not prove absence of ability.
+
+14. **Why did embeddings improve excerpt retrieval without improving ranking?**
+
+    They recovered paraphrases on the small evidence suite, but passage selection, status thresholds, and whole-document scores are different decisions. More correct excerpts did not change the measured ranking order, and dense status agreement was lower. Cite the separate metrics instead of using one result to imply improvement everywhere.
+
+15. **What happens when one upload fails in a batch? Why do the UI and API handle that differently?**
+
+    The UI retains successful files and shows per-file errors so users can recover interactively. The API returns an error for the batch when any item fails, keeping its current response contract simple. Neither public path persists the batch to shared history. A partial-results API would require an explicit contract change.
+
+16. **What breaks first with 100 simultaneous users, and how would you investigate?**
+
+    There is no load-test result establishing that capacity. Measure throughput, tail latency, CPU, memory, and stage timings under representative uploads. Parsing, optional model inference, or worker capacity are candidates to investigate. Choose admission limits, worker isolation, or other changes based on that evidence; asynchronous syntax alone does not solve CPU saturation.
+
+17. **What prevents uploaded resumes from appearing in another user's session?**
+
+    Reviews and export reuse live in session state, public history is disabled, private analyses are not stored in shared Streamlit caches, and extraction temporary files are removed. Model-weight caching is separate from request data. Explain these boundaries and the session-isolation tests without claiming a complete security audit or authenticated storage system.
+
+18. **How do you verify that the deployed app matches the tested commit?**
+
+    Check the exact GitHub Actions commit, deployment branch, and available build logs, then run the [browser smoke check](DEPLOYMENT.md#live-smoke-check). Record the revision actually checked. A successful push, green CI run, or HTTP health response does not establish that the cloud UI is current or renders correctly.
+
+19. **How would you evaluate a proposed improvement without repeatedly tuning against the same examples?**
+
+    Split suitable data by job description, define the annotation rubric, and freeze an unseen evaluation split before tuning. Compare against baselines and inspect error categories. Once a check case guides a change, treat it as development data. Follow the [evaluation protocol](EVALUATION.md#next-independent-evaluation).
+
+20. **How would you prevent optional AI rewrites from suggesting unsupported claims?**
+
+    The current prompt requests truthful suggestions, local templates use placeholders, and response validation checks bullet count and length. Those checks do not verify factual grounding. Users must inspect proposed rewrites; stronger grounding checks would need explicit claim-to-source validation and evaluation. Never claim that the prompt guarantees truthful output.
+
+### Product judgment
+
+21. **Which user segment would you prioritize first, and why?**
+
+    Early-career applicants comparing a resume against a specific internship role fit the current workflow and demo scope. Explain the task and likely confusion to investigate. This is a proposed initial segment, not a validated customer base; use research to confirm its needs.
+
+22. **What would you remove if you had to cut the scope in half?**
+
+    Preserve one resume, one role, exact evidence inspection, and a useful export. Batch comparison, optional embeddings, and external rewrites are candidates to defer. Tie each cut to the central user task and explain what you would need to learn before restoring it.
+
+23. **How would you test whether users understand “partial mention” and “no evidence found”?**
+
+    Give participants a supported example, a skill-list mention, and a retrieval miss. Ask what each result establishes and what they would do next before explaining the intended interpretation. Measure misunderstanding and edit quality. This is proposed research; the study has not been conducted.
+
+24. **What would you do if users liked the app but made worse edits while chasing higher scores?**
+
+    Treat that as failure of the intended outcome despite positive engagement. Inspect the edits and misunderstandings, then test changes such as reducing score prominence and improving evidence explanations. Evaluate truthful, useful edits and comprehension alongside satisfaction; do not optimize only for score increases or time spent.
+
+25. **Which next investment would you choose: better matching, clearer feedback, OCR, or saved history—and what evidence would decide?**
+
+    Use observed task failures, impact, confidence, effort, and privacy costs to choose. Human-reviewed matching errors and label comprehension are natural investigations given current limitations. OCR would need evidence that scanned documents block the target workflow; saved history would need evidence of a repeated task worth retaining data for. These are prioritization hypotheses, not completed findings.
 
 ## AI-assisted development and ownership
 
