@@ -1,0 +1,45 @@
+{
+  "description": "Development scenarios based on official postings checked 2026-11-15. Job text is a short paraphrase, not the full posting. Resumes and expected labels are AI-authored, not human validation. Availability can change.",
+  "checked_on": "2026-11-15",
+  "jobs": [
+    {
+      "id": "amazon-swe-10552937",
+      "company": "Amazon",
+      "title": "Software Development Engineer Intern - Summer 2027 (USA)",
+      "url": "https://www.amazon.jobs/en/jobs/10552937/software-development-engineer-intern-summer-2027-usa",
+      "availability": "Official page showed Apply now and ongoing applications on check date.",
+      "job_description": "Software Development Engineer Intern\nRequirements\nProgramming in a general-purpose language such as Python, Java, or C++.\nData structures, algorithms, or object-oriented design.\nExperience with AI-assisted development tools.\nDesign, test, build, and deploy reliable software.\nPreferred skills\nCloud platforms, databases, and version control.\nCommunicate technical decisions and review code.\nQualifications\nSTEM degree enrollment with graduation between October 2027 and September 2029.\nAvailability for a full-time twelve-week in-person internship.",
+      "profiles": [
+        {"id": "project", "resume": "Alex Example\nEducation\nComputer Science BS, expected May 2028\nProjects\nBuilt Python services with SQL databases and Git version control.\nDesigned algorithms and data structures for reliable software.\nTested and deployed software using continuous integration.\nReviewed code and documented technical decisions.", "kind": "fictional project experience"},
+        {"id": "mention", "resume": "Sam Example\nEducation\nComputer Science BS, expected May 2028\nSkills\nPython Java C++ algorithms data structures SQL Git cloud", "kind": "fictional skill list"},
+        {"id": "unrelated", "resume": "Robin Example\nExperience\nCoordinated campus art exhibitions and organized gallery schedules.", "kind": "fictional unrelated experience"}
+      ]
+    },
+    {
+      "id": "nvidia-ai-JR2023497",
+      "company": "NVIDIA",
+      "title": "NVIDIA 2027 Internships: Deep Learning",
+      "url": "https://nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite/job/NVIDIA-2027-Internships--Deep-Learning_JR2023497-1",
+      "availability": "Official indexed posting stated ongoing applications and an existing vacancy; a talent-pool posting across teams.",
+      "job_description": "Deep Learning Intern\nRequirements\nDevelop deep learning algorithms for GPU performance.\nBuild and optimize deep learning frameworks and libraries.\nContribute to PyTorch, TensorFlow, or JAX.\nDepending on team, programming knowledge may include Python, C++, and CUDA.\nRelevant coursework may cover linear algebra, numerical methods, computer vision, and computer architecture.\nQualifications\nRemain enrolled in a relevant BS, MS, or PhD program throughout a twelve-week internship.\nInclude expected graduation month and year on the resume.",
+      "profiles": [
+        {"id": "project", "resume": "Taylor Example\nEducation\nComputer Engineering BS, expected May 2028\nProjects\nOptimized deep learning algorithms for GPU performance with Python and CUDA.\nBuilt a PyTorch computer vision training pipeline.\nMeasured numerical precision and memory usage during GPU inference.", "kind": "fictional project experience"},
+        {"id": "mention", "resume": "Casey Example\nEducation\nComputer Engineering BS, expected May 2028\nSkills\nPython C++ CUDA PyTorch TensorFlow JAX GPU deep learning linear algebra", "kind": "fictional skill list"},
+        {"id": "unrelated", "resume": "Morgan Example\nExperience\nEdited campus newspaper articles and coordinated publication schedules.", "kind": "fictional unrelated experience"}
+      ]
+    },
+    {
+      "id": "amazon-pm-10586354",
+      "company": "Amazon",
+      "title": "Product Manager Intern - Poland",
+      "url": "https://www.amazon.jobs/en/jobs/10586354/product-manager-intern-poland",
+      "availability": "Official posting available on check date. Warsaw role, not a US summer internship recommendation.",
+      "job_description": "Product Manager Intern\nRequirements\nAdvanced Microsoft Excel knowledge including macros, pivot tables, lookups, and VBA.\nAnalyze problems and identify process improvements.\nCollaborate and communicate with teammates.\nQualifications\nFluent Polish and advanced English.\nPenultimate or final year in engineering, project management, business management, or a related degree.\nAvailable for three to six months full time in Warsaw, starting January through September 2027.\nHave permission to work in Poland.",
+      "profiles": [
+        {"id": "project", "resume": "Jamie Example\nEducation\nBusiness Management BS, expected June 2028\nProjects\nUsed Microsoft Excel pivot tables and lookups to analyze process improvements.\nCollaborated with teammates and communicated project decisions.\nBuilt Excel macros with VBA to automate weekly reports.", "kind": "fictional project experience"},
+        {"id": "mention", "resume": "Drew Example\nEducation\nBusiness Management BS, expected June 2028\nSkills\nMicrosoft Excel macros pivot tables lookups VBA Polish English", "kind": "fictional skill list"},
+        {"id": "unrelated", "resume": "Jordan Example\nExperience\nPainted theater scenery and maintained costume inventories.", "kind": "fictional unrelated experience"}
+      ]
+    }
+  ]
+}

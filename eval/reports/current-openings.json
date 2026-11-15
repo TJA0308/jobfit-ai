@@ -1,0 +1,1182 @@
+{
+  "description": "Development scenarios based on official postings checked 2026-11-15. Job text is a short paraphrase, not the full posting. Resumes and expected labels are AI-authored, not human validation. Availability can change.",
+  "dataset_sha256": "c04c95871f2635adb75abaf792a21aaebe1c07d70b83bc24bdbb0a87636406dd",
+  "runtime": {
+    "python": "3.13.6",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "scikit-learn": "1.7.0",
+      "numpy": "2.3.1",
+      "streamlit": "1.66.0",
+      "fastapi": "0.116.1"
+    },
+    "embedding_model": "all-MiniLM-L6-v2",
+    "embedding_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+  },
+  "result": {
+    "scenario_count": 9,
+    "contract_and_attribution_checks": "passed",
+    "cases": [
+      {
+        "job_id": "amazon-swe-10552937",
+        "profile": "project",
+        "score": 45.01,
+        "statuses": {
+          "partial": 2,
+          "not_found": 4,
+          "supported": 3
+        },
+        "requirements": 9,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Software Development Engineer Intern",
+            "requirement_start": 0,
+            "requirement_end": 36,
+            "status": "partial",
+            "evidence": "Designed algorithms and data structures for reliable software.",
+            "evidence_start": 137,
+            "evidence_end": 199,
+            "section": "projects",
+            "retrieval_score": 6.57,
+            "matched_terms": [
+              "software"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Programming in a general-purpose language such as Python, Java, or C++.",
+            "requirement_start": 50,
+            "requirement_end": 121,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 6.25,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Data structures, algorithms, or object-oriented design.",
+            "requirement_start": 122,
+            "requirement_end": 177,
+            "status": "supported",
+            "evidence": "Designed algorithms and data structures for reliable software.",
+            "evidence_start": 137,
+            "evidence_end": 199,
+            "section": "projects",
+            "retrieval_score": 36.03,
+            "matched_terms": [
+              "algorithms",
+              "data",
+              "structures"
+            ],
+            "explanation": "Relevant wording in an experience/project passage; verify the claim."
+          },
+          {
+            "requirement": "Experience with AI-assisted development tools.",
+            "requirement_start": 178,
+            "requirement_end": 224,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Design, test, build, and deploy reliable software.",
+            "requirement_start": 225,
+            "requirement_end": 275,
+            "status": "partial",
+            "evidence": "Tested and deployed software using continuous integration.",
+            "evidence_start": 200,
+            "evidence_end": 258,
+            "section": "projects",
+            "retrieval_score": 21.08,
+            "matched_terms": [
+              "deploy",
+              "software",
+              "test"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Cloud platforms, databases, and version control.",
+            "requirement_start": 293,
+            "requirement_end": 341,
+            "status": "supported",
+            "evidence": "Built Python services with SQL databases and Git version control.",
+            "evidence_start": 71,
+            "evidence_end": 136,
+            "section": "projects",
+            "retrieval_score": 28.97,
+            "matched_terms": [
+              "control",
+              "database",
+              "version"
+            ],
+            "explanation": "Relevant wording in an experience/project passage; verify the claim."
+          },
+          {
+            "requirement": "Communicate technical decisions and review code.",
+            "requirement_start": 342,
+            "requirement_end": 390,
+            "status": "supported",
+            "evidence": "Reviewed code and documented technical decisions.",
+            "evidence_start": 259,
+            "evidence_end": 308,
+            "section": "projects",
+            "retrieval_score": 37.62,
+            "matched_terms": [
+              "code",
+              "decisions",
+              "technical"
+            ],
+            "explanation": "Relevant wording in an experience/project passage; verify the claim."
+          },
+          {
+            "requirement": "STEM degree enrollment with graduation between October 2027 and September 2029.",
+            "requirement_start": 406,
+            "requirement_end": 485,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Availability for a full-time twelve-week in-person internship.",
+            "requirement_start": 486,
+            "requirement_end": 548,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      },
+      {
+        "job_id": "amazon-swe-10552937",
+        "profile": "mention",
+        "score": 25.38,
+        "statuses": {
+          "not_found": 6,
+          "partial": 3
+        },
+        "requirements": 9,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Software Development Engineer Intern",
+            "requirement_start": 0,
+            "requirement_end": 36,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Programming in a general-purpose language such as Python, Java, or C++.",
+            "requirement_start": 50,
+            "requirement_end": 121,
+            "status": "partial",
+            "evidence": "Python Java C++ algorithms data structures SQL Git cloud",
+            "evidence_start": 68,
+            "evidence_end": 124,
+            "section": "skills",
+            "retrieval_score": 31.25,
+            "matched_terms": [
+              "c++",
+              "java",
+              "python"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Data structures, algorithms, or object-oriented design.",
+            "requirement_start": 122,
+            "requirement_end": 177,
+            "status": "partial",
+            "evidence": "Python Java C++ algorithms data structures SQL Git cloud",
+            "evidence_start": 68,
+            "evidence_end": 124,
+            "section": "skills",
+            "retrieval_score": 28.06,
+            "matched_terms": [
+              "algorithms",
+              "data",
+              "structures"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Experience with AI-assisted development tools.",
+            "requirement_start": 178,
+            "requirement_end": 224,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Design, test, build, and deploy reliable software.",
+            "requirement_start": 225,
+            "requirement_end": 275,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Cloud platforms, databases, and version control.",
+            "requirement_start": 293,
+            "requirement_end": 341,
+            "status": "partial",
+            "evidence": "Python Java C++ algorithms data structures SQL Git cloud",
+            "evidence_start": 68,
+            "evidence_end": 124,
+            "section": "skills",
+            "retrieval_score": 6.58,
+            "matched_terms": [
+              "cloud"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Communicate technical decisions and review code.",
+            "requirement_start": 342,
+            "requirement_end": 390,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "STEM degree enrollment with graduation between October 2027 and September 2029.",
+            "requirement_start": 406,
+            "requirement_end": 485,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Availability for a full-time twelve-week in-person internship.",
+            "requirement_start": 486,
+            "requirement_end": 548,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      },
+      {
+        "job_id": "amazon-swe-10552937",
+        "profile": "unrelated",
+        "score": 3.02,
+        "statuses": {
+          "not_found": 9
+        },
+        "requirements": 9,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Software Development Engineer Intern",
+            "requirement_start": 0,
+            "requirement_end": 36,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Programming in a general-purpose language such as Python, Java, or C++.",
+            "requirement_start": 50,
+            "requirement_end": 121,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Data structures, algorithms, or object-oriented design.",
+            "requirement_start": 122,
+            "requirement_end": 177,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Experience with AI-assisted development tools.",
+            "requirement_start": 178,
+            "requirement_end": 224,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Design, test, build, and deploy reliable software.",
+            "requirement_start": 225,
+            "requirement_end": 275,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Cloud platforms, databases, and version control.",
+            "requirement_start": 293,
+            "requirement_end": 341,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Communicate technical decisions and review code.",
+            "requirement_start": 342,
+            "requirement_end": 390,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "STEM degree enrollment with graduation between October 2027 and September 2029.",
+            "requirement_start": 406,
+            "requirement_end": 485,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Availability for a full-time twelve-week in-person internship.",
+            "requirement_start": 486,
+            "requirement_end": 548,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      },
+      {
+        "job_id": "nvidia-ai-JR2023497",
+        "profile": "project",
+        "score": 46.01,
+        "statuses": {
+          "supported": 2,
+          "partial": 4,
+          "not_found": 2
+        },
+        "requirements": 8,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Deep Learning Intern",
+            "requirement_start": 0,
+            "requirement_end": 20,
+            "status": "supported",
+            "evidence": "Optimized deep learning algorithms for GPU performance with Python and CUDA.",
+            "evidence_start": 77,
+            "evidence_end": 153,
+            "section": "projects",
+            "retrieval_score": 22.98,
+            "matched_terms": [
+              "deep",
+              "learning"
+            ],
+            "explanation": "Relevant wording in an experience/project passage; verify the claim."
+          },
+          {
+            "requirement": "Develop deep learning algorithms for GPU performance.",
+            "requirement_start": 34,
+            "requirement_end": 87,
+            "status": "supported",
+            "evidence": "Optimized deep learning algorithms for GPU performance with Python and CUDA.",
+            "evidence_start": 77,
+            "evidence_end": 153,
+            "section": "projects",
+            "retrieval_score": 61.52,
+            "matched_terms": [
+              "algorithms",
+              "deep",
+              "gpu",
+              "learning",
+              "performance"
+            ],
+            "explanation": "Relevant wording in an experience/project passage; verify the claim."
+          },
+          {
+            "requirement": "Build and optimize deep learning frameworks and libraries.",
+            "requirement_start": 88,
+            "requirement_end": 146,
+            "status": "partial",
+            "evidence": "Optimized deep learning algorithms for GPU performance with Python and CUDA.",
+            "evidence_start": 77,
+            "evidence_end": 153,
+            "section": "projects",
+            "retrieval_score": 14.04,
+            "matched_terms": [
+              "deep",
+              "learning"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Contribute to PyTorch, TensorFlow, or JAX.",
+            "requirement_start": 147,
+            "requirement_end": 189,
+            "status": "partial",
+            "evidence": "Built a PyTorch computer vision training pipeline.",
+            "evidence_start": 154,
+            "evidence_end": 204,
+            "section": "projects",
+            "retrieval_score": 9.26,
+            "matched_terms": [
+              "pytorch"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Depending on team, programming knowledge may include Python, C++, and CUDA.",
+            "requirement_start": 190,
+            "requirement_end": 265,
+            "status": "partial",
+            "evidence": "Optimized deep learning algorithms for GPU performance with Python and CUDA.",
+            "evidence_start": 77,
+            "evidence_end": 153,
+            "section": "projects",
+            "retrieval_score": 11.77,
+            "matched_terms": [
+              "cuda",
+              "python"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Relevant coursework may cover linear algebra, numerical methods, computer vision, and computer architecture.",
+            "requirement_start": 266,
+            "requirement_end": 374,
+            "status": "partial",
+            "evidence": "Built a PyTorch computer vision training pipeline.",
+            "evidence_start": 154,
+            "evidence_end": 204,
+            "section": "projects",
+            "retrieval_score": 18.08,
+            "matched_terms": [
+              "computer",
+              "vision"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Remain enrolled in a relevant BS, MS, or PhD program throughout a twelve-week internship.",
+            "requirement_start": 390,
+            "requirement_end": 479,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Include expected graduation month and year on the resume.",
+            "requirement_start": 480,
+            "requirement_end": 537,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 11.04,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      },
+      {
+        "job_id": "nvidia-ai-JR2023497",
+        "profile": "mention",
+        "score": 49.51,
+        "statuses": {
+          "partial": 6,
+          "not_found": 2
+        },
+        "requirements": 8,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Deep Learning Intern",
+            "requirement_start": 0,
+            "requirement_end": 20,
+            "status": "partial",
+            "evidence": "Python C++ CUDA PyTorch TensorFlow JAX GPU deep learning linear algebra",
+            "evidence_start": 74,
+            "evidence_end": 145,
+            "section": "skills",
+            "retrieval_score": 18.73,
+            "matched_terms": [
+              "deep",
+              "learning"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Develop deep learning algorithms for GPU performance.",
+            "requirement_start": 34,
+            "requirement_end": 87,
+            "status": "partial",
+            "evidence": "Python C++ CUDA PyTorch TensorFlow JAX GPU deep learning linear algebra",
+            "evidence_start": 74,
+            "evidence_end": 145,
+            "section": "skills",
+            "retrieval_score": 17.52,
+            "matched_terms": [
+              "deep",
+              "gpu",
+              "learning"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Build and optimize deep learning frameworks and libraries.",
+            "requirement_start": 88,
+            "requirement_end": 146,
+            "status": "partial",
+            "evidence": "Python C++ CUDA PyTorch TensorFlow JAX GPU deep learning linear algebra",
+            "evidence_start": 74,
+            "evidence_end": 145,
+            "section": "skills",
+            "retrieval_score": 11.21,
+            "matched_terms": [
+              "deep",
+              "learning"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Contribute to PyTorch, TensorFlow, or JAX.",
+            "requirement_start": 147,
+            "requirement_end": 189,
+            "status": "partial",
+            "evidence": "Python C++ CUDA PyTorch TensorFlow JAX GPU deep learning linear algebra",
+            "evidence_start": 74,
+            "evidence_end": 145,
+            "section": "skills",
+            "retrieval_score": 38.92,
+            "matched_terms": [
+              "jax",
+              "pytorch",
+              "tensorflow"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Depending on team, programming knowledge may include Python, C++, and CUDA.",
+            "requirement_start": 190,
+            "requirement_end": 265,
+            "status": "partial",
+            "evidence": "Python C++ CUDA PyTorch TensorFlow JAX GPU deep learning linear algebra",
+            "evidence_start": 74,
+            "evidence_end": 145,
+            "section": "skills",
+            "retrieval_score": 25.3,
+            "matched_terms": [
+              "c++",
+              "cuda",
+              "python"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Relevant coursework may cover linear algebra, numerical methods, computer vision, and computer architecture.",
+            "requirement_start": 266,
+            "requirement_end": 374,
+            "status": "partial",
+            "evidence": "Python C++ CUDA PyTorch TensorFlow JAX GPU deep learning linear algebra",
+            "evidence_start": 74,
+            "evidence_end": 145,
+            "section": "skills",
+            "retrieval_score": 12.41,
+            "matched_terms": [
+              "algebra",
+              "linear"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Remain enrolled in a relevant BS, MS, or PhD program throughout a twelve-week internship.",
+            "requirement_start": 390,
+            "requirement_end": 479,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Include expected graduation month and year on the resume.",
+            "requirement_start": 480,
+            "requirement_end": 537,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 10.69,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      },
+      {
+        "job_id": "nvidia-ai-JR2023497",
+        "profile": "unrelated",
+        "score": 0.0,
+        "statuses": {
+          "not_found": 8
+        },
+        "requirements": 8,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Deep Learning Intern",
+            "requirement_start": 0,
+            "requirement_end": 20,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Develop deep learning algorithms for GPU performance.",
+            "requirement_start": 34,
+            "requirement_end": 87,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Build and optimize deep learning frameworks and libraries.",
+            "requirement_start": 88,
+            "requirement_end": 146,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Contribute to PyTorch, TensorFlow, or JAX.",
+            "requirement_start": 147,
+            "requirement_end": 189,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Depending on team, programming knowledge may include Python, C++, and CUDA.",
+            "requirement_start": 190,
+            "requirement_end": 265,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Relevant coursework may cover linear algebra, numerical methods, computer vision, and computer architecture.",
+            "requirement_start": 266,
+            "requirement_end": 374,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Remain enrolled in a relevant BS, MS, or PhD program throughout a twelve-week internship.",
+            "requirement_start": 390,
+            "requirement_end": 479,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Include expected graduation month and year on the resume.",
+            "requirement_start": 480,
+            "requirement_end": 537,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      },
+      {
+        "job_id": "amazon-pm-10586354",
+        "profile": "project",
+        "score": 44.51,
+        "statuses": {
+          "partial": 3,
+          "supported": 1,
+          "not_found": 3
+        },
+        "requirements": 7,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Advanced Microsoft Excel knowledge including macros, pivot tables, lookups, and VBA.",
+            "requirement_start": 36,
+            "requirement_end": 120,
+            "status": "partial",
+            "evidence": "Used Microsoft Excel pivot tables and lookups to analyze process improvements.",
+            "evidence_start": 76,
+            "evidence_end": 154,
+            "section": "projects",
+            "retrieval_score": 38.83,
+            "matched_terms": [
+              "excel",
+              "lookups",
+              "microsoft",
+              "pivot",
+              "tables"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Analyze problems and identify process improvements.",
+            "requirement_start": 121,
+            "requirement_end": 172,
+            "status": "supported",
+            "evidence": "Used Microsoft Excel pivot tables and lookups to analyze process improvements.",
+            "evidence_start": 76,
+            "evidence_end": 154,
+            "section": "projects",
+            "retrieval_score": 28.28,
+            "matched_terms": [
+              "analyze",
+              "improvements",
+              "process"
+            ],
+            "explanation": "Relevant wording in an experience/project passage; verify the claim."
+          },
+          {
+            "requirement": "Collaborate and communicate with teammates.",
+            "requirement_start": 173,
+            "requirement_end": 216,
+            "status": "partial",
+            "evidence": "Collaborated with teammates and communicated project decisions.",
+            "evidence_start": 155,
+            "evidence_end": 218,
+            "section": "projects",
+            "retrieval_score": 11.64,
+            "matched_terms": [
+              "teammates"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Fluent Polish and advanced English.",
+            "requirement_start": 232,
+            "requirement_end": 267,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Penultimate or final year in engineering, project management, business management, or a related degree.",
+            "requirement_start": 268,
+            "requirement_end": 371,
+            "status": "partial",
+            "evidence": "Business Management BS, expected June 2028",
+            "evidence_start": 24,
+            "evidence_end": 66,
+            "section": "education",
+            "retrieval_score": 25.53,
+            "matched_terms": [
+              "business",
+              "management"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Available for three to six months full time in Warsaw, starting January through September 2027.",
+            "requirement_start": 372,
+            "requirement_end": 467,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Have permission to work in Poland.",
+            "requirement_start": 468,
+            "requirement_end": 502,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      },
+      {
+        "job_id": "amazon-pm-10586354",
+        "profile": "mention",
+        "score": 39.63,
+        "statuses": {
+          "partial": 3,
+          "not_found": 4
+        },
+        "requirements": 7,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Advanced Microsoft Excel knowledge including macros, pivot tables, lookups, and VBA.",
+            "requirement_start": 36,
+            "requirement_end": 120,
+            "status": "partial",
+            "evidence": "Microsoft Excel macros pivot tables lookups VBA Polish English",
+            "evidence_start": 73,
+            "evidence_end": 135,
+            "section": "skills",
+            "retrieval_score": 61.03,
+            "matched_terms": [
+              "excel",
+              "lookups",
+              "macros",
+              "microsoft",
+              "pivot",
+              "tables",
+              "vba"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Analyze problems and identify process improvements.",
+            "requirement_start": 121,
+            "requirement_end": 172,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Collaborate and communicate with teammates.",
+            "requirement_start": 173,
+            "requirement_end": 216,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Fluent Polish and advanced English.",
+            "requirement_start": 232,
+            "requirement_end": 267,
+            "status": "partial",
+            "evidence": "Microsoft Excel macros pivot tables lookups VBA Polish English",
+            "evidence_start": 73,
+            "evidence_end": 135,
+            "section": "skills",
+            "retrieval_score": 16.07,
+            "matched_terms": [
+              "english",
+              "polish"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Penultimate or final year in engineering, project management, business management, or a related degree.",
+            "requirement_start": 268,
+            "requirement_end": 371,
+            "status": "partial",
+            "evidence": "Business Management BS, expected June 2028",
+            "evidence_start": 23,
+            "evidence_end": 65,
+            "section": "education",
+            "retrieval_score": 24.97,
+            "matched_terms": [
+              "business",
+              "management"
+            ],
+            "explanation": "Related wording found; this alone does not establish the full requirement."
+          },
+          {
+            "requirement": "Available for three to six months full time in Warsaw, starting January through September 2027.",
+            "requirement_start": 372,
+            "requirement_end": 467,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Have permission to work in Poland.",
+            "requirement_start": 468,
+            "requirement_end": 502,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      },
+      {
+        "job_id": "amazon-pm-10586354",
+        "profile": "unrelated",
+        "score": 0.0,
+        "statuses": {
+          "not_found": 7
+        },
+        "requirements": 7,
+        "backend": "tfidf",
+        "warnings": [],
+        "evidence": [
+          {
+            "requirement": "Advanced Microsoft Excel knowledge including macros, pivot tables, lookups, and VBA.",
+            "requirement_start": 36,
+            "requirement_end": 120,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Analyze problems and identify process improvements.",
+            "requirement_start": 121,
+            "requirement_end": 172,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Collaborate and communicate with teammates.",
+            "requirement_start": 173,
+            "requirement_end": 216,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Fluent Polish and advanced English.",
+            "requirement_start": 232,
+            "requirement_end": 267,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Penultimate or final year in engineering, project management, business management, or a related degree.",
+            "requirement_start": 268,
+            "requirement_end": 371,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Available for three to six months full time in Warsaw, starting January through September 2027.",
+            "requirement_start": 372,
+            "requirement_end": 467,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          },
+          {
+            "requirement": "Have permission to work in Poland.",
+            "requirement_start": 468,
+            "requirement_end": 502,
+            "status": "not_found",
+            "evidence": null,
+            "evidence_start": null,
+            "evidence_end": null,
+            "section": null,
+            "retrieval_score": 0.0,
+            "matched_terms": [],
+            "explanation": "No sufficiently related passage found. This does not establish a missing ability."
+          }
+        ]
+      }
+    ]
+  }
+}

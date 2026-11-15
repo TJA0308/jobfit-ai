@@ -48,6 +48,7 @@ jobs:
         run: |
           python scripts/evaluate.py --compare --json-output /tmp/jobfit-development.json
           python scripts/evaluate_evidence.py --json-output /tmp/jobfit-evidence.json
+          python scripts/check_openings.py --json-output /tmp/jobfit-openings.json
 
       - name: Upload evaluation reports
         uses: actions/upload-artifact@v4
