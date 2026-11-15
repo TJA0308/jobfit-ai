@@ -4,11 +4,11 @@
   "description": "24 AI-authored development fixtures for requirement-to-passage retrieval. Expected excerpts/statuses were authored before the first benchmark run. These cases describe desired behavior and known hard cases, not independent human annotation. Any case used to guide a fix becomes development data. No resume belongs to a real person.",
   "runtime": {
     "python": "3.13.6",
-    "platform": "Windows-11-10.0.26200-SP0",
+    "platform": "Windows-11-10.0.26300-SP0",
     "packages": {
       "scikit-learn": "1.7.0",
       "numpy": "2.3.1",
-      "streamlit": "1.46.0",
+      "streamlit": "1.66.0",
       "fastapi": "0.116.1"
     },
     "embedding_model": "all-MiniLM-L6-v2",
@@ -22,6 +22,55 @@
     "status_agreement": 0.875,
     "source_attribution": 1.0,
     "false_support_count": 0,
+    "status_confusion_expected_by_predicted": {
+      "supported": {
+        "supported": 12,
+        "not_found": 3
+      },
+      "partial": {
+        "partial": 3
+      },
+      "not_found": {
+        "not_found": 3
+      },
+      "review": {
+        "review": 3
+      }
+    },
+    "by_group": {
+      "backend": {
+        "count": 6,
+        "excerpt_or_abstention": 1.0,
+        "status_agreement": 1.0
+      },
+      "data": {
+        "count": 4,
+        "excerpt_or_abstention": 1.0,
+        "status_agreement": 1.0
+      },
+      "formatting": {
+        "count": 3,
+        "excerpt_or_abstention": 1.0,
+        "status_agreement": 1.0
+      },
+      "frontend": {
+        "count": 4,
+        "excerpt_or_abstention": 1.0,
+        "status_agreement": 1.0
+      },
+      "hard-cases": {
+        "count": 3,
+        "excerpt_or_abstention": 0.0,
+        "status_agreement": 0.0
+      },
+      "quality": {
+        "count": 4,
+        "excerpt_or_abstention": 1.0,
+        "status_agreement": 1.0
+      }
+    },
+    "abstention_precision": 0.5,
+    "abstention_recall": 1.0,
     "actual_backend_counts": {
       "tfidf": 24
     },

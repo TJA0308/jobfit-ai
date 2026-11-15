@@ -25,6 +25,7 @@ def evaluate_evidence(dataset: dict, prefer_embeddings: bool = False) -> dict:
         raise ValueError("At least one evidence case is required.")
     rows = []
     backends = Counter()
+    confusion = {status: Counter() for status in ("supported", "partial", "not_found", "review")}
     hits = status_hits = attribution_hits = positive_hits = positive_total = false_support = 0
     for case in dataset["cases"]:
         matches, warnings, backend, _ = match_evidence(case["resume"], case["requirement"], prefer_embeddings=prefer_embeddings)
@@ -33,6 +34,7 @@ def evaluate_evidence(dataset: dict, prefer_embeddings: bool = False) -> dict:
         result = matches[0]
         exact = result.evidence == case["expected_evidence"]
         status_match = result.status == case["expected_status"]
+        confusion[case["expected_status"]][result.status] += 1
         attributable = (result.evidence is None and result.evidence_start is None and result.evidence_end is None) or (
             result.evidence is not None and case["resume"][result.evidence_start:result.evidence_end] == result.evidence)
         hits += exact
@@ -49,10 +51,23 @@ def evaluate_evidence(dataset: dict, prefer_embeddings: bool = False) -> dict:
                      "expected_status": case["expected_status"], "actual_status": result.status,
                      "warning_codes": [w.code for w in warnings]})
     total = len(rows)
+    groups = {}
+    for group in sorted({row["group"] for row in rows}):
+        subset = [row for row in rows if row["group"] == group]
+        groups[group] = {"count": len(subset),
+                         "excerpt_or_abstention": sum(row["retrieval_hit"] for row in subset) / len(subset),
+                         "status_agreement": sum(row["status_hit"] for row in subset) / len(subset)}
+    expected_absent = sum(row["expected_evidence"] is None for row in rows)
+    predicted_absent = sum(row["actual_evidence"] is None for row in rows)
+    correct_absent = sum(row["expected_evidence"] is None and row["actual_evidence"] is None for row in rows)
     return {"case_count": total, "positive_case_count": positive_total,
             "top_1_positive_retrieval": positive_hits / positive_total if positive_total else None,
             "exact_excerpt_or_abstention": hits / total, "status_agreement": status_hits / total,
             "source_attribution": attribution_hits / total, "false_support_count": false_support,
+            "status_confusion_expected_by_predicted": {key: dict(value) for key, value in confusion.items()},
+            "by_group": groups,
+            "abstention_precision": correct_absent / predicted_absent if predicted_absent else None,
+            "abstention_recall": correct_absent / expected_absent if expected_absent else None,
             "actual_backend_counts": dict(backends), "requested_embeddings": prefer_embeddings, "cases": rows}
 
 
