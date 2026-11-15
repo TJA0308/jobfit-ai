@@ -1,0 +1,78 @@
+{
+  "runtime": {
+    "python": "3.13.6",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "scikit-learn": "1.7.0",
+      "numpy": "2.3.1",
+      "streamlit": "1.66.0",
+      "fastapi": "0.116.1"
+    },
+    "embedding_model": "all-MiniLM-L6-v2",
+    "embedding_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+  },
+  "dataset_sha256": "c04c95871f2635adb75abaf792a21aaebe1c07d70b83bc24bdbb0a87636406dd",
+  "mode": "lexical",
+  "cold_import_and_first_request_ms": 2430.36,
+  "process_peak_rss_bytes": 183316480,
+  "actual_evidence_backends": {
+    "tfidf": 151
+  },
+  "scenarios": {
+    "single": {
+      "runs": 10,
+      "p50_ms": 10.91,
+      "p95_ms": 14.1,
+      "raw_ms": [
+        13.3,
+        10.93,
+        11.08,
+        10.6,
+        10.87,
+        10.54,
+        14.1,
+        10.88,
+        9.9,
+        12.03
+      ],
+      "requests_per_run": 1
+    },
+    "batch_10": {
+      "runs": 10,
+      "p50_ms": 120.86,
+      "p95_ms": 311.61,
+      "raw_ms": [
+        70.76,
+        65.05,
+        69.29,
+        74.93,
+        74.76,
+        166.78,
+        303.95,
+        221.74,
+        188.54,
+        311.61
+      ],
+      "requests_per_run": 1
+    },
+    "concurrent_single": {
+      "runs": 10,
+      "p50_ms": 112.76,
+      "p95_ms": 151.76,
+      "raw_ms": [
+        141.11,
+        135.95,
+        151.76,
+        104.52,
+        106.42,
+        103.08,
+        110.81,
+        107.77,
+        128.74,
+        114.72
+      ],
+      "requests_per_run": 4
+    }
+  },
+  "limits": "Synthetic short TXT resumes; local TestClient HTTP contracts, not external network. Cold timing includes imports and first request, excludes interpreter spawn. Peak RSS is whole worker high-water mark. Batch is ten resumes/request; concurrent latency is wall time for a wave. Small run counts and p95 are descriptive, not an SLO."
+}
