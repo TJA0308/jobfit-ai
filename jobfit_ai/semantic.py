@@ -15,6 +15,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from jobfit_ai.text_features import tokenize
+from jobfit_ai.observability import event
 
 # --- TF-IDF backend -------------------------------------------------------
 # Blend cosine and job-vocabulary coverage, then scale and cap at 100.
@@ -69,11 +70,13 @@ def _load_embedding_model():
     try:
         from sentence_transformers import SentenceTransformer
     except (ImportError, OSError, RuntimeError):
+        event("embedding_unavailable", category="dependency_import")
         return None
     try:
         return SentenceTransformer(EMBEDDING_MODEL_NAME, revision=EMBEDDING_MODEL_REVISION)
     except Exception:
         # Model download/init can fail offline or in constrained environments.
+        event("embedding_unavailable", category="model_initialization")
         return None
 
 
@@ -110,6 +113,7 @@ def _compute_passage_similarities(requirements: list[str], passages: list[str]):
         vectors = model.encode(requirements + passages, normalize_embeddings=True, batch_size=32)
         return vectors[:len(requirements)] @ vectors[len(requirements):].T
     except Exception:
+        event("embedding_unavailable", category="inference")
         return None
 
 

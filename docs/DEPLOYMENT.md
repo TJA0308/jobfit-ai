@@ -91,6 +91,14 @@ The portfolio-quality revision changed public behavior intentionally:
 
 ## Optional FastAPI / Render deployment
 
+The API emits JSON operational events to stderr and returns a server-generated
+`X-Request-ID` header. Events correlate request duration/status, selected
+backends, fallback, and error categories. The application logger excludes
+resume/job text, filenames, query strings, caller IDs, and exception messages.
+Unknown paths are logged as `unmatched`. Hosting/access logs are configured
+separately and can still contain IPs/URLs; apply suitable retention and access
+restrictions there. Do not add resume content to operational events.
+
 `render.yaml` provides optional service definitions. It is not proof that those services are deployed. The Streamlit app calls the shared Python core directly and does not require a separate API server.
 
 For the API, install `requirements-api.txt` and run:

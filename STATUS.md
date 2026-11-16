@@ -1,5 +1,24 @@
 # JobFit AI status
 
+## Portfolio improvements — 2026-11-15
+
+- All 81 Python tests pass after evaluation diagnostics, request-local dense
+  inference reuse, and privacy-conscious structured API logging. The five
+  frontend DOM tests passed during the initial review; frontend source is unchanged.
+- Nine sourced SWE/AI/PM posting scenarios pass multipart API/core parity,
+  TXT/JSON export, and exact job/resume span checks. These are synthetic
+  development scenarios, not real users or independent labels.
+- A local benchmark records cold imports/first request, single/batch/concurrent
+  timings, peak process RSS, input hash, runtime, and actual backends. Dense was
+  requested offline but unavailable, so no real-model speedup is claimed.
+- Evaluation now exposes per-group failures, a status confusion matrix, and
+  abstention precision/recall. See `docs/ANNOTATION.md` for human labeling.
+- Browser access was unavailable and native app approval timed out. Live
+  deployment, responsive screenshots, and browser recording remain pending;
+  see `docs/RELEASE_CHECK.md`.
+- Each milestone has a separate Git commit. The historical verification notes
+  below describe the earlier revision and its 74-test suite.
+
 This records local verification of the scoring-v2 portfolio revision and focused review interface. Local completion, GitHub publication, and live deployment are separate checks.
 
 ## Implemented

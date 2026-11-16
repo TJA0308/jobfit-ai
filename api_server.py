@@ -1,13 +1,37 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from time import perf_counter
+from uuid import uuid4
+import logging
 
 from jobfit_ai.models import BatchAnalysisResponse, HistoryEntry, ResumeAnalysis
 from jobfit_ai.upload_handler import MAX_UPLOAD_BYTES, analyze_uploaded_bytes
 from jobfit_ai.config import embeddings_enabled
+from jobfit_ai.observability import configure_api_logging, event, request_id
 
 
 app = FastAPI(title="JobFit AI API")
+configure_api_logging()
+
+
+@app.middleware("http")
+async def observe_request(request, call_next):
+    # Generate IDs ourselves; caller-supplied IDs can contain private data.
+    identifier = uuid4().hex
+    token = request_id.set(identifier)
+    started = perf_counter()
+    status = 500
+    try:
+        response = await call_next(request)
+        status = response.status_code
+        response.headers["X-Request-ID"] = identifier
+        return response
+    finally:
+        route = request.scope.get("route")
+        event("request_completed", route=getattr(route, "path", "unmatched"),
+              status=status, duration_ms=round((perf_counter() - started) * 1000, 2))
+        request_id.reset(token)
 
 
 @app.get("/health")
@@ -19,15 +43,22 @@ def analyze_file(uploaded_file: UploadFile, job_description: str, use_embeddings
     if use_embeddings and not embeddings_enabled():
         raise HTTPException(status_code=400, detail="Local embeddings are not enabled on this deployment.")
     try:
-        return analyze_uploaded_bytes(
+        analysis = analyze_uploaded_bytes(
             file_bytes=uploaded_file.file.read(MAX_UPLOAD_BYTES + 1),
             filename=uploaded_file.filename or "resume.pdf",
             job_description=job_description,
             prefer_embeddings=use_embeddings,
         )
+        event("analysis_completed", source_type=analysis.source_type,
+              scoring_backend=analysis.breakdown.semantic_backend,
+              evidence_backend=analysis.evidence_backend, duration_ms=analysis.metrics.total_ms,
+              embedding_fallback=any(w.code == "embedding_fallback" for w in analysis.warnings))
+        return analysis
     except ValueError as exc:
+        event("analysis_rejected", category="invalid_input")
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
+        event("analysis_failed", level=logging.ERROR, category="internal_error", error_type=type(exc).__name__)
         raise HTTPException(status_code=500, detail="Analysis failed. Please try again.") from exc
 
 

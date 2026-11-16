@@ -102,6 +102,11 @@ An optional local `all-MiniLM-L6-v2` retriever searches bounded passages for par
 
 ## Evaluation
 
+Additional portfolio checks: [sourced internship scenarios](docs/POSTING_SCENARIOS.md),
+[local latency/memory measurements](docs/PERFORMANCE.md),
+[independent annotation handoff](docs/ANNOTATION.md), and
+[release verification status](docs/RELEASE_CHECK.md).
+
 Committed [JSON reports](eval/reports/) include dataset hashes, runtime/package versions, actual backends, per-example results, and failures.
 
 | Ranking set | Size | Hybrid lexical Spearman | NDCG@3 | Tier agreement |
