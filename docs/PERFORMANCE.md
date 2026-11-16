@@ -31,3 +31,17 @@ used to claim dense latency or an inference speedup. Install optional
 dependencies and cache the pinned model before collecting real dense results.
 Previous committed dense quality reports describe their own recorded runtime,
 not the current environment.
+
+## Request-local inference reuse
+
+Scoring and evidence retrieval use the same bounded requirement/passage lists.
+One analysis now reuses the dense similarity matrix (or unavailable result)
+across both paths. A `ContextVar` scope is reset in `finally`; resume text and
+vectors are not cached across requests. Model weights keep their existing
+process-level cache.
+
+Tests with an instrumented model verify one encoding call per analysis instead
+of two, recomputation on the next analysis, concurrent request isolation, and
+explicit lexical fallback after inference failure. This establishes reduced
+duplicate work, not a measured real-model latency improvement. The nine posting
+scenarios keep identical scores/statuses/excerpts after the change.

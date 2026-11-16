@@ -8,6 +8,8 @@ similarity, not whether a candidate actually has the required experience.
 from __future__ import annotations
 
 from functools import lru_cache
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -23,6 +25,19 @@ TFIDF_MATCH_REFERENCE = 0.45
 # fitted probability mapping. Keep its results separate from lexical scores.
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 EMBEDDING_MODEL_REVISION = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+
+# Results (including unavailable-model fallback) live only for one analysis.
+# ContextVar isolates concurrent threads/tasks; no user text enters a shared cache.
+_passage_cache: ContextVar[dict | None] = ContextVar("jobfit_passage_cache", default=None)
+
+
+@contextmanager
+def retrieval_request():
+    token = _passage_cache.set({})
+    try:
+        yield
+    finally:
+        _passage_cache.reset(token)
 
 
 def _clamp(value: float, lower: float = 0.0, upper: float = 100.0) -> float:
@@ -77,6 +92,17 @@ def _embedding_similarity(resume_text: str, job_description: str) -> float | Non
 
 def passage_similarities(requirements: list[str], passages: list[str]):
     """Dense cosine matrix, or None for an explicitly reported lexical fallback."""
+    cache = _passage_cache.get()
+    key = (tuple(requirements), tuple(passages))
+    if cache is not None and key in cache:
+        return cache[key]
+    result = _compute_passage_similarities(requirements, passages)
+    if cache is not None:
+        cache[key] = result
+    return result
+
+
+def _compute_passage_similarities(requirements: list[str], passages: list[str]):
     model = _load_embedding_model()
     if model is None:
         return None

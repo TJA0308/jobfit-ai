@@ -5,7 +5,7 @@ from uuid import uuid4
 from jobfit_ai.models import AnalysisBreakdown, AnalysisWarning, ResumeAnalysis, ResumeInsights, SkillGap
 from jobfit_ai.evidence import match_evidence
 from jobfit_ai.limits import MAX_JOB_DESCRIPTION_CHARS, MAX_RESUME_CHARS
-from jobfit_ai.semantic import semantic_similarity
+from jobfit_ai.semantic import semantic_similarity, retrieval_request
 from jobfit_ai.text_features import (
     action_verb_hits,
     count_bullets,
@@ -145,6 +145,17 @@ def analyze_resume_fit(
     source_filename: str,
     source_type: str,
     prefer_embeddings: bool = False,
+) -> ResumeAnalysis:
+    with retrieval_request():
+        return _analyze_resume_fit(resume_text, job_description, source_filename, source_type, prefer_embeddings)
+
+
+def _analyze_resume_fit(
+    resume_text: str,
+    job_description: str,
+    source_filename: str,
+    source_type: str,
+    prefer_embeddings: bool,
 ) -> ResumeAnalysis:
     if not resume_text.strip() or not job_description.strip():
         raise ValueError("Resume text and job description must not be empty.")
