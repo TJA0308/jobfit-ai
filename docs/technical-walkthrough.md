@@ -1,14 +1,8 @@
-# JobFit AI: technical interview walkthrough
+# JobFit AI: technical walkthrough
 
-For the product story, SWE/PM answer outlines, fairness discussion, and rehearsal checklist, start with the separate [interview prep guide](docs/INTERVIEW_PREP.md). This walkthrough covers the implementation and technical evidence in more detail.
+Implementation examples and regression history. See [architecture](architecture.md) for the complete design and [evaluation](EVALUATION.md) for dataset boundaries.
 
-## Your 30-second explanation
-
-> JobFit AI helps applicants inspect how their resume expresses a role's requirements. It retrieves exact supporting passages, shows partial matches and gaps, and keeps formatting advice separate from wording alignment. Streamlit and FastAPI share a typed Python core. I compared lexical retrieval with a pinned local sentence-transformer and documented both gains and failures on synthetic fixtures.
-
-Use ownership language only for work you can explain and maintain. AI-assisted implementation is not a substitute for tracing the code yourself.
-
-## Trace one upload
+## Request flow
 
 1. UI/API receives bytes and a job description.
 2. `upload_handler` validates limits and writes an extraction temporary file.
@@ -22,7 +16,7 @@ Use ownership language only for work you can explain and maintain. AI-assisted i
 
 The UI and API share functions; the UI does not call the API over HTTP.
 
-## Explain the score
+## Scoring example
 
 ```text
 Wording alignment = 0.60 × text similarity + 0.40 × keyword coverage
@@ -38,7 +32,7 @@ Components of 60 and 40 produce 36 + 16 = 52/100. Document structure contributes
 - Structure advice uses length, recognized standalone/inline section headings, bullets, and action verbs. A smooth taper replaced a discontinuity at 249/250 and 900/901 words.
 - Version 2 removes the old 20% structure contribution. Old/new scores must not be compared as if the formula stayed the same.
 
-## Explain evidence retrieval
+## Retrieval example
 
 Requirement/passages preserve exact source offsets. `resume_text[start:end]` must equal the excerpt. This is attribution, not proof that the resume claim is true.
 
@@ -48,7 +42,7 @@ An eligible experience/project passage with sufficient coverage is preferred ove
 
 The optional dense retriever uses normalized MiniLM vectors and cosine. It searches bounded passages instead of encoding only the beginning of a long resume. The model revision is pinned. Passage limits reduce work but do not replace parser isolation or guarantee every tokenizer input fits.
 
-## Decisions you can defend
+## Design tradeoffs
 
 | Decision | Reason | Tradeoff |
 | --- | --- | --- |
@@ -62,19 +56,15 @@ The optional dense retriever uses normalized MiniLM vectors and cosine. It searc
 | Sync FastAPI routes | Blocking processing runs in its thread pool | Does not make CPU inference infinitely concurrent |
 | Focused native UI | One candidate/excerpt at a time, forms, and downloads without reruns | Users switch views to inspect other details |
 
-## Measurements you can defend
+## Evaluation summary
 
 Ranking: development Spearman 0.933 over 12 pairs/3 jobs; inspected checks 0.833 over 9 pairs/3 jobs. Keyword-only, raw TF-IDF, and the hybrid have the same ordering. Dense matching does not improve that ordering.
 
 Evidence: 24 AI-authored development cases, including 21 with expected excerpts. Lexical retrieves 18/21; dense retrieves 21/21. Status agreement is 21/24 lexical versus 17/24 dense. All returned excerpts match original source slices. No independent human labels or hiring outcomes were measured.
 
-A useful explanation:
+These development fixtures do not establish hiring validity, fairness, or production performance.
 
-> The dense model recovered three paraphrases but did not improve whole-resume ranking, and its status thresholds marked more expected matches as partial. That showed me why retrieval quality, status decisions, and headline ranking need separate evaluations.
-
-Do not say “100% accurate,” “bias-free,” “production-grade ATS,” or “validated hiring model.” Three jobs and 24 designed cases cannot support those claims. Timings are local full-analysis measurements, not concurrent production latency.
-
-## Bugs and tests worth discussing
+## Regression examples
 
 | Trigger | Old behavior | Fix and regression |
 | --- | --- | --- |
@@ -92,35 +82,3 @@ Do not say “100% accurate,” “bias-free,” “production-grade ATS,” or 
 | Word tabs/breaks separate Python, SQL, and Docker | Extraction merged distinct skills | Preserve explicit separators while joining formatting runs within words |
 | `José García`, `Zoë McDonald`, or initials | ASCII cleanup deleted letters and changed casing | Preserve Unicode names and punctuation through uploads, UI, API, and reports |
 | `Software Engineer Intern` starts a job description | Role title appeared as a qualification | Match intern role noun phrases while retaining explicit experience sentences |
-
-Understand a trigger, fix, and test for at least three of these without reading the table.
-
-## Practice in four short sessions
-
-1. **Architecture:** draw the upload flow from memory. Trace one `/match` request to the result. Explain temporary files, session data, and downloads.
-2. **Retrieval:** calculate a coverage score by hand. Add a skill alias and a test yourself. Explain why an exact quote is not verified qualification.
-3. **Evaluation:** run both evaluators. Open one failure row. Explain dataset leakage by job description, tied ranks, NDCG, and why a high synthetic score may not transfer.
-4. **Live modification:** change one UI label or add one regression case without generated code. Run the suite and explain the diff aloud. Then perform the [90-second demo](docs/DEMO.md).
-
-Useful interview follow-ups:
-
-- Why can copied text still score 100? Why not invent a penalty?
-- Why are “no evidence found” and “does not have the skill” different?
-- Could a requirement with three clauses get a misleading partial match?
-- What if the relevant passage occurs after the retrieval cap?
-- Why does a dense retriever struggle with negation?
-- What changes when model initialization fails?
-- Why are the old separate checks no longer a clean held-out test?
-- How would two human annotators build a stronger evaluation?
-- What limits occur after multipart parsing, and what would a gateway add?
-- What is the first change you would make if inference became the bottleneck?
-
-For the UI performance change, explain the three execution boundaries: forms batch upload inputs, `@st.fragment` limits Python review reruns, and the Components v2 workspace handles requirement navigation locally with no Python events. Only the selected candidate's bounded evidence is sent to the component. This trades a small TypeScript build and DOM test suite for immediate browsing; a native alternative remains available. The custom component is based on Streamlit's official template, uses isolated theme tokens, and inserts resume data as text. Export reuse is a single session-local entry with content invalidation and explicit cleanup. These are reductions in repeated work, not measured browser latency improvements.
-
-## AI-assisted development
-
-A truthful explanation after doing the practice:
-
-> I used AI to help implement and review changes. I traced the request flow, reproduced bugs, ran the evaluations, and practiced modifying the code. I can explain the model choices and the limitations of the measurements.
-
-Do not memorize ownership claims. Demonstrate understanding with a small change and a test.

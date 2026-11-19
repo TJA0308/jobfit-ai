@@ -33,7 +33,7 @@ This records local verification of the scoring-v2 portfolio revision and focused
 - Bounded PDF pages, expanded DOCX XML, extracted text, and retrieval work.
 - Exactly-three/28-word output validation for optional external rewrites; local template fallback.
 - Baseline comparison, NDCG, actual backend counts, dataset hashes, runtime manifests, and per-example failure reports.
-- Updated architecture, evaluation protocol, 90-second demo script, and interview practice guide.
+- Updated architecture, evaluation protocol, and 90-second demo script.
 - Public requests retain session-local results; no shared SQLite history or automatic paid requests.
 - Native Streamlit theme/form inputs with a packaged Components v2 evidence workspace: browser-local search, filtering, and requirement selection alongside exact excerpts.
 - Sidebar removed in favor of a header session popover. Warm paper theme, serif headings, flat sections, inline evidence counts, segmented review views, and an on-demand comparison table reduce dashboard clutter.
@@ -77,4 +77,4 @@ Actual local dense inference was run with cached weights and offline network set
 - Local dense inference measurements do not establish hosted startup/memory behavior or production performance.
 - Public API request limits and abuse controls remain deployment responsibilities.
 
-Start with [README.md](README.md), then [DEFENSE.md](DEFENSE.md) and [the release guide](docs/DEPLOYMENT.md).
+Start with [README.md](README.md), then [the technical walkthrough](docs/technical-walkthrough.md) and [the release guide](docs/DEPLOYMENT.md).
