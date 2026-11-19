@@ -196,5 +196,5 @@ See [evaluation protocol](docs/EVALUATION.md), [posting scenarios](docs/POSTING_
 | [Deployment](docs/DEPLOYMENT.md) | Hosting, optional models, logging, and smoke checks |
 | [UI](docs/UI.md) | Component behavior, session state, and verification boundaries |
 | [Demo](docs/DEMO.md) | Repeatable 90-second walkthrough and failure cases |
-| [Technical walkthrough](DEFENSE.md) | Request trace and implementation discussion |
+| [Technical walkthrough](docs/technical-walkthrough.md) | Request trace, scoring examples, and regression history |
 | [Project status](STATUS.md) | Completed work and remaining verification |

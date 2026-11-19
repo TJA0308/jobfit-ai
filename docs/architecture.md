@@ -55,7 +55,7 @@ These rules do not establish logical entailment. Mixed positive/negative clauses
 
 The sentence-transformer is `all-MiniLM-L6-v2`, revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`. It encodes bounded passages and uses normalized dot products (cosine). Scores below 0.40 abstain; scores at least 0.65 in experience/projects can receive the experience-wording label. These thresholds were not retuned after inspecting the evidence benchmark.
 
-The optional document signal is the mean best-passage cosine over requirements, rather than cosine over a silently truncated whole resume. Whole-document and evidence matrices are currently computed separately; consolidating them would reduce duplicate inference. The 600-character passage bound reduces long inputs but does not mathematically guarantee every tokenizer sequence fits the model limit.
+The optional document signal is the mean best-passage cosine over requirements, rather than cosine over a silently truncated whole resume. Scoring and evidence retrieval reuse the same dense similarity matrix within one analysis; a request-local context is reset afterward. The 600-character passage bound reduces long inputs but does not mathematically guarantee every tokenizer sequence fits the model limit.
 
 Only model weights are cached. Resume text/embeddings are not cached across requests. A deployment flag controls availability; a user choice controls use. Model initialization/inference failure is reported as a lexical fallback. Reports record actual backends so unavailable models cannot be counted as successful embedding experiments.
 

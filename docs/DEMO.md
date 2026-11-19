@@ -1,4 +1,4 @@
-# A repeatable interview demo
+# A repeatable application demo
 
 ## Before presenting
 
