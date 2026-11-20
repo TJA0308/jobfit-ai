@@ -116,6 +116,14 @@ python -m uvicorn api_server:app --reload
 
 Interactive documentation: <http://127.0.0.1:8000/docs>.
 
+Check that the API is responding before uploading a resume (use `curl.exe` in PowerShell):
+
+```sh
+curl --fail http://127.0.0.1:8000/health
+```
+
+Expected response: `{"status":"ok"}`. This checks basic API availability; it does not load the optional embedding model or validate document extraction.
+
 | Method | Route | Purpose |
 | --- | --- | --- |
 | GET | `/health` | Health response |
